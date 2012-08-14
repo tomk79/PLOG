@@ -1,20 +1,16 @@
 <?php
 
-#	Pickles Framework - Content - [PLOG-C]
-#	Copyright (C)Tomoya Koyanagi, All rights reserved.
-#	Last Update : 9:41 2010/09/02
+/**
+ * PxFW - Content - [PLOG]
+ * @author (C)Tomoya Koyanagi.
+ * Last Update : 6:35 2012/08/15
+ */
 
-#------------------------------------------------------------------------------------------------------------------
-#	コンテンツオブジェクトクラス [ cont_PLOG_config ]
+/**
+ * コンテンツオブジェクトクラス [ cont_PLOG_config ]
+ */
 class cont_PLOG_config{
-	var $conf;
-	var $errors;
-	var $dbh;
-	var $req;
-	var $user;
-	var $site;
-	var $theme;
-	var $custom;
+	var $px;
 
 	var $path_lib = null;//ライブラリディレクトリのパスを記憶(コンストラクタで初期化)
 
@@ -27,7 +23,7 @@ class cont_PLOG_config{
 		#	プラグインのホームディレクトリ
 	var $path_cache_dir = null;
 		#	プラグインのキャッシュファイルディレクトリ
-	var $path_public_dir = null;
+	var $path_public_cache_dir = null;
 		#	プラグインの公開ファイルディレクトリ
 	var $path_rss = null;
 		#	RSSファイルの保存先ファイル名称
@@ -39,7 +35,7 @@ class cont_PLOG_config{
 		#	12:04 2008/01/15 追加
 		#	RSSファイルに設定するXSLTのパス。
 		#	共有リソースディレクトリ内の相対パスで指定。
-	var $url_public_dir = null;
+	var $url_public_cache_dir = null;
 		#	プラグインの公開ファイルディレクトリURL
 	var $url_article = null;
 	var $url_article_rss = null;
@@ -132,71 +128,68 @@ class cont_PLOG_config{
 	#	/ 設定項目
 	#--------------------------------------
 
-	#--------------------------------------
-	#	コンストラクタ
-	function cont_PLOG_config( &$conf , &$errors , &$dbh , &$req , &$user , &$site , &$theme , &$custom ){
-		$this->conf = &$conf;
-		$this->errors = &$errors;
-		$this->dbh = &$dbh;
-		$this->req = &$req;
-		$this->user = &$user;
-		$this->site = &$site;
-		$this->theme = &$theme;
-		$this->custom = &$custom;
+	/**
+	 * コンストラクタ
+	 */
+	public function cont_PLOG_config( &$px ){
+		$this->px = &$px;
 
-		$contentpath = $this->theme->parse_contentspath();
-		$this->path_lib = $this->dbh->get_realpath($contentpath['path_workdir']).'/lib/';
+		$contentpath = $px->get_local_resource_dir_realpath();
+		$this->path_lib = $this->px->dbh()->get_realpath($contentpath.'/lib').'/';
 
-		if( is_null( $this->article_image_maxwidth ) && is_callable( array( $this->theme , 'contents_min_width' ) ) ){
-			$this->article_image_maxwidth = $this->theme->contents_min_width();
-		}
-
-		$this->additional_setup();
+//		if( is_null( $this->article_image_maxwidth ) && is_callable( array( $this->px->theme() , 'contents_min_width' ) ) ){
+//			$this->article_image_maxwidth = $this->px->theme()->contents_min_width();
+//		}
 	}
 
-	#--------------------------------------
-	#	コンストラクタの追加処理
-	function additional_setup(){
-		#	コンストラクタ拡張用の空白のメソッドです。
-	}
-
-	#--------------------------------------
-	#	ディレクトリのパスを得る
+	/**
+	 * ホームディレクトリのパスを得る
+	 */
 	function get_home_dir(){
 		if( strlen( $this->path_home_dir ) ){
 			return	$this->path_home_dir;
 		}
-		$path = $this->conf->path_ramdata_dir.'/plugins/PLOG';//←デフォルト
+		$path = $this->px->get_conf('paths.px_dir').'_sys/ramdata/PLOG/';//←デフォルト
 		return	$path;
 	}
 
+	/**
+	 * 内部キャッシュディレクトリのパスを得る
+	 */
 	function get_cache_dir(){
 		if( strlen( $this->path_cache_dir ) ){
 			return	$this->path_cache_dir;
 		}
-		$path = $this->conf->path_cache_dir.'/plugins/PLOG';//←デフォルト
+		$path = $this->px->get_conf('paths.px_dir').'_sys/caches/PLOG/';//←デフォルト
 		return	$path;
 	}
 
-	function get_public_dir(){
-		if( strlen( $this->path_public_dir ) ){
-			return	$this->path_public_dir;
+	/**
+	 * 公開キャッシュディレクトリのパスを得る
+	 */
+	function get_public_cache_dir(){
+		if( strlen( $this->path_public_cache_dir ) ){
+			return	$this->path_public_cache_dir;
 		}
-		$path = $this->conf->path_docroot.$this->conf->url_localresource.'/plugins/PLOG';//←デフォルト
+		$path = $_SERVER['DOCUMENT_ROOT'].'_caches/PLOG/';//←デフォルト
 		return	$path;
 	}
 
-	function get_url_public_dir(){
-		if( strlen( $this->url_public_dir ) ){
-			return	$this->url_public_dir;
+	/**
+	 * 公開キャッシュディレクトリのURLを得る
+	 */
+	function get_url_public_cache_dir(){
+		if( strlen( $this->url_public_cache_dir ) ){
+			return	$this->url_public_cache_dir;
 		}
-		$path = $this->conf->url_root.$this->conf->url_localresource.'/plugins/PLOG';//←デフォルト
+		$path = 'http'.($this->px->req()->is_ssl()?'s':'').'://'.$_SERVER['HTTP_HOST'].($_SERVER['HTTP_PORT']?':'.$_SERVER['HTTP_PORT']:'').$this->px->get_install_path().'_caches/PLOG/';//←デフォルト
 		return	$path;
 	}
 
-	#--------------------------------------
-	#	記事データディレクトリのパスを得る
-	function get_article_dir( $article_cd ){
+	/**
+	 * 記事データディレクトリのパスを得る
+	 */
+	public function get_article_dir( $article_cd ){
 		$base_dir = $this->get_home_dir().'/article_datas';
 
 		$ary_path_id = preg_split( '/.{0}/' , $article_cd );
@@ -206,38 +199,31 @@ class cont_PLOG_config{
 			$path_id .= '/'.urlencode($dirname);
 		}
 
-		$RTN = $base_dir.$path_id.'/data';
+		$RTN = $base_dir.$path_id.'/data/';
 
 		return	$RTN;
 	}
 
 
-
-	#--------------------------------------
-	#	基本オブジェクトを取り出す
-	function &get_basicobj_conf()		{ return $this->conf; }
-	function &get_basicobj_errors()		{ return $this->errors; }
-	function &get_basicobj_dbh()		{ return $this->dbh; }
-	function &get_basicobj_req()		{ return $this->req; }
-	function &get_basicobj_user()		{ return $this->user; }
-	function &get_basicobj_site()		{ return $this->site; }
-	function &get_basicobj_theme()		{ return $this->theme; }
-	function &get_basicobj_custom()		{ return $this->custom; }
-
-	#--------------------------------------
-	#	オプションソースの出し入れ
-	function set_src( $src , $name ){//PLOG 0.5.0 追加
+	/**
+	 * オプションソースの入力
+	 */
+	public function set_src( $src , $name ){
 		if( !strlen( $name ) ){ return false; }
 		$this->srcs[$name] = $src;
 		return true;
 	}
-	function get_src( $name ){//PLOG 0.5.0 追加
+	/**
+	 * オプションソースの出力
+	 */
+	public function get_src( $name ){
 		return $this->srcs[$name];
 	}
 
-	#--------------------------------------
-	#	ライブラリをロードする
-	function require_lib( $lib_localpath ){
+	/**
+	 * ライブラリをロードする
+	 */
+	public function require_lib( $lib_localpath ){
 		$lib_localpath = preg_replace( '/^\/'.'*'.'/' , '/' , $lib_localpath );
 		$lib_localpath = preg_replace( '/\/+/' , '/' , $lib_localpath );
 		$classname_body = str_replace( '/' , '_' , text::trimext( $lib_localpath ) );
@@ -264,12 +250,13 @@ class cont_PLOG_config{
 		return	$adoptLayer.$classname_body;
 	}
 
-	#--------------------------------------
-	#	記事オブジェクトを作成
-	function &factory_article(){
+	/**
+	 * 記事オブジェクトを作成
+	 */
+	public function &factory_article(){
 		$className = $this->require_lib( '/PLOG/contents/article.php' );
 		if( !$className ){
-			$this->errors->error_log( 'FAILD to load library [article.php]' );
+			$this->px->error()->error_log( 'FAILD to load library [article.php]' );
 			return	false;
 		}
 
@@ -278,12 +265,13 @@ class cont_PLOG_config{
 	}
 
 
-	#--------------------------------------
-	#	管理画面オブジェクトを作成
-	function &factory_admin(){
+	/**
+	 * 管理画面オブジェクトを作成
+	 */
+	public function &factory_admin(){
 		$className = $this->require_lib( '/PLOG/contents/admin.php' );
 		if( !$className ){
-			$this->errors->error_log( 'FAILD to load library [admin.php]' );
+			$this->px->error()->error_log( 'FAILD to load library [admin.php]' );
 			return	false;
 		}
 
@@ -292,12 +280,13 @@ class cont_PLOG_config{
 	}
 
 
-	#--------------------------------------
-	#	記事パーサオブジェクトを作成
-	function &factory_articleparser(){
+	/**
+	 * 記事パーサオブジェクトを作成
+	 */
+	public function &factory_articleparser(){
 		$className = $this->require_lib( '/PLOG/articleParser/operator.php' );
 		if( !$className ){
-			$this->errors->error_log( 'FAILD to load library [articleParser/operator.php]' );
+			$this->px->error()->error_log( 'FAILD to load library [articleParser/operator.php]' );
 			return	false;
 		}
 
@@ -306,12 +295,13 @@ class cont_PLOG_config{
 	}
 
 
-	#--------------------------------------
-	#	DAOを作成
-	function &factory_dao( $dao_name ){
+	/**
+	 * DAOを作成
+	 */
+	public function &factory_dao( $dao_name ){
 		$className = $this->require_lib( '/PLOG/dao/'.$dao_name.'.php' );
 		if( !$className ){
-			$this->errors->error_log( 'FAILD to load library ['.$dao_name.'.php]' );
+			$this->px->error()->error_log( 'FAILD to load library ['.$dao_name.'.php]' );
 			return	false;
 		}
 
@@ -335,7 +325,7 @@ class cont_PLOG_config{
 		}
 
 		$RTN = preg_replace( '/'.preg_quote( '{$article_cd}' , '/' ).'/si' , urlencode( $article_cd ) , $url_article );
-		$RTN = $this->theme->href(
+		$RTN = $this->px->theme()->href(
 			$RTN ,
 			array(
 				'protocol'=>'http',
@@ -377,13 +367,13 @@ class cont_PLOG_config{
 		$path_log_dir = $this->conf->path_common_log_dir.'/'.$this->send_tbp_log_name;
 		if( !is_dir( $path_log_dir ) ){
 			#	保存先ディレクトリが存在しなかったら。
-			if( !$this->dbh->mkdirall( $path_log_dir ) ){
+			if( !$this->px->dbh()->mkdirall( $path_log_dir ) ){
 				#	作成を試みて、ダメならダメ。
 				return	false;
 			}
 		}
 
-		if( !$this->dbh->is_writable( $path_log_dir ) ){
+		if( !$this->px->dbh()->is_writable( $path_log_dir ) ){
 			#	書き込めなかったらだめ。
 			return	false;
 		}

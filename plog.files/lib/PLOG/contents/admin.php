@@ -3199,7 +3199,7 @@ class cont_PLOG_contents_admin{
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">path_public_dir</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->get_public_dir() ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->get_public_cache_dir() ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">path_rss</th>'."\n";
@@ -3211,7 +3211,7 @@ class cont_PLOG_contents_admin{
 		$RTN .= '<table class="deftable" width="100%">'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">url_public_dir</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->get_url_public_dir() ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->get_url_public_cache_dir() ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">url_article</th>'."\n";

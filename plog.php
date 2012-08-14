@@ -6,18 +6,9 @@
 	 */
 
 	#--------------------------------------
-	#	コンテンツCSSを登録
-	$StyleSheet = '';
-	$StyleSheet .= '<link rel="stylesheet" href="'.htmlspecialchars($theme->resource('css/contents.css')).'" type="text/css" />'."\n";
-	$theme->setsrc( $StyleSheet , 'additional_header' );
-	#	/ コンテンツCSSを登録
-	#--------------------------------------
-
-
-	#--------------------------------------
 	#	ライブラリをロード
-	$contentpath = $theme->parse_contentspath();
-	if( !require_once( $contentpath['path_workdir'].'/lib/PLOG/config.php' ) ){
+	$contentpath = $px->get_local_resource_dir_realpath();
+	if( !include_once( $contentpath.'/lib/PLOG/config.php' ) ){
 		return false;
 	}
 
@@ -26,8 +17,17 @@
 		$errors->error_log( '$plogconfをロードできません。' , __FILE__ , __LINE__ );
 		return	false;
 	}
-	$plogconf = new $className( &$conf , &$errors , &$dbh , &$req , &$user , &$site , &$theme , &$custom );
+	$plogconf = new $className( &$px );
 	#	/ ライブラリをロード
+	#--------------------------------------
+
+
+	#--------------------------------------
+	#	コンテンツCSSを登録
+	$StyleSheet = '';
+	$StyleSheet .= '<link rel="stylesheet" href="'.t::h($px->get_local_resource_dir()).'res/css/contents.css" type="text/css" />'."\n";
+	$px->theme()->send_content( $StyleSheet , 'head' );
+	#	/ コンテンツCSSを登録
 	#--------------------------------------
 
 	#--------------------------------------
@@ -43,15 +43,14 @@
 		'search'   =>'pxt255_plog_diary_search',
 	);
 
-	#	プラグインのホームディレクトリ (必要に応じて変更してください。)
-	$plogconf->path_home_dir = $conf->path_ramdata_dir.'/plugins/PLOG/diary/';
-	#	プラグインのキャッシュファイルディレクトリ (必要に応じて変更してください。)
-	$plogconf->path_cache_dir = $contentpath['path_workdir_cache'];//←PxFW 0.6.10以降で利用可能。
-#	$plogconf->path_cache_dir = $conf->path_cache_dir.'/plog';//←PxFW 0.6.9以前はこちら
-	#	プラグインの公開ファイルディレクトリ (必要に応じて変更してください。)
-	$plogconf->path_public_dir = $conf->path_docroot.$conf->url_localresource.$theme->get_contresource_cache_localpath().'/resources/c';
-	#	プラグインの公開ファイルディレクトリURL (必要に応じて変更してください。)
-	$plogconf->url_public_dir = $conf->url_root.$conf->url_localresource.$theme->get_contresource_cache_localpath().'/resources/c';
+	#	ホームディレクトリ (必要に応じて変更してください。)
+	$plogconf->path_home_dir = $px->get_conf('paths.px_dir').'_sys/ramdata/PLOG/';
+	#	内部キャッシュディレクトリ (必要に応じて変更してください。)
+	$plogconf->path_cache_dir = $px->get_conf('paths.px_dir').'_sys/caches/PLOG/';
+	#	公開キャッシュディレクトリ (必要に応じて変更してください。)
+	$plogconf->path_public_cache_dir = $_SERVER['DOCUMENT_ROOT'].'_caches/PLOG/';
+	#	公開キャッシュディレクトリURL (必要に応じて変更してください。)
+	$plogconf->url_public_cache_dir = 'http'.($this->px->req()->is_ssl()?'s':'').'://'.$_SERVER['HTTP_HOST'].($_SERVER['HTTP_PORT']?':'.$_SERVER['HTTP_PORT']:'').$this->px->get_install_path().'_caches/PLOG/';
 
 	#	RSSファイルの保存先パス
 	#	(必要に応じてコメントを外してください。設定しない場合、RSSは作成されません)
@@ -71,7 +70,7 @@
 	$plogconf->url_article_admin = 'diary.admin.article.{$article_cd}';
 
 	#	ブログ名
-	$plogconf->blog_name = $site->gettitle().' - '.$site->getpageinfo( 'diary' , 'title' );
+	$plogconf->blog_name = 'Your BLOG Name';
 
 	#	インポート/エクスポート機能の有効/無効 (必要に応じて変更してください。)
 	$plogconf->enable_function_export = true;
@@ -83,8 +82,11 @@
 	$plogconf->comment_userinfo_url = true;			#	コメンタのサイトURLを取得するか否か false=取得しない true=取得する 'must'=必須項目
 	$plogconf->comment_userinfo_passwd = true;		#	コメント編集用パスワードを取得するか否か false=取得しない true=取得する 'must'=必須項目
 
+test::var_dump('開発中です。('.__LINE__.')');
+return;
+
 	#	表示しようとした画像が存在しなかった場合に採用するNoImage画像。
-	$plogconf->no_image_realpath = $theme->resource('img/noimage_base.jpg');
+	$plogconf->no_image_realpath = $px->theme()->resource('img/noimage_base.jpg');
 
 	#	レポートメールのあて先
 	$plogconf->reportmail_to = $conf->email['info'];
@@ -100,12 +102,12 @@
 	$plogconf->helpers = array(
 		'freemind'=>array(
 			// FreeMind
-			'url_freemind_flash_browser'=>$theme->resource( 'freemind_flash_browser' ) ,
+			'url_freemind_flash_browser'=>$px->theme()->resource( 'freemind_flash_browser' ) ,
 		) ,
 		'captcha'=>array(
 			// kcaptcha
 			'name'=>'kcaptcha' ,
-			'url'=>$theme->resource('kcaptcha-2008-04-06') ,
+			'url'=>$px->theme()->resource('kcaptcha-2008-04-06') ,
 		) ,
 	);
 
@@ -114,7 +116,7 @@
 
 	#--------------------------------------
 	#	コンテンツの描画
-	if( $req->poelm(-1) == 'admin' ){
+	if( $px->req()->poelm(-1) == 'admin' ){
 		#	管理画面
 		$plog_article = &$plogconf->factory_admin();
 		$SRC = $plog_article->start();

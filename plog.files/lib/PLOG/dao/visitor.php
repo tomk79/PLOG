@@ -335,7 +335,7 @@ GROUP BY article_cd
 
 		#--------------------------------------
 		#	キャッシュのパス
-		$path_cache_basedir = $this->plogconf->get_public_dir();
+		$path_cache_basedir = $this->plogconf->get_public_cache_dir();
 		if( !is_dir( $path_cache_basedir ) ){
 			if( !$this->dbh->mkdirall( $path_cache_basedir ) ){
 				return	false;
@@ -372,7 +372,7 @@ GROUP BY article_cd
 		if( !is_dir( dirname( $path_cache_file ) ) ){
 			$this->dbh->mkdirall( dirname( $path_cache_file ) );
 		}
-		$RTN = $this->plogconf->get_url_public_dir().$path_id.'/'.$real_image_name;
+		$RTN = $this->plogconf->get_url_public_cache_dir().$path_id.'/'.$real_image_name;
 
 		#--------------------------------------
 		#	更新日比較
