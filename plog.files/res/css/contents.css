@@ -1,0 +1,10 @@
+@charset "UTF-8";
+.contents .cont_plog_article{ margin-bottom:10px; }
+.contents .cont_pager{padding:3px; background-color:#eeeeee; }
+.contents .cont_plog_article_prev_and_next{ display:table; width:100%; margin-bottom:12px; }
+.contents .cont_plog_article_prev_and_next ul{ display:table; width:100%; padding:0px; margin:0px; }
+.contents .cont_plog_article_prev_and_next li{ display:table; width:100%; padding:0px; margin:0px; }
+.contents .cont_plog_article_prev_and_next .cont_plog_prev_article{ display:table; width:47%; float:left;  text-align:left;  }
+.contents .cont_plog_article_prev_and_next .cont_plog_next_article{ display:table; width:47%; float:right; text-align:right; }
+.contents #cont_article_comment table th{ width:30%; text-align:left; }
+.contents #cont_article_comment table td{ width:70%; text-align:left; }
