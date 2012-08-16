@@ -8,11 +8,11 @@
 	#--------------------------------------
 	#	ライブラリをロード
 	$contentpath = $px->get_local_resource_dir_realpath();
-	if( !include_once( $contentpath.'/lib/PLOG/config.php' ) ){
+	if( !include_once( $contentpath.'/lib/plog/config.php' ) ){
 		return false;
 	}
 
-	$className = 'cont_PLOG_config';
+	$className = 'cont_plog_config';
 	if( !$className ){
 		$errors->error_log( '$plogconfをロードできません。' , __FILE__ , __LINE__ );
 		return	false;
@@ -33,24 +33,17 @@
 	#--------------------------------------
 	#	設定項目を反映
 
-	#	データベースのテーブル名 (必要に応じて変更してください。)
-	$plogconf->table_name = array(
-		'article'  =>'pxt255_plog_diary_article',
-		'category' =>'pxt255_plog_diary_category',
-		'tbp_send' =>'pxt255_plog_diary_tbp_send',
-		'trackback'=>'pxt255_plog_diary_trackback',
-		'comment'  =>'pxt255_plog_diary_comment',
-		'search'   =>'pxt255_plog_diary_search',
-	);
+	#	データベースのテーブル名プレフィックス (必要に応じて変更してください。)
+	$plogconf->table_name = 'plog';
 
 	#	ホームディレクトリ (必要に応じて変更してください。)
-	$plogconf->path_home_dir = $px->get_conf('paths.px_dir').'_sys/ramdata/PLOG/';
+	$plogconf->path_home_dir = $px->get_conf('paths.px_dir').'_sys/ramdata/plog/';
 	#	内部キャッシュディレクトリ (必要に応じて変更してください。)
-	$plogconf->path_cache_dir = $px->get_conf('paths.px_dir').'_sys/caches/PLOG/';
+	$plogconf->path_cache_dir = $px->get_conf('paths.px_dir').'_sys/caches/plog/';
 	#	公開キャッシュディレクトリ (必要に応じて変更してください。)
-	$plogconf->path_public_cache_dir = $_SERVER['DOCUMENT_ROOT'].'_caches/PLOG/';
+	$plogconf->path_public_cache_dir = $_SERVER['DOCUMENT_ROOT'].'_caches/plog/';
 	#	公開キャッシュディレクトリURL (必要に応じて変更してください。)
-	$plogconf->url_public_cache_dir = 'http'.($this->px->req()->is_ssl()?'s':'').'://'.$_SERVER['HTTP_HOST'].($_SERVER['HTTP_PORT']?':'.$_SERVER['HTTP_PORT']:'').$this->px->get_install_path().'_caches/PLOG/';
+	$plogconf->url_public_cache_dir = 'http'.($this->px->req()->is_ssl()?'s':'').'://'.$_SERVER['HTTP_HOST'].($_SERVER['HTTP_PORT']?':'.$_SERVER['HTTP_PORT']:'').$this->px->get_install_path().'_caches/plog/';
 
 	#	RSSファイルの保存先パス
 	#	(必要に応じてコメントを外してください。設定しない場合、RSSは作成されません)
@@ -82,14 +75,11 @@
 	$plogconf->comment_userinfo_url = true;			#	コメンタのサイトURLを取得するか否か false=取得しない true=取得する 'must'=必須項目
 	$plogconf->comment_userinfo_passwd = true;		#	コメント編集用パスワードを取得するか否か false=取得しない true=取得する 'must'=必須項目
 
-test::var_dump('開発中です。('.__LINE__.')');
-return;
-
 	#	表示しようとした画像が存在しなかった場合に採用するNoImage画像。
-	$plogconf->no_image_realpath = $px->theme()->resource('img/noimage_base.jpg');
+	$plogconf->no_image_realpath = $px->get_local_resource_dir_realpath().'res/img/noimage_base.jpg';
 
 	#	レポートメールのあて先
-	$plogconf->reportmail_to = $conf->email['info'];
+	//$plogconf->reportmail_to = 'youremail@example.com';
 
 	$plogconf->article_summary_mode = 'manual';
 		#	記事サマリモード
@@ -99,20 +89,26 @@ return;
 
 	#	ヘルパーの設定
 	#	(必要に応じてコメントアウトを外し、ライブラリを導入してください)
+	/**/
 	$plogconf->helpers = array(
 		'freemind'=>array(
 			// FreeMind
-			'url_freemind_flash_browser'=>$px->theme()->resource( 'freemind_flash_browser' ) ,
+			'url_freemind_flash_browser'=>$px->get_local_resource_dir().'res/freemind_flash_browser' ,
 		) ,
 		'captcha'=>array(
 			// kcaptcha
 			'name'=>'kcaptcha' ,
-			'url'=>$px->theme()->resource('kcaptcha-2008-04-06') ,
+			'url'=>$px->get_local_resource_dir().'res/kcaptcha-2008-04-06' ,
 		) ,
 	);
+	/**/
 
 	#	/ 設定項目を反映
 	#--------------------------------------
+
+test::var_dump('開発中です。('.__LINE__.')');
+test::var_dump($plogconf);
+return;
 
 	#--------------------------------------
 	#	コンテンツの描画

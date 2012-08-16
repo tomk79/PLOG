@@ -1,12 +1,12 @@
 <?php
 
-#	Pickles Framework - Content - [PLOG-C]
+#	PxFW - Content - [PLOG]
 #	Copyright (C)Tomoya Koyanagi, All rights reserved.
 #	Last Update : 12:10 2010/08/09
 
 #------------------------------------------------------------------------------------------------------------------
-#	コンテンツオブジェクトクラス [ cont_PLOG_dao_comment ]
-class cont_PLOG_dao_comment{
+#	コンテンツオブジェクトクラス [ cont_plog_dao_comment ]
+class cont_plog_dao_comment{
 	var $plogconf;
 	var $conf;
 	var $errors;
@@ -14,7 +14,7 @@ class cont_PLOG_dao_comment{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_PLOG_dao_comment( &$plogconf ){
+	function cont_plog_dao_comment( &$plogconf ){
 		$this->plogconf = &$plogconf;
 		$this->conf = &$plogconf->get_basicobj_conf();
 		$this->errors = &$plogconf->get_basicobj_errors();
@@ -53,7 +53,7 @@ ORDER BY comment_date
 		}
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['comment'],
+			'tableName'=>$this->plogconf->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'limit_string'=>$limit_string,
 		);
@@ -93,7 +93,7 @@ ORDER BY comment_date
 		}
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['comment'],
+			'tableName'=>$this->plogconf->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'limit_string'=>$limit_string,
 		);
@@ -138,8 +138,8 @@ LIMIT :N:limit
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName_comment'=>$this->plogconf->table_name['comment'],
-			'tableName_article'=>$this->plogconf->table_name['article'],
+			'tableName_comment'=>$this->plogconf->table_name.'_comment',
+			'tableName_article'=>$this->plogconf->table_name.'_article',
 			'limit'=>$count,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -165,7 +165,7 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['comment'],
+			'tableName'=>$this->plogconf->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 		);
@@ -199,7 +199,7 @@ WHERE
 		$UPDATE_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['comment'],
+			'tableName'=>$this->plogconf->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 			'create_date'=>$create_date,
@@ -262,7 +262,7 @@ INSERT INTO :D:tableName(
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['comment'],
+			'tableName'=>$this->plogconf->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'keystr'=>md5( time::microtime() ),
 			'comment'=>$comment,
@@ -366,7 +366,7 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['comment'],
+			'tableName'=>$this->plogconf->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'client_ip'=>$client_ip,
 			'timelimit'=>$this->dbh->int2datetime( time()-60 ),//60秒以内で計測(仮)
@@ -416,7 +416,7 @@ WHERE
 		$UPDATE_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['comment'],
+			'tableName'=>$this->plogconf->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 			'now'=>$this->dbh->int2datetime( time() ),
@@ -449,7 +449,7 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['comment'],
+			'tableName'=>$this->plogconf->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 		);

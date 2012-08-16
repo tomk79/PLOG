@@ -8,7 +8,7 @@
 #		受信系：anch_receive_tbp
 #		発信系：anch_send_tbp
 #		その他：anch_other_methods
-class cont_PLOG_resources_tbp{
+class cont_plog_resources_tbp{
 	var $plogconf;
 	var $conf;
 	var $dbh;
@@ -26,7 +26,7 @@ class cont_PLOG_resources_tbp{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_PLOG_resources_tbp( &$plogconf , &$conf , &$dbh , &$theme ){
+	function cont_plog_resources_tbp( &$plogconf , &$conf , &$dbh , &$theme ){
 		$this->plogconf = &$plogconf;
 		$this->conf = &$conf;
 		$this->dbh = &$dbh;

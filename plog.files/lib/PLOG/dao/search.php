@@ -1,12 +1,12 @@
 <?php
 
-#	Pickles Framework - Content - [PLOG-C]
+#	PxFW - Content - [PLOG]
 #	Copyright (C)Tomoya Koyanagi, All rights reserved.
 #	Last Update : 1:17 2008/03/20
 
 #------------------------------------------------------------------------------------------------------------------
-#	記事検索オブジェクトクラス [ cont_PLOG_dao_search ]
-class cont_PLOG_dao_search{
+#	記事検索オブジェクトクラス [ cont_plog_dao_search ]
+class cont_plog_dao_search{
 	var $plogconf;
 	var $conf;
 	var $errors;
@@ -14,7 +14,7 @@ class cont_PLOG_dao_search{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_PLOG_dao_search( &$plogconf ){
+	function cont_plog_dao_search( &$plogconf ){
 		$this->plogconf = &$plogconf;
 		$this->conf = &$plogconf->get_basicobj_conf();
 		$this->errors = &$plogconf->get_basicobj_errors();
@@ -32,7 +32,7 @@ SELECT article_cd FROM :D:tableName
 <?php
 		$SELECT_SQL = @ob_get_clean();
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['article'] ,
+			'tableName'=>$this->plogconf->table_name.'_article' ,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
 		$res = $this->dbh->sendquery( $SELECT_SQL );
@@ -67,7 +67,7 @@ WHERE article_cd = :N:article_cd
 <?php
 		$DELETE_SQL = @ob_get_clean();
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['search'] ,
+			'tableName'=>$this->plogconf->table_name.'_search' ,
 			'article_cd'=>$article_cd ,
 		);
 		$DELETE_SQL = $this->dbh->bind( $DELETE_SQL , $bindData );
@@ -93,7 +93,7 @@ INSERT INTO :D:tableName (
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['search'] ,
+			'tableName'=>$this->plogconf->table_name.'_search' ,
 			'article_cd'=>$article_cd ,
 			'article_bodytext'=>$this->mk_bodytext4search_by_html( $ARTICLE_BODY_SRC ) ,
 			'now'=>date( 'Y-m-d H:i:s' ) ,

@@ -7,9 +7,9 @@
  */
 
 /**
- * コンテンツオブジェクトクラス [ cont_PLOG_config ]
+ * コンテンツオブジェクトクラス [ cont_plog_config ]
  */
-class cont_PLOG_config{
+class cont_plog_config{
 	var $px;
 
 	var $path_lib = null;//ライブラリディレクトリのパスを記憶(コンストラクタで初期化)
@@ -92,14 +92,8 @@ class cont_PLOG_config{
 		#		'url' => '～～～', //キャプチャ機能のインストール先ディレクトリ(外部パス)
 		#	);
 
-	var $table_name = array(
-		'article'=>'plog_article',
-		'category'=>'plog_category',
-		'trackback'=>'plog_trackback',
-		'comment'=>'plog_comment',
-		'search'=>'plog_search',
-	);
-		#	テーブル名設定
+	var $table_name = 'plog';
+		#	テーブル名プレフィックス設定
 
 	var $no_image_realpath = null;
 		#	存在しない画像を表示しようとした場合に、
@@ -131,7 +125,7 @@ class cont_PLOG_config{
 	/**
 	 * コンストラクタ
 	 */
-	public function cont_PLOG_config( &$px ){
+	public function cont_plog_config( &$px ){
 		$this->px = &$px;
 
 		$contentpath = $px->get_local_resource_dir_realpath();
@@ -149,7 +143,7 @@ class cont_PLOG_config{
 		if( strlen( $this->path_home_dir ) ){
 			return	$this->path_home_dir;
 		}
-		$path = $this->px->get_conf('paths.px_dir').'_sys/ramdata/PLOG/';//←デフォルト
+		$path = $this->px->get_conf('paths.px_dir').'_sys/ramdata/plog/';//←デフォルト
 		return	$path;
 	}
 
@@ -160,7 +154,7 @@ class cont_PLOG_config{
 		if( strlen( $this->path_cache_dir ) ){
 			return	$this->path_cache_dir;
 		}
-		$path = $this->px->get_conf('paths.px_dir').'_sys/caches/PLOG/';//←デフォルト
+		$path = $this->px->get_conf('paths.px_dir').'_sys/caches/plog/';//←デフォルト
 		return	$path;
 	}
 
@@ -171,7 +165,7 @@ class cont_PLOG_config{
 		if( strlen( $this->path_public_cache_dir ) ){
 			return	$this->path_public_cache_dir;
 		}
-		$path = $_SERVER['DOCUMENT_ROOT'].'_caches/PLOG/';//←デフォルト
+		$path = $_SERVER['DOCUMENT_ROOT'].'_caches/plog/';//←デフォルト
 		return	$path;
 	}
 
@@ -182,7 +176,7 @@ class cont_PLOG_config{
 		if( strlen( $this->url_public_cache_dir ) ){
 			return	$this->url_public_cache_dir;
 		}
-		$path = 'http'.($this->px->req()->is_ssl()?'s':'').'://'.$_SERVER['HTTP_HOST'].($_SERVER['HTTP_PORT']?':'.$_SERVER['HTTP_PORT']:'').$this->px->get_install_path().'_caches/PLOG/';//←デフォルト
+		$path = 'http'.($this->px->req()->is_ssl()?'s':'').'://'.$_SERVER['HTTP_HOST'].($_SERVER['HTTP_PORT']?':'.$_SERVER['HTTP_PORT']:'').$this->px->get_install_path().'_caches/plog/';//←デフォルト
 		return	$path;
 	}
 
@@ -254,7 +248,7 @@ class cont_PLOG_config{
 	 * 記事オブジェクトを作成
 	 */
 	public function &factory_article(){
-		$className = $this->require_lib( '/PLOG/contents/article.php' );
+		$className = $this->require_lib( '/plog/contents/article.php' );
 		if( !$className ){
 			$this->px->error()->error_log( 'FAILD to load library [article.php]' );
 			return	false;
@@ -269,7 +263,7 @@ class cont_PLOG_config{
 	 * 管理画面オブジェクトを作成
 	 */
 	public function &factory_admin(){
-		$className = $this->require_lib( '/PLOG/contents/admin.php' );
+		$className = $this->require_lib( '/plog/contents/admin.php' );
 		if( !$className ){
 			$this->px->error()->error_log( 'FAILD to load library [admin.php]' );
 			return	false;
@@ -284,7 +278,7 @@ class cont_PLOG_config{
 	 * 記事パーサオブジェクトを作成
 	 */
 	public function &factory_articleparser(){
-		$className = $this->require_lib( '/PLOG/articleParser/operator.php' );
+		$className = $this->require_lib( '/plog/articleParser/operator.php' );
 		if( !$className ){
 			$this->px->error()->error_log( 'FAILD to load library [articleParser/operator.php]' );
 			return	false;
@@ -299,7 +293,7 @@ class cont_PLOG_config{
 	 * DAOを作成
 	 */
 	public function &factory_dao( $dao_name ){
-		$className = $this->require_lib( '/PLOG/dao/'.$dao_name.'.php' );
+		$className = $this->require_lib( '/plog/dao/'.$dao_name.'.php' );
 		if( !$className ){
 			$this->px->error()->error_log( 'FAILD to load library ['.$dao_name.'.php]' );
 			return	false;

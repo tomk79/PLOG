@@ -1,6 +1,6 @@
 <?php
 
-#	Pickles Framework - Content - [PLOG-C]
+#	PxFW - Content - [PLOG]
 #	Copyright (C)Tomoya Koyanagi, All rights reserved.
 #	Last Update : 21:15 2008/10/06
 
@@ -9,8 +9,8 @@
 #	その他：anch_other_functions
 
 #------------------------------------------------------------------------------------------------------------------
-#	コンテンツオブジェクトクラス [ cont_PLOG_dao_io ]
-class cont_PLOG_dao_io{
+#	コンテンツオブジェクトクラス [ cont_plog_dao_io ]
+class cont_plog_dao_io{
 	var $plogconf;
 	var $conf;
 	var $errors;
@@ -18,7 +18,7 @@ class cont_PLOG_dao_io{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_PLOG_dao_io( &$plogconf ){
+	function cont_plog_dao_io( &$plogconf ){
 		$this->plogconf = &$plogconf;
 		$this->conf = &$plogconf->get_basicobj_conf();
 		$this->errors = &$plogconf->get_basicobj_errors();
@@ -249,7 +249,7 @@ INSERT INTO :D:tableName(
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['article'],
+			'tableName'=>$this->plogconf->table_name.'_article',
 			'article_title'=>$article_info['article_title'],
 			'user_cd'=>$article_info['user_cd'],
 			'article_summary'=>$article_info['article_summary'],
@@ -269,7 +269,7 @@ INSERT INTO :D:tableName(
 		}
 		$this->dbh->commit();
 
-		$article_cd = $this->dbh->get_last_insert_id( null , $this->plogconf->table_name['article'].'_article_cd_seq' );//挿入された行のIDを取得
+		$article_cd = $this->dbh->get_last_insert_id( null , $this->plogconf->table_name.'_article'.'_article_cd_seq' );//挿入された行のIDを取得
 		if( !strlen( $article_cd ) ){
 			return	false;
 		}
@@ -346,7 +346,7 @@ INSERT INTO :D:tableName(
 			$INSERT_SQL = @ob_get_clean();
 
 			$bindData = array(
-				'tableName'=>$this->plogconf->table_name['comment'],
+				'tableName'=>$this->plogconf->table_name.'_comment',
 				'article_cd'=>$new_article_cd ,
 				'keystr'=>md5( time::microtime() ) ,
 				'comment'=>$data_line['comment'] ,
@@ -418,7 +418,7 @@ INSERT INTO :D:tableName(
 			$INSERT_SQL = @ob_get_clean();
 
 			$bindData = array(
-				'tableName'=>$this->plogconf->table_name['trackback'],
+				'tableName'=>$this->plogconf->table_name.'_trackback',
 				'article_cd'=>$new_article_cd ,
 				'keystr'=>md5( time::microtime() ) ,
 				'trackback_blog_name'=>$data_line['trackback_blog_name'] ,

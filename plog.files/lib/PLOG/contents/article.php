@@ -1,12 +1,12 @@
 <?php
 
-#	Pickles Framework - Content - [PLOG-C]
+#	PxFW - Content - [PLOG]
 #	Copyright (C)Tomoya Koyanagi, All rights reserved.
 #	Last Update : 13:54 2011/07/17
 
 #------------------------------------------------------------------------------------------------------------------
-#	コンテンツオブジェクトクラス [ cont_PLOG_contents_article ]
-class cont_PLOG_contents_article{
+#	コンテンツオブジェクトクラス [ cont_plog_contents_article ]
+class cont_plog_contents_article{
 	var $plogconf;
 	var $conf;
 	var $errors;
@@ -19,7 +19,7 @@ class cont_PLOG_contents_article{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_PLOG_contents_article( &$plogconf ){
+	function cont_plog_contents_article( &$plogconf ){
 		$this->plogconf = &$plogconf;
 		$this->conf = &$plogconf->get_basicobj_conf();
 		$this->errors = &$plogconf->get_basicobj_errors();

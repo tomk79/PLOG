@@ -1,12 +1,12 @@
 <?php
 
-#	Pickles Framework - Content - [PLOG-C]
+#	PxFW - Content - [PLOG]
 #	Copyright (C)Tomoya Koyanagi, All rights reserved.
 #	Last Update : 19:44 2010/08/09
 
 #------------------------------------------------------------------------------------------------------------------
-#	コンテンツオブジェクトクラス [ cont_PLOG_contents_admin ]
-class cont_PLOG_contents_admin{
+#	コンテンツオブジェクトクラス [ cont_plog_contents_admin ]
+class cont_plog_contents_admin{
 	var $plogconf;
 	var $conf;
 	var $errors;
@@ -19,7 +19,7 @@ class cont_PLOG_contents_admin{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_PLOG_contents_admin( &$plogconf ){
+	function cont_plog_contents_admin( &$plogconf ){
 		$this->plogconf = &$plogconf;
 		$this->conf = &$plogconf->get_basicobj_conf();
 		$this->errors = &$plogconf->get_basicobj_errors();
@@ -3078,23 +3078,23 @@ class cont_PLOG_contents_admin{
 		$RTN .= '	<caption>作成するテーブル名設定</caption>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th>article</th>'."\n";
-		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name['article'] ).'</td>'."\n";
+		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name.'_article' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th>category</th>'."\n";
-		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name['category'] ).'</td>'."\n";
+		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name.'_category' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th>trackback</th>'."\n";
-		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name['trackback'] ).'</td>'."\n";
+		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name.'_trackback' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th>comment</th>'."\n";
-		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name['comment'] ).'</td>'."\n";
+		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name.'_comment' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th>search</th>'."\n";
-		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name['search'] ).'</td>'."\n";
+		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name.'_search' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 		$RTN .= '<table class="deftable">'."\n";
@@ -3231,23 +3231,23 @@ class cont_PLOG_contents_admin{
 		$RTN .= '<table class="deftable" width="100%">'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">article</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name['article'] ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name.'_article' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">category</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name['category'] ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name.'_category' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">trackback</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name['trackback'] ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name.'_trackback' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">comment</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name['comment'] ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name.'_comment' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">search</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name['search'] ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name.'_search' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 

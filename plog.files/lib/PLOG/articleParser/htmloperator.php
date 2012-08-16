@@ -1,8 +1,8 @@
 <?php
 
 #------------------------------------------------------------------------------------------------------------------
-#	コンテンツオブジェクトクラス [ cont_PLOG_articleParser_htmloperator ]
-class cont_PLOG_articleParser_htmloperator{
+#	コンテンツオブジェクトクラス [ cont_plog_articleParser_htmloperator ]
+class cont_plog_articleParser_htmloperator{
 	var $article_cd = 0;
 
 	var $localconf = array( 'print_comment' => true , 'do_reform' => false );
@@ -28,7 +28,7 @@ class cont_PLOG_articleParser_htmloperator{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_PLOG_articleParser_htmloperator( $article_cd ){
+	function cont_plog_articleParser_htmloperator( $article_cd ){
 		$this->article_cd = intval( $article_cd );
 	}
 

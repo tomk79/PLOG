@@ -1,12 +1,12 @@
 <?php
 
-#	Pickles Framework - Content - [PLOG-C]
+#	PxFW - Content - [PLOG]
 #	Copyright (C)Tomoya Koyanagi, All rights reserved.
 #	Last Update : 23:51 2008/04/27
 
 #------------------------------------------------------------------------------------------------------------------
-#	コンテンツオブジェクトクラス [ cont_PLOG_dao_dbcreate ]
-class cont_PLOG_dao_dbcreate{
+#	コンテンツオブジェクトクラス [ cont_plog_dao_dbcreate ]
+class cont_plog_dao_dbcreate{
 	var $plogconf;
 	var $conf;
 	var $errors;
@@ -14,7 +14,7 @@ class cont_PLOG_dao_dbcreate{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_PLOG_dao_dbcreate( &$plogconf ){
+	function cont_plog_dao_dbcreate( &$plogconf ){
 		$this->plogconf = &$plogconf;
 		$this->conf = &$plogconf->get_basicobj_conf();
 		$this->errors = &$plogconf->get_basicobj_errors();
@@ -266,7 +266,7 @@ CREATE TABLE :D:tableName(
 		foreach( $targetTableNames as $tableName ){
 			foreach( $sql[$tableName] as $sql_content ){
 				$bindData = array(
-					'tableName'=>$this->plogconf->table_name[$tableName],
+					'tableName'=>$this->plogconf->table_name.'_'.$tableName,
 				);
 				$sqlFinal = $this->dbh->bind( $sql_content , $bindData );
 				if( !strlen( $sqlFinal ) ){ continue; }

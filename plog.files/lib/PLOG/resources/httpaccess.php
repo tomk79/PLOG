@@ -6,7 +6,7 @@
 
 ###################################################################################################################
 #	HTTPアクセスオブジェクト
-class cont_PLOG_resources_httpaccess{
+class cont_plog_resources_httpaccess{
 
 	var $http_connection_resource = null;//コネクションリソース
 

@@ -4,8 +4,8 @@
 #	Last Update : 23:16 2010/07/04
 
 #------------------------------------------------------------------------------------------------------------------
-#	コンテンツ解析オブジェクトクラス [ cont_PLOG_articleParser_operator ]
-class cont_PLOG_articleParser_operator{
+#	コンテンツ解析オブジェクトクラス [ cont_plog_articleParser_operator ]
+class cont_plog_articleParser_operator{
 	var $plogconf;
 	var $conf;
 	var $errors;
@@ -22,7 +22,7 @@ class cont_PLOG_articleParser_operator{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_PLOG_articleParser_operator( &$plogconf ){
+	function cont_plog_articleParser_operator( &$plogconf ){
 		$this->plogconf = &$plogconf;
 		$this->conf = &$plogconf->get_basicobj_conf();
 		$this->errors = &$plogconf->get_basicobj_errors();

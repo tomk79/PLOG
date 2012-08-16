@@ -1,12 +1,12 @@
 <?php
 
-#	Pickles Framework - Content - [PLOG-C]
+#	PxFW - Content - [PLOG]
 #	Copyright (C)Tomoya Koyanagi, All rights reserved.
 #	Last Update : 13:19 2010/11/07
 
 #------------------------------------------------------------------------------------------------------------------
-#	コンテンツオブジェクトクラス [ cont_PLOG_dao_rss ]
-class cont_PLOG_dao_rss{
+#	コンテンツオブジェクトクラス [ cont_plog_dao_rss ]
+class cont_plog_dao_rss{
 	var $plogconf;
 	var $conf;
 	var $errors;
@@ -17,7 +17,7 @@ class cont_PLOG_dao_rss{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_PLOG_dao_rss( &$plogconf ){
+	function cont_plog_dao_rss( &$plogconf ){
 		$this->plogconf = &$plogconf;
 		$this->conf = &$plogconf->get_basicobj_conf();
 		$this->errors = &$plogconf->get_basicobj_errors();
@@ -75,8 +75,8 @@ ORDER BY release_date DESC
 		}
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name['article'],
-			'tableName_category'=>$this->plogconf->table_name['category'],
+			'tableName_article'=>$this->plogconf->table_name.'_article',
+			'tableName_category'=>$this->plogconf->table_name.'_category',
 			'limit_string'=>$limit_string,
 			'now'=>$this->dbh->int2datetime(time()),
 		);

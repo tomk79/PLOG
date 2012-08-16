@@ -1,12 +1,12 @@
 <?php
 
-#	Pickles Framework - Content - [PLOG-C]
+#	PxFW - Content - [PLOG]
 #	Copyright (C)Tomoya Koyanagi, All rights reserved.
 #	Last Update : 12:16 2010/08/09
 
 #------------------------------------------------------------------------------------------------------------------
-#	コンテンツオブジェクトクラス [ cont_PLOG_dao_trackback ]
-class cont_PLOG_dao_trackback{
+#	コンテンツオブジェクトクラス [ cont_plog_dao_trackback ]
+class cont_plog_dao_trackback{
 	var $plogconf;
 	var $conf;
 	var $errors;
@@ -14,7 +14,7 @@ class cont_PLOG_dao_trackback{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_PLOG_dao_trackback( &$plogconf ){
+	function cont_plog_dao_trackback( &$plogconf ){
 		$this->plogconf = &$plogconf;
 		$this->conf = &$plogconf->get_basicobj_conf();
 		$this->errors = &$plogconf->get_basicobj_errors();
@@ -50,7 +50,7 @@ ORDER BY trackback_date
 		}
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['trackback'],
+			'tableName'=>$this->plogconf->table_name.'_trackback',
 			'article_cd'=>$article_cd,
 			'limit_string'=>$limit_string,
 		);
@@ -91,7 +91,7 @@ ORDER BY trackback_date
 		}
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['trackback'],
+			'tableName'=>$this->plogconf->table_name.'_trackback',
 			'article_cd'=>$article_cd,
 			'limit_string'=>$limit_string,
 		);
@@ -136,8 +136,8 @@ LIMIT :N:limit
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName_trackback'=>$this->plogconf->table_name['trackback'],
-			'tableName_article'=>$this->plogconf->table_name['article'],
+			'tableName_trackback'=>$this->plogconf->table_name.'_trackback',
+			'tableName_article'=>$this->plogconf->table_name.'_article',
 			'limit'=>$count,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -164,7 +164,7 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['trackback'],
+			'tableName'=>$this->plogconf->table_name.'_trackback',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 		);
@@ -198,7 +198,7 @@ WHERE
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['trackback'],
+			'tableName'=>$this->plogconf->table_name.'_trackback',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 			'trackback_url'=>$trackback_url,
@@ -241,7 +241,7 @@ WHERE
 <?php
 		$SELECT_SQL = @ob_get_clean();
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['trackback'],
+			'tableName'=>$this->plogconf->table_name.'_trackback',
 			'article_cd'=>$article_cd,
 			'trackback_url'=>$url,
 		);
@@ -286,7 +286,7 @@ INSERT INTO :D:tableName(
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['trackback'] ,
+			'tableName'=>$this->plogconf->table_name.'_trackback' ,
 			'article_cd'=>$article_cd ,
 			'keystr'=>md5( time::microtime() ) ,
 			'trackback_blog_name'=>$blog_name ,
@@ -364,7 +364,7 @@ WHERE
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['trackback'],
+			'tableName'=>$this->plogconf->table_name.'_trackback',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 			'trackback_url'=>$trackback_url,

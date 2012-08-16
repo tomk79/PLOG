@@ -1,12 +1,12 @@
 <?php
 
-#	Pickles Framework - Content - [PLOG-C]
+#	PxFW - Content - [PLOG]
 #	Copyright (C)Tomoya Koyanagi, All rights reserved.
 #	Last Update : 16:12 2009/12/29
 
 #------------------------------------------------------------------------------------------------------------------
-#	コンテンツオブジェクトクラス [ cont_PLOG_dao_visitor ]
-class cont_PLOG_dao_visitor{
+#	コンテンツオブジェクトクラス [ cont_plog_dao_visitor ]
+class cont_plog_dao_visitor{
 	var $plogconf;
 	var $conf;
 	var $errors;
@@ -14,7 +14,7 @@ class cont_PLOG_dao_visitor{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_PLOG_dao_visitor( &$plogconf ){
+	function cont_plog_dao_visitor( &$plogconf ){
 		$this->plogconf = &$plogconf;
 		$this->conf = &$plogconf->get_basicobj_conf();
 		$this->errors = &$plogconf->get_basicobj_errors();
@@ -70,8 +70,8 @@ ORDER BY release_date DESC
 
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name['article'],
-			'tableName_category'=>$this->plogconf->table_name['category'],
+			'tableName_article'=>$this->plogconf->table_name.'_article',
+			'tableName_category'=>$this->plogconf->table_name.'_category',
 			'limit_string'=>$limit_string,
 			'category_cd_string'=>$category_cd_string,
 			'now'=>$this->dbh->int2datetime( $this->conf->time ),
@@ -106,7 +106,7 @@ WHERE
 
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['article'],
+			'tableName'=>$this->plogconf->table_name.'_article',
 			'category_cd_string'=>$category_cd_string,
 			'now'=>$this->dbh->int2datetime( $this->conf->time ),
 		);
@@ -147,8 +147,8 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name['article'],
-			'tableName_category'=>$this->plogconf->table_name['category'],
+			'tableName_article'=>$this->plogconf->table_name.'_article',
+			'tableName_category'=>$this->plogconf->table_name.'_category',
 			'article_cd'=>$article_cd,
 			'now'=>$this->dbh->int2datetime( $this->conf->time ),
 		);
@@ -186,7 +186,7 @@ GROUP BY article_cd
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['comment'],
+			'tableName'=>$this->plogconf->table_name.'_comment',
 			'target_article_cd'=>$target_article_cd,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -224,7 +224,7 @@ GROUP BY article_cd
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['comment'],
+			'tableName'=>$this->plogconf->table_name.'_comment',
 			'target_article_cd'=>$target_article_cd,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -262,7 +262,7 @@ GROUP BY article_cd
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['trackback'],
+			'tableName'=>$this->plogconf->table_name.'_trackback',
 			'target_article_cd'=>$target_article_cd,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -299,7 +299,7 @@ GROUP BY article_cd
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['trackback'],
+			'tableName'=>$this->plogconf->table_name.'_trackback',
 			'target_article_cd'=>$target_article_cd,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -470,7 +470,7 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['category'],
+			'tableName'=>$this->plogconf->table_name.'_category',
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
 		$res = $this->dbh->sendquery( $SELECT_SQL );
@@ -494,7 +494,7 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['category'],
+			'tableName'=>$this->plogconf->table_name.'_category',
 			'category_cd'=>$category_cd,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -567,8 +567,8 @@ ORDER BY atc.release_date DESC
 		}
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name['article'] ,
-			'tableName_search'=>$this->plogconf->table_name['search'] ,
+			'tableName_article'=>$this->plogconf->table_name.'_article' ,
+			'tableName_search'=>$this->plogconf->table_name.'_search' ,
 			'limit_string'=>$limit_string,
 			'sql_where'=>$SQL_WHERE,
 			'now'=>$this->dbh->int2datetime( $this->conf->time ),
@@ -614,8 +614,8 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name['article'] ,
-			'tableName_search'=>$this->plogconf->table_name['search'] ,
+			'tableName_article'=>$this->plogconf->table_name.'_article' ,
+			'tableName_search'=>$this->plogconf->table_name.'_search' ,
 			'sql_where'=>$SQL_WHERE,
 			'now'=>$this->dbh->int2datetime( $this->conf->time ),
 		);
@@ -698,8 +698,8 @@ WHERE
 
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name['article'],
-			'tableName_category'=>$this->plogconf->table_name['category'],
+			'tableName_article'=>$this->plogconf->table_name.'_article',
+			'tableName_category'=>$this->plogconf->table_name.'_category',
 			'limit_string'=>$limit_string,
 			'next_or_prev'=>$next_or_prev_string,
 			'orderby'=>$orderby_string,

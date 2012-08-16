@@ -1,12 +1,12 @@
 <?php
 
-#	Pickles Framework - Content - [PLOG-C]
+#	PxFW - Content - [PLOG]
 #	Copyright (C)Tomoya Koyanagi, All rights reserved.
 #	Last Update : 23:21 2010/07/04
 
 #------------------------------------------------------------------------------------------------------------------
-#	コンテンツオブジェクトクラス [ cont_PLOG_dao_admin ]
-class cont_PLOG_dao_admin{
+#	コンテンツオブジェクトクラス [ cont_plog_dao_admin ]
+class cont_plog_dao_admin{
 	var $plogconf;
 	var $conf;
 	var $errors;
@@ -14,7 +14,7 @@ class cont_PLOG_dao_admin{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_PLOG_dao_admin( &$plogconf ){
+	function cont_plog_dao_admin( &$plogconf ){
 		$this->plogconf = &$plogconf;
 		$this->conf = &$plogconf->get_basicobj_conf();
 		$this->errors = &$plogconf->get_basicobj_errors();
@@ -47,7 +47,7 @@ ORDER BY release_date DESC
 		}
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['article'],
+			'tableName'=>$this->plogconf->table_name.'_article',
 			'limit_string'=>$limit_string,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -78,7 +78,7 @@ WHERE
 
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['article'],
+			'tableName'=>$this->plogconf->table_name.'_article',
 			'category_cd_string'=>$category_cd_string,
 			'now'=>$this->dbh->int2datetime(time()),
 		);
@@ -118,8 +118,8 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name['article'],
-			'tableName_category'=>$this->plogconf->table_name['category'],
+			'tableName_article'=>$this->plogconf->table_name.'_article',
+			'tableName_category'=>$this->plogconf->table_name.'_category',
 			'article_cd'=>$article_cd,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -164,7 +164,7 @@ INSERT INTO :D:tableName(
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['article'],
+			'tableName'=>$this->plogconf->table_name.'_article',
 			'article_title'=>$article_title,
 			'article_summary'=>$ary_options['article_summary'],
 			'user_cd'=>intval( $ary_options['user_cd'] ),
@@ -182,7 +182,7 @@ INSERT INTO :D:tableName(
 		}
 		$this->dbh->commit();
 
-		$article_cd = $this->dbh->get_last_insert_id( null , $this->plogconf->table_name['article'].'_article_cd_seq' );//挿入された行のIDを取得
+		$article_cd = $this->dbh->get_last_insert_id( null , $this->plogconf->table_name.'_article'.'_article_cd_seq' );//挿入された行のIDを取得
 		if( !strlen( $article_cd ) ){
 			return	false;
 		}
@@ -229,7 +229,7 @@ WHERE article_cd = :N:article_cd
 		$UPDATE_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['article'],
+			'tableName'=>$this->plogconf->table_name.'_article',
 			'article_cd'=>$article_cd,
 			'article_title'=>$article_title,
 			'article_summary'=>$ary_options['article_summary'],
@@ -291,7 +291,7 @@ WHERE article_cd = :N:article_cd
 			$UPDATE_SQL = @ob_get_clean();
 
 			$bindData = array(
-				'tableName'=>$this->plogconf->table_name['article'],
+				'tableName'=>$this->plogconf->table_name.'_article',
 				'article_cd'=>$article_cd,
 				'article_summary'=>$SQLPARTS_SUMMARY,
 				'now'=>date( 'Y-m-d H:i:s' ),
@@ -387,7 +387,7 @@ ORDER BY category_title
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['category'],
+			'tableName'=>$this->plogconf->table_name.'_category',
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
 		$res = $this->dbh->sendquery( $SELECT_SQL );
@@ -405,7 +405,7 @@ UPDATE :D:tableName SET parent_category_cd = :N:parent_category_cd;
 		$UPDATE_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['category'],
+			'tableName'=>$this->plogconf->table_name.'_category',
 			'parent_category_cd'=>0,
 		);
 		$UPDATE_SQL = $this->dbh->bind( $UPDATE_SQL , $bindData );
@@ -432,7 +432,7 @@ WHERE category_cd = :N:category_cd
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['category'] ,
+			'tableName'=>$this->plogconf->table_name.'_category' ,
 			'category_cd'=>$category_cd ,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -474,7 +474,7 @@ INSERT INTO :D:tableName(
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['category'],
+			'tableName'=>$this->plogconf->table_name.'_category',
 			'category_title'=>$category_title,
 			'user_cd'=>intval($ary_options['user_cd']),
 			'category_subtitle'=>$category_subtitle,
@@ -491,7 +491,7 @@ INSERT INTO :D:tableName(
 		}
 		$this->dbh->commit();
 
-		$category_cd = $this->dbh->get_last_insert_id( null , $this->plogconf->table_name['category'].'_category_cd_seq' );//挿入された行のIDを取得
+		$category_cd = $this->dbh->get_last_insert_id( null , $this->plogconf->table_name.'_category'.'_category_cd_seq' );//挿入された行のIDを取得
 		if( !strlen( $category_cd ) ){
 			return	false;
 		}
@@ -523,7 +523,7 @@ WHERE category_cd = :N:category_cd
 		$UPDATE_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['category'],
+			'tableName'=>$this->plogconf->table_name.'_category',
 			'category_cd'=>$category_cd,
 			'category_title'=>$category_title,
 			'category_subtitle'=>$category_subtitle,
@@ -592,8 +592,8 @@ ORDER BY c.comment_date
 		}
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name['article'] ,
-			'tableName_comment'=>$this->plogconf->table_name['comment'] ,
+			'tableName_article'=>$this->plogconf->table_name.'_article' ,
+			'tableName_comment'=>$this->plogconf->table_name.'_comment' ,
 			'limit_string'=>$limit_string,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -645,8 +645,8 @@ ORDER BY t.trackback_date
 		}
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name['article'] ,
-			'tableName_trackback'=>$this->plogconf->table_name['trackback'] ,
+			'tableName_article'=>$this->plogconf->table_name.'_article' ,
+			'tableName_trackback'=>$this->plogconf->table_name.'_trackback' ,
 			'limit_string'=>$limit_string,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -671,7 +671,7 @@ WHERE article_cd = :N:article_cd
 		$UPDATE_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name['article'],
+			'tableName'=>$this->plogconf->table_name.'_article',
 			'article_cd'=>$article_cd,
 			'now'=>$this->dbh->int2datetime( time() ),
 		);
@@ -747,8 +747,8 @@ ORDER BY atc.release_date DESC
 		}
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name['article'] ,
-			'tableName_search'=>$this->plogconf->table_name['search'] ,
+			'tableName_article'=>$this->plogconf->table_name.'_article' ,
+			'tableName_search'=>$this->plogconf->table_name.'_search' ,
 			'keyword'=>'%'.$keyword.'%' ,
 			'limit_string'=>$limit_string,
 			'sql_where'=>$SQL_WHERE,
@@ -793,8 +793,8 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name['article'] ,
-			'tableName_search'=>$this->plogconf->table_name['search'] ,
+			'tableName_article'=>$this->plogconf->table_name.'_article' ,
+			'tableName_search'=>$this->plogconf->table_name.'_search' ,
 			'keyword'=>'%'.$keyword.'%' ,
 			'sql_where'=>$SQL_WHERE,
 		);
