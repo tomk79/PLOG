@@ -7,9 +7,9 @@
  */
 
 /**
- * コンテンツオブジェクトクラス [ cont_plog_config ]
+ * コンテンツオブジェクトクラス [ cont_plog ]
  */
-class cont_plog_config{
+class cont_plog{
 	var $px;
 
 	var $path_lib = null;//ライブラリディレクトリのパスを記憶(コンストラクタで初期化)
@@ -125,7 +125,7 @@ class cont_plog_config{
 	/**
 	 * コンストラクタ
 	 */
-	public function cont_plog_config( &$px ){
+	public function cont_plog( &$px ){
 		$this->px = &$px;
 
 		$contentpath = $px->get_local_resource_dir_realpath();

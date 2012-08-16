@@ -8,11 +8,11 @@
 	#--------------------------------------
 	#	ライブラリをロード
 	$contentpath = $px->get_local_resource_dir_realpath();
-	if( !include_once( $contentpath.'/lib/plog/config.php' ) ){
+	if( !include_once( $contentpath.'/lib/plog.php' ) ){
 		return false;
 	}
 
-	$className = 'cont_plog_config';
+	$className = 'cont_plog';
 	if( !$className ){
 		$errors->error_log( '$plogconfをロードできません。' , __FILE__ , __LINE__ );
 		return	false;
