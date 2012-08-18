@@ -7,18 +7,18 @@
 #------------------------------------------------------------------------------------------------------------------
 #	コンテンツオブジェクトクラス [ cont_plog_dao_comment ]
 class cont_plog_dao_comment{
-	var $plogconf;
+	var $plog;
 	var $conf;
 	var $errors;
 	var $dbh;
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_plog_dao_comment( &$plogconf ){
-		$this->plogconf = &$plogconf;
-		$this->conf = &$plogconf->get_basicobj_conf();
-		$this->errors = &$plogconf->get_basicobj_errors();
-		$this->dbh = &$plogconf->get_basicobj_dbh();
+	function cont_plog_dao_comment( &$plog ){
+		$this->plog = &$plog;
+		$this->conf = &$plog->get_basicobj_conf();
+		$this->errors = &$plog->get_basicobj_errors();
+		$this->dbh = &$plog->get_basicobj_dbh();
 	}
 
 
@@ -53,7 +53,7 @@ ORDER BY comment_date
 		}
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_comment',
+			'tableName'=>$this->plog->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'limit_string'=>$limit_string,
 		);
@@ -93,7 +93,7 @@ ORDER BY comment_date
 		}
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_comment',
+			'tableName'=>$this->plog->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'limit_string'=>$limit_string,
 		);
@@ -138,8 +138,8 @@ LIMIT :N:limit
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName_comment'=>$this->plogconf->table_name.'_comment',
-			'tableName_article'=>$this->plogconf->table_name.'_article',
+			'tableName_comment'=>$this->plog->table_name.'_comment',
+			'tableName_article'=>$this->plog->table_name.'_article',
 			'limit'=>$count,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -165,7 +165,7 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_comment',
+			'tableName'=>$this->plog->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 		);
@@ -199,7 +199,7 @@ WHERE
 		$UPDATE_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_comment',
+			'tableName'=>$this->plog->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 			'create_date'=>$create_date,
@@ -262,7 +262,7 @@ INSERT INTO :D:tableName(
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_comment',
+			'tableName'=>$this->plog->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'keystr'=>md5( time::microtime() ),
 			'comment'=>$comment,
@@ -282,7 +282,7 @@ INSERT INTO :D:tableName(
 		}
 		$this->dbh->commit();
 
-		if( strlen( $this->plogconf->reportmail_to ) ){
+		if( strlen( $this->plog->reportmail_to ) ){
 			#--------------------------------------
 			#	レポートメールを送信する (PLOG 0.1.6 追加)
 			$className = $this->dbh->require_lib( '/resources/mail.php' );
@@ -291,11 +291,11 @@ INSERT INTO :D:tableName(
 				return true;
 			}
 			$mail = new $className( &$this->conf , &$this->errors );
-			$mail->setsubject( '【'.$this->plogconf->blog_name.'】[記事'.$article_cd.']投稿が送信されました。' );
+			$mail->setsubject( '【'.$this->plog->blog_name.'】[記事'.$article_cd.']投稿が送信されました。' );
 			$mail->setbody(
-				 ''.$this->plogconf->blog_name.' の記事 '.$article_cd.' に、'."\n"
+				 ''.$this->plog->blog_name.' の記事 '.$article_cd.' に、'."\n"
 				.'コメントが投稿されました。'."\n"
-				.$this->plogconf->get_article_url($article_cd,'admin')."\n"
+				.$this->plog->get_article_url($article_cd,'admin')."\n"
 				."\n"
 				.'From: '.$commentator_name."\n"
 				.'Email: '.$commentator_email."\n"
@@ -306,8 +306,8 @@ INSERT INTO :D:tableName(
 				."\n"
 				.'Client IP: '.$client_ip."\n"
 			);
-			$mail->putto( $this->plogconf->reportmail_to );
-			$mail->setfrom( $this->plogconf->reportmail_to );
+			$mail->putto( $this->plog->reportmail_to );
+			$mail->setfrom( $this->plog->reportmail_to );
 
 			if( !$mail->send() ){//メール送信
 				$this->errors->error_log( 'レポートメールの送信に失敗しました。' , __FILE__ , __LINE__ );
@@ -331,7 +331,7 @@ INSERT INTO :D:tableName(
 
 		$locked_error_message = 'コメントの投稿をロックにより拒否しました。client_ip = ['.$client_ip.'] article_cd = ['.$article_cd.']';
 
-		$path_lockfile_dir = $this->plogconf->path_home_dir.'/lockfiles/comment_contribute_lock';
+		$path_lockfile_dir = $this->plog->path_home_dir.'/lockfiles/comment_contribute_lock';
 		if( !is_dir( $path_lockfile_dir ) ){
 			if( !$this->dbh->mkdirall( $path_lockfile_dir ) ){
 				#	ディレクトリを作れません。
@@ -366,7 +366,7 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_comment',
+			'tableName'=>$this->plog->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'client_ip'=>$client_ip,
 			'timelimit'=>$this->dbh->int2datetime( time()-60 ),//60秒以内で計測(仮)
@@ -416,7 +416,7 @@ WHERE
 		$UPDATE_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_comment',
+			'tableName'=>$this->plog->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 			'now'=>$this->dbh->int2datetime( time() ),
@@ -449,7 +449,7 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_comment',
+			'tableName'=>$this->plog->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 		);

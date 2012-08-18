@@ -7,18 +7,18 @@
 #------------------------------------------------------------------------------------------------------------------
 #	コンテンツオブジェクトクラス [ cont_plog_dao_visitor ]
 class cont_plog_dao_visitor{
-	var $plogconf;
+	var $plog;
 	var $conf;
 	var $errors;
 	var $dbh;
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_plog_dao_visitor( &$plogconf ){
-		$this->plogconf = &$plogconf;
-		$this->conf = &$plogconf->get_basicobj_conf();
-		$this->errors = &$plogconf->get_basicobj_errors();
-		$this->dbh = &$plogconf->get_basicobj_dbh();
+	function cont_plog_dao_visitor( &$plog ){
+		$this->plog = &$plog;
+		$this->conf = &$plog->get_basicobj_conf();
+		$this->errors = &$plog->get_basicobj_errors();
+		$this->dbh = &$plog->get_basicobj_dbh();
 	}
 
 
@@ -70,8 +70,8 @@ ORDER BY release_date DESC
 
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name.'_article',
-			'tableName_category'=>$this->plogconf->table_name.'_category',
+			'tableName_article'=>$this->plog->table_name.'_article',
+			'tableName_category'=>$this->plog->table_name.'_category',
 			'limit_string'=>$limit_string,
 			'category_cd_string'=>$category_cd_string,
 			'now'=>$this->dbh->int2datetime( $this->conf->time ),
@@ -106,7 +106,7 @@ WHERE
 
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_article',
+			'tableName'=>$this->plog->table_name.'_article',
 			'category_cd_string'=>$category_cd_string,
 			'now'=>$this->dbh->int2datetime( $this->conf->time ),
 		);
@@ -147,8 +147,8 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name.'_article',
-			'tableName_category'=>$this->plogconf->table_name.'_category',
+			'tableName_article'=>$this->plog->table_name.'_article',
+			'tableName_category'=>$this->plog->table_name.'_category',
 			'article_cd'=>$article_cd,
 			'now'=>$this->dbh->int2datetime( $this->conf->time ),
 		);
@@ -186,7 +186,7 @@ GROUP BY article_cd
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_comment',
+			'tableName'=>$this->plog->table_name.'_comment',
 			'target_article_cd'=>$target_article_cd,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -224,7 +224,7 @@ GROUP BY article_cd
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_comment',
+			'tableName'=>$this->plog->table_name.'_comment',
 			'target_article_cd'=>$target_article_cd,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -262,7 +262,7 @@ GROUP BY article_cd
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_trackback',
+			'tableName'=>$this->plog->table_name.'_trackback',
 			'target_article_cd'=>$target_article_cd,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -299,7 +299,7 @@ GROUP BY article_cd
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_trackback',
+			'tableName'=>$this->plog->table_name.'_trackback',
 			'target_article_cd'=>$target_article_cd,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -325,17 +325,17 @@ GROUP BY article_cd
 
 		#--------------------------------------
 		#	オリジナルのパス
-		$path_original_file = $this->plogconf->get_article_dir( $article_cd ).'/images/'.$filename;
-		if( !is_file( $path_original_file ) && is_file( $this->plogconf->no_image_realpath ) ){
+		$path_original_file = $this->plog->get_article_dir( $article_cd ).'/images/'.$filename;
+		if( !is_file( $path_original_file ) && is_file( $this->plog->no_image_realpath ) ){
 			#	No Image 画像が指定されていたら、
 			#	それを採用する。
-			$path_original_file = realpath( $this->plogconf->no_image_realpath );
+			$path_original_file = realpath( $this->plog->no_image_realpath );
 		}
 		if( !is_file( $path_original_file ) ){ return false; }
 
 		#--------------------------------------
 		#	キャッシュのパス
-		$path_cache_basedir = $this->plogconf->get_public_cache_dir();
+		$path_cache_basedir = $this->plog->get_public_cache_dir();
 		if( !is_dir( $path_cache_basedir ) ){
 			if( !$this->dbh->mkdirall( $path_cache_basedir ) ){
 				return	false;
@@ -350,7 +350,7 @@ GROUP BY article_cd
 			case 'jpe':
 			case 'jpeg':
 			case 'bmp':
-				$real_image_name = $filename.'@m'.intval($this->plogconf->article_image_maxwidth).'w'.intval($option['width']).'h'.intval($option['height']).'.'.$this->dbh->get_extension($filename);
+				$real_image_name = $filename.'@m'.intval($this->plog->article_image_maxwidth).'w'.intval($option['width']).'h'.intval($option['height']).'.'.$this->dbh->get_extension($filename);
 				$is_image = true;
 				break;
 			default:
@@ -372,7 +372,7 @@ GROUP BY article_cd
 		if( !is_dir( dirname( $path_cache_file ) ) ){
 			$this->dbh->mkdirall( dirname( $path_cache_file ) );
 		}
-		$RTN = $this->plogconf->get_url_public_cache_dir().$path_id.'/'.$real_image_name;
+		$RTN = $this->plog->get_url_public_cache_dir().$path_id.'/'.$real_image_name;
 
 		#--------------------------------------
 		#	更新日比較
@@ -415,10 +415,10 @@ GROUP BY article_cd
 			#	画像サイズを指定されていたらリサイズ
 			$new_width = intval( $option['width'] );
 			$new_height = intval( $option['height'] );
-			if( intval( $new_width ) > $this->plogconf->article_image_maxwidth ){
+			if( intval( $new_width ) > $this->plog->article_image_maxwidth ){
 				#	最大画像幅を超えていたらそれを超えられない
-				$rate = intval( $this->plogconf->article_image_maxwidth )/intval( $new_width );
-				$new_width = intval( $this->plogconf->article_image_maxwidth );
+				$rate = intval( $this->plog->article_image_maxwidth )/intval( $new_width );
+				$new_width = intval( $this->plog->article_image_maxwidth );
 				$new_height = intval( $new_height*$rate );
 			}
 			$obj_image->resize( $new_width , $new_height , array() );
@@ -426,9 +426,9 @@ GROUP BY article_cd
 		}elseif( $option['width'] ){
 			#	画像幅を指定されていたらリサイズ
 			$new_width = intval( $option['width'] );
-			if( intval( $new_width ) > $this->plogconf->article_image_maxwidth ){
+			if( intval( $new_width ) > $this->plog->article_image_maxwidth ){
 				#	最大画像幅を超えていたらそれを超えられない
-				$new_width = intval( $this->plogconf->article_image_maxwidth );
+				$new_width = intval( $this->plog->article_image_maxwidth );
 			}
 			$obj_image->fit2width( $new_width , array() );
 
@@ -437,9 +437,9 @@ GROUP BY article_cd
 			$new_height = intval( $option['height'] );
 			$obj_image->fit2height( $new_height , array() );
 
-		}elseif( $imgSize[0] > $this->plogconf->article_image_maxwidth ){
+		}elseif( $imgSize[0] > $this->plog->article_image_maxwidth ){
 			#	最大画像幅を超えていたらリサイズ
-			$obj_image->fit2width( $this->plogconf->article_image_maxwidth , array() );
+			$obj_image->fit2width( $this->plog->article_image_maxwidth , array() );
 		}
 
 		#	MIMEタイプをセットする
@@ -470,7 +470,7 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_category',
+			'tableName'=>$this->plog->table_name.'_category',
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
 		$res = $this->dbh->sendquery( $SELECT_SQL );
@@ -494,7 +494,7 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_category',
+			'tableName'=>$this->plog->table_name.'_category',
 			'category_cd'=>$category_cd,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -567,8 +567,8 @@ ORDER BY atc.release_date DESC
 		}
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name.'_article' ,
-			'tableName_search'=>$this->plogconf->table_name.'_search' ,
+			'tableName_article'=>$this->plog->table_name.'_article' ,
+			'tableName_search'=>$this->plog->table_name.'_search' ,
 			'limit_string'=>$limit_string,
 			'sql_where'=>$SQL_WHERE,
 			'now'=>$this->dbh->int2datetime( $this->conf->time ),
@@ -614,8 +614,8 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name.'_article' ,
-			'tableName_search'=>$this->plogconf->table_name.'_search' ,
+			'tableName_article'=>$this->plog->table_name.'_article' ,
+			'tableName_search'=>$this->plog->table_name.'_search' ,
 			'sql_where'=>$SQL_WHERE,
 			'now'=>$this->dbh->int2datetime( $this->conf->time ),
 		);
@@ -698,8 +698,8 @@ WHERE
 
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name.'_article',
-			'tableName_category'=>$this->plogconf->table_name.'_category',
+			'tableName_article'=>$this->plog->table_name.'_article',
+			'tableName_category'=>$this->plog->table_name.'_category',
 			'limit_string'=>$limit_string,
 			'next_or_prev'=>$next_or_prev_string,
 			'orderby'=>$orderby_string,

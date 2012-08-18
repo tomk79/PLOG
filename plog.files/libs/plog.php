@@ -1,18 +1,15 @@
 <?php
 
 /**
+ * PLOGメインオブジェクトクラス
  * PxFW - Content - [PLOG]
- * @author (C)Tomoya Koyanagi.
- * Last Update : 6:35 2012/08/15
- */
-
-/**
- * コンテンツオブジェクトクラス [ cont_plog ]
+ * @author Tomoya Koyanagi
  */
 class cont_plog{
 	var $px;
 
-	var $path_lib = null;//ライブラリディレクトリのパスを記憶(コンストラクタで初期化)
+	private $path_lib = null;//ライブラリディレクトリのパスを記憶(コンストラクタで初期化)
+	private $queries = array();
 
 	#--------------------------------------
 	#	設定項目
@@ -110,12 +107,15 @@ class cont_plog{
 	var $reportmail_to = null;
 		#	レポートメールのあて先(PLOG 0.1.6 追加)
 
-	var $blog_name = 'unknown';
+	var $blog_name = 'Your BLOG name';
 		#	ブログ名
-	var $blog_description = 'powered by Pickles Framework';
+
+	var $blog_description = '';
 		#	ブログの説明
+
 	var $blog_language = 'ja';
 		#	ブログの自然言語
+
 	var $blog_author_name = null;
 		#	ブログの編集者名
 
@@ -125,15 +125,30 @@ class cont_plog{
 	/**
 	 * コンストラクタ
 	 */
-	public function cont_plog( &$px ){
+	public function cont_plog( &$px , $dynamic_path_name ){
 		$this->px = &$px;
 
-		$contentpath = $px->get_local_resource_dir_realpath();
-		$this->path_lib = $this->px->dbh()->get_realpath($contentpath.'/lib').'/';
+		$content_path = $px->get_local_resource_dir_realpath();
+		$this->path_lib = $this->px->dbh()->get_realpath($content_path.'/libs').'/';
 
-//		if( is_null( $this->article_image_maxwidth ) && is_callable( array( $this->px->theme() , 'contents_min_width' ) ) ){
-//			$this->article_image_maxwidth = $this->px->theme()->contents_min_width();
-//		}
+		$query = $this->px->req()->get_path_param( $dynamic_path_name );
+		$this->queries = $this->parse_query( $query );
+
+		/*
+		//↓UTODO: PxFWから削除された機能を使用するため、一時的にコメントアウト。
+		if( is_null( $this->article_image_maxwidth ) && is_callable( array( $this->px->theme() , 'contents_min_width' ) ) ){
+			$this->article_image_maxwidth = $this->px->theme()->contents_min_width();
+		}
+		*/
+	}
+
+	/**
+	 * クエリを解析する。
+	 */
+	private function parse_query( $query ){
+		//UTODO: 未開発のメソッド
+		test::var_dump( $query );
+		return array();
 	}
 
 	/**

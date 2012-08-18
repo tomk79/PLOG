@@ -7,7 +7,7 @@
 #------------------------------------------------------------------------------------------------------------------
 #	コンテンツオブジェクトクラス [ cont_plog_contents_admin ]
 class cont_plog_contents_admin{
-	var $plogconf;
+	var $plog;
 	var $conf;
 	var $errors;
 	var $dbh;
@@ -19,16 +19,16 @@ class cont_plog_contents_admin{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_plog_contents_admin( &$plogconf ){
-		$this->plogconf = &$plogconf;
-		$this->conf = &$plogconf->get_basicobj_conf();
-		$this->errors = &$plogconf->get_basicobj_errors();
-		$this->dbh = &$plogconf->get_basicobj_dbh();
-		$this->req = &$plogconf->get_basicobj_req();
-		$this->user = &$plogconf->get_basicobj_user();
-		$this->site = &$plogconf->get_basicobj_site();
-		$this->theme = &$plogconf->get_basicobj_theme();
-		$this->custom = &$plogconf->get_basicobj_custom();
+	function cont_plog_contents_admin( &$plog ){
+		$this->plog = &$plog;
+		$this->conf = &$plog->get_basicobj_conf();
+		$this->errors = &$plog->get_basicobj_errors();
+		$this->dbh = &$plog->get_basicobj_dbh();
+		$this->req = &$plog->get_basicobj_req();
+		$this->user = &$plog->get_basicobj_user();
+		$this->site = &$plog->get_basicobj_site();
+		$this->theme = &$plog->get_basicobj_theme();
+		$this->custom = &$plog->get_basicobj_custom();
 
 		$this->additional_setup();
 	}
@@ -44,7 +44,7 @@ class cont_plog_contents_admin{
 	function start(){
 		$article_info = array();
 		if( strlen( $this->req->pvelm(1) ) ){
-			$dao_admin = &$this->plogconf->factory_dao( 'admin' );
+			$dao_admin = &$this->plog->factory_dao( 'admin' );
 			$article_info = $dao_admin->get_article_info( $this->req->pvelm(1) );
 		}
 
@@ -204,7 +204,7 @@ class cont_plog_contents_admin{
 			$page_number = 1;
 		}
 
-		$dao = &$this->plogconf->factory_dao( 'admin' );
+		$dao = &$this->plog->factory_dao( 'admin' );
 		$pager_info = $this->dbh->get_pager_info( $dao->get_article_count() , $page_number , 20 );
 		$article_list = $dao->get_article_list( null , $pager_info['offset'] , $pager_info['dpp'] );
 
@@ -292,7 +292,7 @@ class cont_plog_contents_admin{
 	###################################################################################################################
 	#	記事の詳細画面
 	function page_article(){
-		$dao_admin = &$this->plogconf->factory_dao( 'admin' );
+		$dao_admin = &$this->plog->factory_dao( 'admin' );
 		$article_info = $dao_admin->get_article_info( $this->req->pvelm(1) );
 		if( !is_array($article_info) ){
 			return	$this->theme->printnotfound();
@@ -332,7 +332,7 @@ class cont_plog_contents_admin{
 		$RTN .= '		<td>'.htmlspecialchars( $status_view[$article_info['status']] ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
-		$dao_visitor = &$this->plogconf->factory_dao( 'visitor' );
+		$dao_visitor = &$this->plog->factory_dao( 'visitor' );
 		$tb_count = $dao_visitor->get_trackback_count( $this->req->pvelm(1) );
 		$RTN .= '		<th>トラックバック</th>'."\n";
 		$RTN .= '		<td>有効件数：'.intval( $tb_count[$this->req->pvelm(1)] ).'件 '.$this->theme->mk_link( ':tb_list.'.$this->req->pvelm(1) , array('label'=>'トラックバック一覧','style'=>'inside') ).'</td>'."\n";
@@ -344,7 +344,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 
-		$operator = $this->plogconf->factory_articleparser();
+		$operator = $this->plog->factory_articleparser();
 		$ARTICLE_BODY_SRC = $operator->get_article_content( $this->req->pvelm(1) );
 
 		$RTN .= $this->theme->mk_hx('記事プレビュー')."\n";
@@ -382,9 +382,9 @@ class cont_plog_contents_admin{
 	###################################################################################################################
 	#	記事のトラックバック一覧
 	function page_tb_list(){
-		$dao_visitor = &$this->plogconf->factory_dao( 'visitor' );
+		$dao_visitor = &$this->plog->factory_dao( 'visitor' );
 		$trackback_count = $dao_visitor->get_trackback_allcount( $this->req->pvelm(1) );
-		$dao_trackback = &$this->plogconf->factory_dao( 'trackback' );
+		$dao_trackback = &$this->plog->factory_dao( 'trackback' );
 		$trackback_list = $dao_trackback->get_trackback_alllist( $this->req->pvelm(1) );
 
 		$SRCMEMO = '';
@@ -441,7 +441,7 @@ class cont_plog_contents_admin{
 	#--------------------------------------
 	#	トラックバックのステータス変更：確認
 	function page_tb_cst_confirm(){
-		$dao_trackback = &$this->plogconf->factory_dao( 'trackback' );
+		$dao_trackback = &$this->plog->factory_dao( 'trackback' );
 		$trackback_info = $dao_trackback->get_trackback_info( $this->req->pvelm(1) , $this->req->in('keystr') );
 
 		$RTN = '';
@@ -538,7 +538,7 @@ class cont_plog_contents_admin{
 			return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
 		}
 
-		$obj_trackback = &$this->plogconf->factory_dao( 'trackback' );
+		$obj_trackback = &$this->plog->factory_dao( 'trackback' );
 		$result = $obj_trackback->update_trackback_status( $this->req->pvelm(1) , $this->req->in('keystr') , $this->req->in('trackback_url') , $this->req->in('status') );
 		if( !$result ){
 			return	'<p class="ttr error">トラックバック['.htmlspecialchars( $this->req->in('keystr') ).']のステータスの更新に失敗しました。</p>';
@@ -572,7 +572,7 @@ class cont_plog_contents_admin{
 	#--------------------------------------
 	#	トラックバックの削除：確認
 	function page_tb_delete_confirm(){
-		$dao_trackback = &$this->plogconf->factory_dao( 'trackback' );
+		$dao_trackback = &$this->plog->factory_dao( 'trackback' );
 		$trackback_info = $dao_trackback->get_trackback_info( $this->req->pvelm(1) , $this->req->in('keystr') );
 
 		$RTN = '';
@@ -652,7 +652,7 @@ class cont_plog_contents_admin{
 		}
 
 		#	トラックバックDAOの生成
-		$dao_trackback = &$this->plogconf->factory_dao( 'trackback' );
+		$dao_trackback = &$this->plog->factory_dao( 'trackback' );
 		$result = $dao_trackback->delete_trackback( $this->req->pvelm(1) , $this->req->in('keystr') , $this->req->in('trackback_url') );
 		if( !$result ){
 			return	'<p class="ttr error">トラックバックの削除に失敗しました。</p>';
@@ -677,9 +677,9 @@ class cont_plog_contents_admin{
 	###################################################################################################################
 	#	記事のコメント一覧
 	function page_comment_list(){
-		$dao_visitor = &$this->plogconf->factory_dao( 'visitor' );
+		$dao_visitor = &$this->plog->factory_dao( 'visitor' );
 		$comment_count = $dao_visitor->get_comment_allcount( $this->req->pvelm(1) );
-		$obj_comment = &$this->plogconf->factory_dao( 'comment' );
+		$obj_comment = &$this->plog->factory_dao( 'comment' );
 		$comment_list = $obj_comment->get_comment_alllist( $this->req->pvelm(1) );
 
 		$SRCMEMO = '';
@@ -739,7 +739,7 @@ class cont_plog_contents_admin{
 	#--------------------------------------
 	#	コメントのステータス変更：確認
 	function page_comment_cst_confirm(){
-		$dao_comment = &$this->plogconf->factory_dao( 'comment' );
+		$dao_comment = &$this->plog->factory_dao( 'comment' );
 		$comment_info = $dao_comment->get_comment_info( $this->req->pvelm(1) , $this->req->in('keystr') );
 
 		$RTN = '';
@@ -760,7 +760,7 @@ class cont_plog_contents_admin{
 		$RTN .= '			<div>'.$this->theme->mk_link( ':article.'.$this->req->pvelm(1) , array('label'=>$this->req->pvelm(1)) ).'</div>'."\n";
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
-		if( $this->plogconf->comment_userinfo_name ){
+		if( $this->plog->comment_userinfo_name ){
 			$RTN .= '	<tr>'."\n";
 			$RTN .= '		<th style="width:30%;"><div>お名前</div></th>'."\n";
 			$RTN .= '		<td style="width:70%;">'."\n";
@@ -768,7 +768,7 @@ class cont_plog_contents_admin{
 			$RTN .= '		</td>'."\n";
 			$RTN .= '	</tr>'."\n";
 		}
-		if( $this->plogconf->comment_userinfo_url ){
+		if( $this->plog->comment_userinfo_url ){
 			$RTN .= '	<tr>'."\n";
 			$RTN .= '		<th style="width:30%;"><div>URL</div></th>'."\n";
 			$RTN .= '		<td style="width:70%;">'."\n";
@@ -833,7 +833,7 @@ class cont_plog_contents_admin{
 			return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
 		}
 
-		$obj_comment = &$this->plogconf->factory_dao( 'comment' );
+		$obj_comment = &$this->plog->factory_dao( 'comment' );
 		$result = $obj_comment->update_comment_status( $this->req->pvelm(1) , $this->req->in('keystr') , $this->req->in('create_date') , $this->req->in('client_ip') , $this->req->in('status') );
 		if( !$result ){
 			return	'<p class="ttr error">コメント['.htmlspecialchars( $this->req->in('keystr') ).']のステータスの更新に失敗しました。</p>';
@@ -867,7 +867,7 @@ class cont_plog_contents_admin{
 	#--------------------------------------
 	#	コメントの削除：確認
 	function page_comment_delete_confirm(){
-		$dao_comment = &$this->plogconf->factory_dao( 'comment' );
+		$dao_comment = &$this->plog->factory_dao( 'comment' );
 		$comment_info = $dao_comment->get_comment_info( $this->req->pvelm(1) , $this->req->in('keystr') );
 
 		$RTN = '';
@@ -886,7 +886,7 @@ class cont_plog_contents_admin{
 		$RTN .= '			<div>'.$this->theme->mk_link( ':article.'.$this->req->pvelm(1) , array('label'=>$this->req->pvelm(1)) ).'</div>'."\n";
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
-		if( $this->plogconf->comment_userinfo_name ){
+		if( $this->plog->comment_userinfo_name ){
 			$RTN .= '	<tr>'."\n";
 			$RTN .= '		<th style="width:30%;"><div>お名前</div></th>'."\n";
 			$RTN .= '		<td style="width:70%;">'."\n";
@@ -894,7 +894,7 @@ class cont_plog_contents_admin{
 			$RTN .= '		</td>'."\n";
 			$RTN .= '	</tr>'."\n";
 		}
-		if( $this->plogconf->comment_userinfo_url ){
+		if( $this->plog->comment_userinfo_url ){
 			$RTN .= '	<tr>'."\n";
 			$RTN .= '		<th style="width:30%;"><div>URL</div></th>'."\n";
 			$RTN .= '		<td style="width:70%;">'."\n";
@@ -946,7 +946,7 @@ class cont_plog_contents_admin{
 		}
 
 		#	コメントDAOの生成
-		$dao_comment = &$this->plogconf->factory_dao( 'comment' );
+		$dao_comment = &$this->plog->factory_dao( 'comment' );
 		$result = $dao_comment->delete_comment( $this->req->pvelm(1) , $this->req->in('keystr') );
 		if( !$result ){
 			return	'<p class="ttr error">コメントの削除に失敗しました。</p>';
@@ -984,7 +984,7 @@ class cont_plog_contents_admin{
 			$error = array();
 			$this->req->delete_uploadfile_all();
 			if( $this->req->pvelm() == 'edit_article' ){
-				$dao_admin = &$this->plogconf->factory_dao( 'admin' );
+				$dao_admin = &$this->plog->factory_dao( 'admin' );
 				$article_info = $dao_admin->get_article_info( $this->req->pvelm(1) );
 				if( !is_array( $article_info ) || !count( $article_info ) ){
 					#	記事が存在しません。
@@ -996,7 +996,7 @@ class cont_plog_contents_admin{
 				$this->req->setin( 'category_cd' , $article_info['category_cd'] );
 				$this->req->setin( 'release_date' , $article_info['release_date'] );
 
-//				$dao_admin = &$this->plogconf->factory_dao( 'admin' );
+//				$dao_admin = &$this->plog->factory_dao( 'admin' );
 				$this->req->setin( 'contents' , $dao_admin->get_contents_src( $this->req->pvelm(1) ) );
 
 				$file_name_list = $dao_admin->get_contents_image_list( $this->req->pvelm(1) );
@@ -1104,7 +1104,7 @@ class cont_plog_contents_admin{
 		$c = array($this->req->in('category_cd')=>' selected="selected"');
 		$RTN .= '				<select name="category_cd">'."\n";
 		$RTN .= '					<option value="0"'.$c['0'].'>(選択しない)</option>'."\n";
-		$dao_visitor = &$this->plogconf->factory_dao( 'visitor' );
+		$dao_visitor = &$this->plog->factory_dao( 'visitor' );
 		$category_list = $dao_visitor->get_category_list();
 		foreach( $category_list as $line ){
 			$RTN .= '					<option value="'.intval($line['category_cd']).'"'.$c[intval($line['category_cd'])].'>'.htmlspecialchars($line['category_title']).'</option>'."\n";
@@ -1140,7 +1140,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 
-		if( $this->plogconf->article_summary_mode == 'manual' ){
+		if( $this->plog->article_summary_mode == 'manual' ){
 			$RTN .= $this->theme->mk_hx('サマリ')."\n";
 			if( strlen( $error['article_summary'] ) ){
 				$RTN .= '<div class="ttr error">'.$error['article_summary'].'</div>'."\n";
@@ -1249,7 +1249,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th><div>カテゴリ</div></th>'."\n";
 		$RTN .= '		<td>'."\n";
-		$dao_visitor = &$this->plogconf->factory_dao( 'visitor' );
+		$dao_visitor = &$this->plog->factory_dao( 'visitor' );
 		$category_list = $dao_visitor->get_category_list();
 		$category_title = '(選択しない)';
 		foreach( $category_list as $line ){
@@ -1279,7 +1279,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 
-		if( $this->plogconf->article_summary_mode == 'manual' ){
+		if( $this->plog->article_summary_mode == 'manual' ){
 			$RTN .= $this->theme->mk_hx('サマリ')."\n";
 			$RTN .= '<blockquote class="sourcecode"><div>'.htmlspecialchars( $this->req->in('article_summary') ).'</div></blockquote>'."\n";
 			$HIDDEN .= '<input type="hidden" name="article_summary" value="'.htmlspecialchars( $this->req->in('article_summary') ).'" />';
@@ -1287,7 +1287,7 @@ class cont_plog_contents_admin{
 
 		$RTN .= $this->theme->mk_hx('内容プレビュー',null,array('allow_html'=>true))."\n";
 
-		$operator = $this->plogconf->factory_articleparser();
+		$operator = $this->plog->factory_articleparser();
 		$ARTICLE_BODY_SRC = $operator->get_article_content_preview( $this->req->in('contents') );
 		if( strlen( $ARTICLE_BODY_SRC ) ){
 			$RTN .= '<div class="unit">'.$ARTICLE_BODY_SRC.'</div>'."\n";
@@ -1444,7 +1444,7 @@ class cont_plog_contents_admin{
 
 		$this->req->setin( 'release_date' , $this->theme->mk_form_select_date( 'get_datetime' , array('max_year'=>date('Y')+3) ) );//公開日を反映
 
-		$dao_admin = &$this->plogconf->factory_dao( 'admin' );
+		$dao_admin = &$this->plog->factory_dao( 'admin' );
 
 		if( $this->req->pvelm() == 'create_article' ){
 			#--------------------------------------
@@ -1568,7 +1568,7 @@ class cont_plog_contents_admin{
 			#	記事が指定されていません。
 			return	$this->theme->printnotfound();
 		}
-		$dao_admin = &$this->plogconf->factory_dao('admin');
+		$dao_admin = &$this->plog->factory_dao('admin');
 		$article_info = $dao_admin->get_article_info( $this->req->pvelm(1) );
 		if( !is_array( $article_info ) && !count( $article_info ) ){
 			#	記事が存在しません。
@@ -1599,7 +1599,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th><div>ブログ名</div></th>'."\n";
 		$RTN .= '		<td>'."\n";
-		$RTN .= '			<div>'.htmlspecialchars( $this->plogconf->blog_name ).'</div>'."\n";
+		$RTN .= '			<div>'.htmlspecialchars( $this->plog->blog_name ).'</div>'."\n";
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
@@ -1611,7 +1611,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th><div>記事URL</div></th>'."\n";
 		$RTN .= '		<td>'."\n";
-		$RTN .= '			<div>'.htmlspecialchars( $this->plogconf->get_article_url( $this->req->pvelm(1) ) ).'</div>'."\n";
+		$RTN .= '			<div>'.htmlspecialchars( $this->plog->get_article_url( $this->req->pvelm(1) ) ).'</div>'."\n";
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
@@ -1622,7 +1622,7 @@ class cont_plog_contents_admin{
 			$RTN .= '<p class="ttr error">'.$error['trackback_url'].'</p>'."\n";
 		}
 
-		$operator = $this->plogconf->factory_articleparser();
+		$operator = $this->plog->factory_articleparser();
 		$ARTICLE_BODY_SRC = $operator->get_article_content( $this->req->pvelm(1) );
 
 		$RTN .= $this->theme->mk_hx('サマリ')."\n";
@@ -1671,7 +1671,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th><div>ブログ名</div></th>'."\n";
 		$RTN .= '		<td>'."\n";
-		$RTN .= '			<div>'.htmlspecialchars( $this->plogconf->blog_name ).'</div>'."\n";
+		$RTN .= '			<div>'.htmlspecialchars( $this->plog->blog_name ).'</div>'."\n";
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
@@ -1683,7 +1683,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th><div>記事URL</div></th>'."\n";
 		$RTN .= '		<td>'."\n";
-		$RTN .= '			<div>'.htmlspecialchars( $this->plogconf->get_article_url( $this->req->pvelm(1) ) ).'</div>'."\n";
+		$RTN .= '			<div>'.htmlspecialchars( $this->plog->get_article_url( $this->req->pvelm(1) ) ).'</div>'."\n";
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
@@ -1757,7 +1757,7 @@ class cont_plog_contents_admin{
 			return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
 		}
 
-		if( !$this->plogconf->enable_trackback ){
+		if( !$this->plog->enable_trackback ){
 			return	'<p class="ttr error">トラックバック機能が無効になっています。</p>';
 		}
 
@@ -1773,11 +1773,11 @@ class cont_plog_contents_admin{
 		#	/ TrackbackPing送信先の一覧を作成する
 		#--------------------------------------
 
-		$className = $this->plogconf->require_lib('/PLOG/resources/tbp.php');
+		$className = $this->plog->require_lib('/PLOG/resources/tbp.php');
 		if( !$className ){
 			return	'<p class="ttr error">TrackbackPingクラスのロードに失敗しました。</p>';
 		}
-		$tbp = new $className( &$this->plogconf , &$this->conf , &$this->dbh , &$this->theme );
+		$tbp = new $className( &$this->plog , &$this->conf , &$this->dbh , &$this->theme );
 
 		#--------------------------------------
 		#	TrackbackPingを送信する
@@ -1793,10 +1793,10 @@ class cont_plog_contents_admin{
 			$result = $tbp->send_trackback_ping(
 				$this->req->pvelm(1) ,
 				$tbp_url ,
-				$this->plogconf->get_article_url( $this->req->pvelm(1) ) ,
+				$this->plog->get_article_url( $this->req->pvelm(1) ) ,
 				$article_info['article_title'] ,
 				$this->req->in('article_summary') ,
-				$this->plogconf->blog_name
+				$this->plog->blog_name
 			);
 
 			if( !$result ){
@@ -1813,7 +1813,7 @@ class cont_plog_contents_admin{
 
 		#--------------------------------------
 		#	今回のトラックバックPING送信のログを、ファイルに保存する。
-		$dao_tb = $this->plogconf->factory_dao( 'trackback' );
+		$dao_tb = $this->plog->factory_dao( 'trackback' );
 		$result = $dao_tb->tbp_sendlog( $tbp->get_tbp_sendlog() );
 #		if( !$result ){
 #			return	'<p class="ttr error">トラックバックPING送信ログを保存できませんでした。</p>';
@@ -1919,7 +1919,7 @@ class cont_plog_contents_admin{
 			return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
 		}
 
-		$dao_admin = &$this->plogconf->factory_dao( 'admin' );
+		$dao_admin = &$this->plog->factory_dao( 'admin' );
 		if( !$dao_admin->delete_article( $this->req->pvelm(1) ) ){
 			return	'<p class="ttr error">記事の削除に失敗しました。</p>';
 		}
@@ -1945,7 +1945,7 @@ class cont_plog_contents_admin{
 	###################################################################################################################
 	#	カテゴリ一覧
 	function page_category(){
-		$dao_admin = &$this->plogconf->factory_dao( 'admin' );
+		$dao_admin = &$this->plog->factory_dao( 'admin' );
 		$category_list = $dao_admin->get_category_list();
 		$SRC_LIST = '';
 		if( is_array( $category_list ) && count( $category_list ) ){
@@ -2006,7 +2006,7 @@ class cont_plog_contents_admin{
 		}elseif( !strlen( $this->req->in('mode') ) ){
 			$error = array();
 			if( $this->req->pvelm() == 'edit_category' ){
-				$dao_admin = &$this->plogconf->factory_dao( 'admin' );
+				$dao_admin = &$this->plog->factory_dao( 'admin' );
 				$category_info = $dao_admin->get_category_info( $this->req->pvelm(1) );
 				if( !is_array($category_info) ){
 					return	'<p class="ttr error">指定されたカテゴリは存在しません。</p>';
@@ -2072,7 +2072,7 @@ class cont_plog_contents_admin{
 		$RTN .= '				<select name="parent_category_cd">'."\n";
 		$c = array( $this->req->in('parent_category_cd')=>' selected="selected"' );
 		$RTN .= '					<option value="0"'.$c['0'].'>(最上位階層)</option>'."\n";
-		$dao_admin = &$this->plogconf->factory_dao( 'admin' );
+		$dao_admin = &$this->plog->factory_dao( 'admin' );
 		$category_list = $dao_admin->get_category_list();
 		if( !is_array( $category_list ) ){ $category_list = array(); }
 		foreach( $category_list as $category_info ){
@@ -2137,7 +2137,7 @@ class cont_plog_contents_admin{
 		if( !intval( $this->req->in('parent_category_cd') ) ){
 			$RTN .= '			<div>(最上位階層)</div>'."\n";
 		}else{
-			$dao_admin = &$this->plogconf->factory_dao( 'admin' );
+			$dao_admin = &$this->plog->factory_dao( 'admin' );
 			$category_list = $dao_admin->get_category_list();
 			foreach( $category_list as $category_info ){
 				if( $category_info['category_cd'] == $this->req->in('parent_category_cd') ){
@@ -2216,7 +2216,7 @@ class cont_plog_contents_admin{
 			return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
 		}
 
-		$dao_admin = &$this->plogconf->factory_dao( 'admin' );
+		$dao_admin = &$this->plog->factory_dao( 'admin' );
 
 		if( $this->req->pvelm() == 'create_category' ){
 			#--------------------------------------
@@ -2316,7 +2316,7 @@ class cont_plog_contents_admin{
 			return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
 		}
 
-		$dao_admin = &$this->plogconf->factory_dao( 'admin' );
+		$dao_admin = &$this->plog->factory_dao( 'admin' );
 		if( !$dao_admin->make_all_categories_flat() ){
 			$errorMsg = 'カテゴリ階層構造のリセットに失敗しました。';
 			$this->errors->error_log( $errorMsg , __FILE__ , __LINE__ );
@@ -2412,13 +2412,13 @@ class cont_plog_contents_admin{
 	#--------------------------------------
 	#	全記事データのエクスポート
 	function download_io_article_export(){
-		if( !$this->plogconf->enable_function_export ){
+		if( !$this->plog->enable_function_export ){
 			return	'<p class="ttr error">エクスポート機能が無効に設定されています。</p>';
 		}
 
-		$dao_io = &$this->plogconf->factory_dao( 'io' );
+		$dao_io = &$this->plog->factory_dao( 'io' );
 
-		$export_tmp_dir = $this->plogconf->get_home_dir().'/tmp_io/export';
+		$export_tmp_dir = $this->plog->get_home_dir().'/tmp_io/export';
 		if( !is_dir( $export_tmp_dir ) ){
 			$this->dbh->mkdirall( $export_tmp_dir );
 		}
@@ -2533,7 +2533,7 @@ class cont_plog_contents_admin{
 		if( !strlen( $UPFILE_INFO['content'] ) ){
 			$RTN['exported_data'] = 'TGZファイルをアップロードしてください。';
 		}
-		if( !$this->plogconf->enable_function_import ){
+		if( !$this->plog->enable_function_import ){
 			$RTN['exported_data'] = 'インポート機能が無効に設定されています。';
 		}
 
@@ -2551,9 +2551,9 @@ class cont_plog_contents_admin{
 			return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
 		}
 
-		$dao_io = &$this->plogconf->factory_dao( 'io' );
+		$dao_io = &$this->plog->factory_dao( 'io' );
 
-		$import_tmp_dir = $this->plogconf->get_home_dir().'/tmp_io/import';
+		$import_tmp_dir = $this->plog->get_home_dir().'/tmp_io/import';
 
 		if( !is_dir( $import_tmp_dir ) ){
 			#	作業ディレクトリを作成
@@ -2567,12 +2567,12 @@ class cont_plog_contents_admin{
 			$RTN .= '<p class="ttr error">アップロードファイルがゼロバイトです。</p>'."\n";
 			return	$RTN;
 		}
-		if( !$this->dbh->file_overwrite( $this->plogconf->get_home_dir().'/tmp_io/import/export.tgz' , $UPFILE_INFO['content'] ) ){//PLOG 0.1.9 : savefile()をfile_overwrite()に変更。Windowsでキャッシュを開けないバグへの対応。
+		if( !$this->dbh->file_overwrite( $this->plog->get_home_dir().'/tmp_io/import/export.tgz' , $UPFILE_INFO['content'] ) ){//PLOG 0.1.9 : savefile()をfile_overwrite()に変更。Windowsでキャッシュを開けないバグへの対応。
 			$RTN = '';
 			$RTN .= '<p class="ttr error">アップロードファイルの一時領域への保存に失敗しました。</p>'."\n";
 			return	$RTN;
 		}
-		$UPFILE_INFO['tmp_name'] = $this->plogconf->get_home_dir().'/tmp_io/import/export.tgz';
+		$UPFILE_INFO['tmp_name'] = $this->plog->get_home_dir().'/tmp_io/import/export.tgz';
 
 		$result = $dao_io->import( $import_tmp_dir , $UPFILE_INFO );
 		if( $result === false ){
@@ -2582,7 +2582,7 @@ class cont_plog_contents_admin{
 		}
 
 		#	アップロード一時ファイルの削除
-		$this->dbh->rmdir( $this->plogconf->get_home_dir().'/tmp_io/import/export.tgz' );
+		$this->dbh->rmdir( $this->plog->get_home_dir().'/tmp_io/import/export.tgz' );
 		$this->req->delete_uploadfile_all();
 
 		return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
@@ -2624,7 +2624,7 @@ class cont_plog_contents_admin{
 	#--------------------------------------
 	#	RSSの更新：確認
 	function page_update_rss_confirm(){
-		$dao_rss = &$this->plogconf->factory_dao( 'rss' );
+		$dao_rss = &$this->plog->factory_dao( 'rss' );
 		$article_list = $dao_rss->get_article_list();
 
 		foreach( $article_list as $line ){
@@ -2635,7 +2635,7 @@ class cont_plog_contents_admin{
 			}else{
 				$SRC_MEMO .= '			(未分類)<br />'."\n";
 			}
-			$SRC_MEMO .= '			'.htmlspecialchars( $this->plogconf->get_article_url( $line['article_cd'] , 'rss' ) ).'<br />'."\n";
+			$SRC_MEMO .= '			'.htmlspecialchars( $this->plog->get_article_url( $line['article_cd'] , 'rss' ) ).'<br />'."\n";
 			$SRC_MEMO .= '			'.htmlspecialchars( $line['release_date'] ).'<br />'."\n";
 			$SRC_MEMO .= '		</dd>'."\n";
 		}
@@ -2662,9 +2662,9 @@ class cont_plog_contents_admin{
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th style="width:30%;"><div>XSLT</div></th>'."\n";
 		$RTN .= '		<td style="width:70%;">'."\n";
-		$RTN .= '			<div>'.htmlspecialchars( $this->theme->resource( $this->plogconf->path_rss_xslt['rss1.0'] ) ).'<br /></div>'."\n";
-		$RTN .= '			<div>'.htmlspecialchars( $this->theme->resource( $this->plogconf->path_rss_xslt['rss2.0'] ) ).'<br /></div>'."\n";
-		$RTN .= '			<div>'.htmlspecialchars( $this->theme->resource( $this->plogconf->path_rss_xslt['atom1.0'] ) ).'<br /></div>'."\n";
+		$RTN .= '			<div>'.htmlspecialchars( $this->theme->resource( $this->plog->path_rss_xslt['rss1.0'] ) ).'<br /></div>'."\n";
+		$RTN .= '			<div>'.htmlspecialchars( $this->theme->resource( $this->plog->path_rss_xslt['rss2.0'] ) ).'<br /></div>'."\n";
+		$RTN .= '			<div>'.htmlspecialchars( $this->theme->resource( $this->plog->path_rss_xslt['atom1.0'] ) ).'<br /></div>'."\n";
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
@@ -2704,7 +2704,7 @@ class cont_plog_contents_admin{
 			return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
 		}
 
-		$dao_rss = &$this->plogconf->factory_dao( 'rss' );
+		$dao_rss = &$this->plog->factory_dao( 'rss' );
 		$result = $dao_rss->update_rss_file();
 		if( $result === false ){
 			$ERROR = '';
@@ -2741,7 +2741,7 @@ class cont_plog_contents_admin{
 	###################################################################################################################
 	#	承認待ちのコメント一覧
 	function page_req_comments(){
-		$dao_admin = &$this->plogconf->factory_dao( 'admin' );
+		$dao_admin = &$this->plog->factory_dao( 'admin' );
 		$result = $dao_admin->get_req_comment_list();
 
 		$SRCMEMO = '';
@@ -2775,7 +2775,7 @@ class cont_plog_contents_admin{
 	###################################################################################################################
 	#	新着コメント一覧
 	function page_new_comments(){
-		$dao = &$this->plogconf->factory_dao( 'comment' );
+		$dao = &$this->plog->factory_dao( 'comment' );
 		$result = $dao->get_new_comments( 25 );
 
 		$SRCMEMO = '';
@@ -2813,7 +2813,7 @@ class cont_plog_contents_admin{
 	###################################################################################################################
 	#	承認待ちのトラックバック一覧
 	function page_req_trackbacks(){
-		$dao_admin = &$this->plogconf->factory_dao( 'admin' );
+		$dao_admin = &$this->plog->factory_dao( 'admin' );
 		$result = $dao_admin->get_req_trackback_list();
 
 		$SRCMEMO = '';
@@ -2849,7 +2849,7 @@ class cont_plog_contents_admin{
 	###################################################################################################################
 	#	新着トラックバック一覧
 	function page_new_trackbacks(){
-		$dao = &$this->plogconf->factory_dao( 'trackback' );
+		$dao = &$this->plog->factory_dao( 'trackback' );
 		$result = $dao->get_new_trackbacks( 25 );
 
 		$SRCMEMO = '';
@@ -2905,7 +2905,7 @@ class cont_plog_contents_admin{
 		}
 
 		$option = array();
-		$dao_admin = &$this->plogconf->factory_dao('admin');
+		$dao_admin = &$this->plog->factory_dao('admin');
 		$hit_count = $dao_admin->search_article_count( $this->req->in('keyword') , $option );
 		$pager_info = $this->dbh->get_pager_info( $hit_count , $page_number , 20 );
 		$search_result = $dao_admin->search_article( $this->req->in('keyword') , $pager_info['offset'] , $pager_info['dpp'] , $option );
@@ -3034,7 +3034,7 @@ class cont_plog_contents_admin{
 			return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
 		}
 
-		$dao_search = $this->plogconf->factory_dao('search');
+		$dao_search = $this->plog->factory_dao('search');
 		if( !$dao_search->update_all_index() ){
 			return	'<p class="ttr error">更新に失敗しました。</p>';
 		}
@@ -3078,23 +3078,23 @@ class cont_plog_contents_admin{
 		$RTN .= '	<caption>作成するテーブル名設定</caption>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th>article</th>'."\n";
-		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name.'_article' ).'</td>'."\n";
+		$RTN .= '		<td>'.htmlspecialchars( $this->plog->table_name.'_article' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th>category</th>'."\n";
-		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name.'_category' ).'</td>'."\n";
+		$RTN .= '		<td>'.htmlspecialchars( $this->plog->table_name.'_category' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th>trackback</th>'."\n";
-		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name.'_trackback' ).'</td>'."\n";
+		$RTN .= '		<td>'.htmlspecialchars( $this->plog->table_name.'_trackback' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th>comment</th>'."\n";
-		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name.'_comment' ).'</td>'."\n";
+		$RTN .= '		<td>'.htmlspecialchars( $this->plog->table_name.'_comment' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th>search</th>'."\n";
-		$RTN .= '		<td>'.htmlspecialchars( $this->plogconf->table_name.'_search' ).'</td>'."\n";
+		$RTN .= '		<td>'.htmlspecialchars( $this->plog->table_name.'_search' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 		$RTN .= '<table class="deftable">'."\n";
@@ -3147,7 +3147,7 @@ class cont_plog_contents_admin{
 			return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
 		}
 
-		$dao = &$this->plogconf->factory_dao( 'dbcreate' );
+		$dao = &$this->plog->factory_dao( 'dbcreate' );
 		$result = $dao->create_tables();
 
 		if( !$result ){
@@ -3172,7 +3172,7 @@ class cont_plog_contents_admin{
 	#--------------------------------------
 	#	DBを作成するSQLをダウンロード
 	function start_create_db_sql_download(){
-		$dao = &$this->plogconf->factory_dao( 'dbcreate' );
+		$dao = &$this->plog->factory_dao( 'dbcreate' );
 		$SQL_SRC = $dao->create_tables( 'GET_SQL_SOURCE' );
 		return	$this->theme->download( $SQL_SRC , array( 'filename'=>'PLOG_create_db.sql' , 'content-type'=>'x-download/download' ) );
 
@@ -3191,19 +3191,19 @@ class cont_plog_contents_admin{
 		$RTN .= '<table class="deftable" width="100%">'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">path_home_dir</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->get_home_dir() ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->get_home_dir() ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">path_cache_dir</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->get_cache_dir() ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->get_cache_dir() ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">path_public_dir</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->get_public_cache_dir() ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->get_public_cache_dir() ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">path_rss</th>'."\n";
-		$RTN .= '		<td width="70%"><span class="notes">'.htmlspecialchars( $this->conf->path_docroot ).'</span>'.htmlspecialchars( $this->plogconf->path_rss ).'</td>'."\n";
+		$RTN .= '		<td width="70%"><span class="notes">'.htmlspecialchars( $this->conf->path_docroot ).'</span>'.htmlspecialchars( $this->plog->path_rss ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 
@@ -3211,19 +3211,19 @@ class cont_plog_contents_admin{
 		$RTN .= '<table class="deftable" width="100%">'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">url_public_dir</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->get_url_public_cache_dir() ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->get_url_public_cache_dir() ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">url_article</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->get_article_url( 'XXXXXX' ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->get_article_url( 'XXXXXX' ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">url_article_rss</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->get_article_url( 'XXXXXX' , 'rss' ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->get_article_url( 'XXXXXX' , 'rss' ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">url_article_admin</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->get_article_url( 'XXXXXX' , 'admin' ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->get_article_url( 'XXXXXX' , 'admin' ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 
@@ -3231,23 +3231,23 @@ class cont_plog_contents_admin{
 		$RTN .= '<table class="deftable" width="100%">'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">article</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name.'_article' ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->table_name.'_article' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">category</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name.'_category' ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->table_name.'_category' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">trackback</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name.'_trackback' ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->table_name.'_trackback' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">comment</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name.'_comment' ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->table_name.'_comment' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">search</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->table_name.'_search' ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->table_name.'_search' ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 
@@ -3255,19 +3255,19 @@ class cont_plog_contents_admin{
 		$RTN .= '<table class="deftable" width="100%">'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">blog_name</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->blog_name ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->blog_name ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">blog_description</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->blog_description ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->blog_description ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">blog_language</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->blog_language ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->blog_language ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">blog_author_name</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->blog_author_name ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->blog_author_name ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 
@@ -3275,44 +3275,44 @@ class cont_plog_contents_admin{
 		$RTN .= '<table class="deftable" width="100%">'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">enable_trackback</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plogconf->enable_trackback ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plog->enable_trackback ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">enable_comments</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plogconf->enable_comments ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plog->enable_comments ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">trackback_auto_commit</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plogconf->trackback_auto_commit ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plog->trackback_auto_commit ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">comment_auto_commit</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plogconf->comment_auto_commit ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plog->comment_auto_commit ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">article_summary_mode</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->article_summary_mode ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->article_summary_mode ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">comment_userinfo_name</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plogconf->comment_userinfo_name ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plog->comment_userinfo_name ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">comment_userinfo_email</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plogconf->comment_userinfo_email ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plog->comment_userinfo_email ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">comment_userinfo_url</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plogconf->comment_userinfo_url ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plog->comment_userinfo_url ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">comment_userinfo_passwd</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plogconf->comment_userinfo_passwd ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plog->comment_userinfo_passwd ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 
 		$RTN .= $this->theme->mk_hx('RSSパス')."\n";
-		$dao_rss = &$this->plogconf->factory_dao( 'rss' );
+		$dao_rss = &$this->plog->factory_dao( 'rss' );
 		$RTN .= '<table class="deftable" width="100%">'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th align="left" valign="top" width="15%" rowspan="3"><div>RSS1.0</div></th>'."\n";
@@ -3324,7 +3324,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th align="left" valign="top" width="15%"><div>XSLT</div></th>'."\n";
 		$RTN .= '		<td>'."\n";
-		$RTN .= '			<div>'.htmlspecialchars( $this->plogconf->path_rss_xslt['rss1.0'] ).'</div>'."\n";
+		$RTN .= '			<div>'.htmlspecialchars( $this->plog->path_rss_xslt['rss1.0'] ).'</div>'."\n";
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
@@ -3343,7 +3343,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th align="left" valign="top" width="15%"><div>XSLT</div></th>'."\n";
 		$RTN .= '		<td>'."\n";
-		$RTN .= '			<div>'.htmlspecialchars( $this->plogconf->path_rss_xslt['rss2.0'] ).'</div>'."\n";
+		$RTN .= '			<div>'.htmlspecialchars( $this->plog->path_rss_xslt['rss2.0'] ).'</div>'."\n";
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
@@ -3362,7 +3362,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th align="left" valign="top" width="15%"><div>XSLT</div></th>'."\n";
 		$RTN .= '		<td>'."\n";
-		$RTN .= '			<div>'.htmlspecialchars( $this->plogconf->path_rss_xslt['atom1.0'] ).'</div>'."\n";
+		$RTN .= '			<div>'.htmlspecialchars( $this->plog->path_rss_xslt['atom1.0'] ).'</div>'."\n";
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
@@ -3377,23 +3377,23 @@ class cont_plog_contents_admin{
 		$RTN .= '<table class="deftable" width="100%">'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">send_tbp_log_name</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plogconf->send_tbp_log_name ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( $this->plog->send_tbp_log_name ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">enable_function_export</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plogconf->enable_function_export ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plog->enable_function_export ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">enable_function_import</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plogconf->enable_function_import ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plog->enable_function_import ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">rss_limit_number</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plogconf->rss_limit_number ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plog->rss_limit_number ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th width="30%">reportmail_to</th>'."\n";
-		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plogconf->reportmail_to ) ).'</td>'."\n";
+		$RTN .= '		<td width="70%">'.htmlspecialchars( text::data2text( $this->plog->reportmail_to ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '</table>'."\n";
 

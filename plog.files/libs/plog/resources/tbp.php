@@ -9,7 +9,7 @@
 #		発信系：anch_send_tbp
 #		その他：anch_other_methods
 class cont_plog_resources_tbp{
-	var $plogconf;
+	var $plog;
 	var $conf;
 	var $dbh;
 	var $theme;
@@ -26,8 +26,8 @@ class cont_plog_resources_tbp{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_plog_resources_tbp( &$plogconf , &$conf , &$dbh , &$theme ){
-		$this->plogconf = &$plogconf;
+	function cont_plog_resources_tbp( &$plog , &$conf , &$dbh , &$theme ){
+		$this->plog = &$plog;
 		$this->conf = &$conf;
 		$this->dbh = &$dbh;
 		$this->theme = &$theme;
@@ -46,7 +46,7 @@ class cont_plog_resources_tbp{
 
 		#--------------------------------------
 		#	環境変数系のチェック
-		if( !$this->plogconf->enable_trackback ){
+		if( !$this->plog->enable_trackback ){
 			#	トラックバック機能が無効に設定されている場合
 			return	$this->response_ng( 'Trackback Ping is Not Allowed.' );
 		}
@@ -126,14 +126,14 @@ class cont_plog_resources_tbp{
 
 		#--------------------------------------
 		#	トラックバック登録の処理開始
-		$dao = &$this->plogconf->factory_dao( 'trackback' );
+		$dao = &$this->plog->factory_dao( 'trackback' );
 		if( !is_object( $dao ) ){
 			$this->internal_error( 'FAILD to load DAO.' , __FILE__ , __LINE__ );
 			return	$this->response_ng( 'Application Error.' );
 		}
 
 		$status = 0;
-		if( $this->plogconf->trackback_auto_commit ){
+		if( $this->plog->trackback_auto_commit ){
 			#	トラックバックの即座反映設定の反映
 			$status = 1;
 		}
@@ -212,7 +212,7 @@ class cont_plog_resources_tbp{
 #			return	false;
 #		}
 
-		$saveTo = realpath( $this->plogconf->get_home_dir() );
+		$saveTo = realpath( $this->plog->get_home_dir() );
 		if( !is_dir( $saveTo ) ){
 			#	ホームディレクトリが設定されていない場合
 			$this->internal_error( 'HOME directory is NOT exists.' , __FILE__ , __LINE__ );
@@ -250,7 +250,7 @@ class cont_plog_resources_tbp{
 
 		#--------------------------------------
 		#	トラックバックリクエストを送信
-		$className = $this->plogconf->require_lib( '/PLOG/resources/httpaccess.php' );
+		$className = $this->plog->require_lib( '/PLOG/resources/httpaccess.php' );
 		$httpaccess = new $className();
 		$httpaccess->set_user_agent( $this->tbp_user_agent );
 		$httpaccess->set_max_redirect_number( 5 );

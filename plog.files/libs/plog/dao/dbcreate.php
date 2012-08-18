@@ -7,18 +7,18 @@
 #------------------------------------------------------------------------------------------------------------------
 #	コンテンツオブジェクトクラス [ cont_plog_dao_dbcreate ]
 class cont_plog_dao_dbcreate{
-	var $plogconf;
+	var $plog;
 	var $conf;
 	var $errors;
 	var $dbh;
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_plog_dao_dbcreate( &$plogconf ){
-		$this->plogconf = &$plogconf;
-		$this->conf = &$plogconf->get_basicobj_conf();
-		$this->errors = &$plogconf->get_basicobj_errors();
-		$this->dbh = &$plogconf->get_basicobj_dbh();
+	function cont_plog_dao_dbcreate( &$plog ){
+		$this->plog = &$plog;
+		$this->conf = &$plog->get_basicobj_conf();
+		$this->errors = &$plog->get_basicobj_errors();
+		$this->dbh = &$plog->get_basicobj_dbh();
 	}
 
 
@@ -266,7 +266,7 @@ CREATE TABLE :D:tableName(
 		foreach( $targetTableNames as $tableName ){
 			foreach( $sql[$tableName] as $sql_content ){
 				$bindData = array(
-					'tableName'=>$this->plogconf->table_name.'_'.$tableName,
+					'tableName'=>$this->plog->table_name.'_'.$tableName,
 				);
 				$sqlFinal = $this->dbh->bind( $sql_content , $bindData );
 				if( !strlen( $sqlFinal ) ){ continue; }

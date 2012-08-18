@@ -7,18 +7,18 @@
 #------------------------------------------------------------------------------------------------------------------
 #	コンテンツオブジェクトクラス [ cont_plog_dao_trackback ]
 class cont_plog_dao_trackback{
-	var $plogconf;
+	var $plog;
 	var $conf;
 	var $errors;
 	var $dbh;
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_plog_dao_trackback( &$plogconf ){
-		$this->plogconf = &$plogconf;
-		$this->conf = &$plogconf->get_basicobj_conf();
-		$this->errors = &$plogconf->get_basicobj_errors();
-		$this->dbh = &$plogconf->get_basicobj_dbh();
+	function cont_plog_dao_trackback( &$plog ){
+		$this->plog = &$plog;
+		$this->conf = &$plog->get_basicobj_conf();
+		$this->errors = &$plog->get_basicobj_errors();
+		$this->dbh = &$plog->get_basicobj_dbh();
 	}
 
 
@@ -50,7 +50,7 @@ ORDER BY trackback_date
 		}
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_trackback',
+			'tableName'=>$this->plog->table_name.'_trackback',
 			'article_cd'=>$article_cd,
 			'limit_string'=>$limit_string,
 		);
@@ -91,7 +91,7 @@ ORDER BY trackback_date
 		}
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_trackback',
+			'tableName'=>$this->plog->table_name.'_trackback',
 			'article_cd'=>$article_cd,
 			'limit_string'=>$limit_string,
 		);
@@ -136,8 +136,8 @@ LIMIT :N:limit
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName_trackback'=>$this->plogconf->table_name.'_trackback',
-			'tableName_article'=>$this->plogconf->table_name.'_article',
+			'tableName_trackback'=>$this->plog->table_name.'_trackback',
+			'tableName_article'=>$this->plog->table_name.'_article',
 			'limit'=>$count,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -164,7 +164,7 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_trackback',
+			'tableName'=>$this->plog->table_name.'_trackback',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 		);
@@ -198,7 +198,7 @@ WHERE
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_trackback',
+			'tableName'=>$this->plog->table_name.'_trackback',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 			'trackback_url'=>$trackback_url,
@@ -222,7 +222,7 @@ WHERE
 	function insert_trackbackping( $article_cd , $url , $title = '' , $blog_name = '' , $excerpt = '' , $client_ip = '' , $status = 0 ){
 		if( !strlen($article_cd) || $article_cd != intval($article_cd) ){ return false; }
 
-		$dao_visitor = &$this->plogconf->factory_dao( 'visitor' );
+		$dao_visitor = &$this->plog->factory_dao( 'visitor' );
 		$article_info = $dao_visitor->get_article_info( $article_cd );
 		if( !is_array( $article_info ) || !count( $article_info ) ){
 			#	対象の記事が存在しません。
@@ -241,7 +241,7 @@ WHERE
 <?php
 		$SELECT_SQL = @ob_get_clean();
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_trackback',
+			'tableName'=>$this->plog->table_name.'_trackback',
 			'article_cd'=>$article_cd,
 			'trackback_url'=>$url,
 		);
@@ -286,7 +286,7 @@ INSERT INTO :D:tableName(
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_trackback' ,
+			'tableName'=>$this->plog->table_name.'_trackback' ,
 			'article_cd'=>$article_cd ,
 			'keystr'=>md5( time::microtime() ) ,
 			'trackback_blog_name'=>$blog_name ,
@@ -305,7 +305,7 @@ INSERT INTO :D:tableName(
 		}
 		$this->dbh->commit();
 
-		if( strlen( $this->plogconf->reportmail_to ) ){
+		if( strlen( $this->plog->reportmail_to ) ){
 			#--------------------------------------
 			#	レポートメールを送信する (PLOG 0.1.6 追加)
 			$className = $this->dbh->require_lib( '/resources/mail.php' );
@@ -314,19 +314,19 @@ INSERT INTO :D:tableName(
 				return true;
 			}
 			$mail = new $className( &$this->conf , &$this->errors );
-			$mail->setsubject( '【'.$this->plogconf->blog_name.'】[記事'.$article_cd.']トラックバックが投稿されました。' );
+			$mail->setsubject( '【'.$this->plog->blog_name.'】[記事'.$article_cd.']トラックバックが投稿されました。' );
 			$mail->setbody(
-				 ''.$this->plogconf->blog_name.' の記事 '.$article_cd.' に、'."\n"
+				 ''.$this->plog->blog_name.' の記事 '.$article_cd.' に、'."\n"
 				.'トラックバックが投稿されました。'."\n"
-				.$this->plogconf->get_article_url($article_cd,'admin')."\n"
+				.$this->plog->get_article_url($article_cd,'admin')."\n"
 				."\n"
 				.'Blog name: '.$blog_name."\n"
 				.'Title: '.$title."\n"
 				.'URL: '.$url."\n"
 				.'excerpt: '.$excerpt."\n"
 			);
-			$mail->putto( $this->plogconf->reportmail_to );
-			$mail->setfrom( $this->plogconf->reportmail_to );
+			$mail->putto( $this->plog->reportmail_to );
+			$mail->setfrom( $this->plog->reportmail_to );
 
 			if( !$mail->send() ){//メール送信
 				$this->errors->error_log( 'レポートメールの送信に失敗しました。' , __FILE__ , __LINE__ );
@@ -364,7 +364,7 @@ WHERE
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_trackback',
+			'tableName'=>$this->plog->table_name.'_trackback',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 			'trackback_url'=>$trackback_url,
@@ -391,7 +391,7 @@ WHERE
 			return	false;
 		}
 
-		$path_tbp_log_dir = $this->plogconf->get_send_tbp_log_dir();
+		$path_tbp_log_dir = $this->plog->get_send_tbp_log_dir();
 		if( $path_tbp_log_dir === false ){
 			return	false;
 		}

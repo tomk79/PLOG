@@ -7,18 +7,18 @@
 #------------------------------------------------------------------------------------------------------------------
 #	記事検索オブジェクトクラス [ cont_plog_dao_search ]
 class cont_plog_dao_search{
-	var $plogconf;
+	var $plog;
 	var $conf;
 	var $errors;
 	var $dbh;
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_plog_dao_search( &$plogconf ){
-		$this->plogconf = &$plogconf;
-		$this->conf = &$plogconf->get_basicobj_conf();
-		$this->errors = &$plogconf->get_basicobj_errors();
-		$this->dbh = &$plogconf->get_basicobj_dbh();
+	function cont_plog_dao_search( &$plog ){
+		$this->plog = &$plog;
+		$this->conf = &$plog->get_basicobj_conf();
+		$this->errors = &$plog->get_basicobj_errors();
+		$this->dbh = &$plog->get_basicobj_dbh();
 	}
 
 
@@ -32,7 +32,7 @@ SELECT article_cd FROM :D:tableName
 <?php
 		$SELECT_SQL = @ob_get_clean();
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_article' ,
+			'tableName'=>$this->plog->table_name.'_article' ,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
 		$res = $this->dbh->sendquery( $SELECT_SQL );
@@ -55,7 +55,7 @@ SELECT article_cd FROM :D:tableName
 	function update_article_index( $article_cd ){
 
 		#	HTMLを取得
-		$operator = $this->plogconf->factory_articleparser();
+		$operator = $this->plog->factory_articleparser();
 		$ARTICLE_BODY_SRC = $operator->get_article_content( $article_cd );
 
 		#--------------------------------------
@@ -67,7 +67,7 @@ WHERE article_cd = :N:article_cd
 <?php
 		$DELETE_SQL = @ob_get_clean();
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_search' ,
+			'tableName'=>$this->plog->table_name.'_search' ,
 			'article_cd'=>$article_cd ,
 		);
 		$DELETE_SQL = $this->dbh->bind( $DELETE_SQL , $bindData );
@@ -93,7 +93,7 @@ INSERT INTO :D:tableName (
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_search' ,
+			'tableName'=>$this->plog->table_name.'_search' ,
 			'article_cd'=>$article_cd ,
 			'article_bodytext'=>$this->mk_bodytext4search_by_html( $ARTICLE_BODY_SRC ) ,
 			'now'=>date( 'Y-m-d H:i:s' ) ,

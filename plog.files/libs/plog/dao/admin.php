@@ -7,18 +7,18 @@
 #------------------------------------------------------------------------------------------------------------------
 #	コンテンツオブジェクトクラス [ cont_plog_dao_admin ]
 class cont_plog_dao_admin{
-	var $plogconf;
+	var $plog;
 	var $conf;
 	var $errors;
 	var $dbh;
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_plog_dao_admin( &$plogconf ){
-		$this->plogconf = &$plogconf;
-		$this->conf = &$plogconf->get_basicobj_conf();
-		$this->errors = &$plogconf->get_basicobj_errors();
-		$this->dbh = &$plogconf->get_basicobj_dbh();
+	function cont_plog_dao_admin( &$plog ){
+		$this->plog = &$plog;
+		$this->conf = &$plog->get_basicobj_conf();
+		$this->errors = &$plog->get_basicobj_errors();
+		$this->dbh = &$plog->get_basicobj_dbh();
 	}
 
 
@@ -47,7 +47,7 @@ ORDER BY release_date DESC
 		}
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_article',
+			'tableName'=>$this->plog->table_name.'_article',
 			'limit_string'=>$limit_string,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -78,7 +78,7 @@ WHERE
 
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_article',
+			'tableName'=>$this->plog->table_name.'_article',
 			'category_cd_string'=>$category_cd_string,
 			'now'=>$this->dbh->int2datetime(time()),
 		);
@@ -118,8 +118,8 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name.'_article',
-			'tableName_category'=>$this->plogconf->table_name.'_category',
+			'tableName_article'=>$this->plog->table_name.'_article',
+			'tableName_category'=>$this->plog->table_name.'_category',
 			'article_cd'=>$article_cd,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -164,7 +164,7 @@ INSERT INTO :D:tableName(
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_article',
+			'tableName'=>$this->plog->table_name.'_article',
 			'article_title'=>$article_title,
 			'article_summary'=>$ary_options['article_summary'],
 			'user_cd'=>intval( $ary_options['user_cd'] ),
@@ -182,14 +182,14 @@ INSERT INTO :D:tableName(
 		}
 		$this->dbh->commit();
 
-		$article_cd = $this->dbh->get_last_insert_id( null , $this->plogconf->table_name.'_article'.'_article_cd_seq' );//挿入された行のIDを取得
+		$article_cd = $this->dbh->get_last_insert_id( null , $this->plog->table_name.'_article'.'_article_cd_seq' );//挿入された行のIDを取得
 		if( !strlen( $article_cd ) ){
 			return	false;
 		}
 
 		#--------------------------------------
 		#	コンテンツファイルの保存
-		$base_path = $this->plogconf->get_article_dir( $article_cd );
+		$base_path = $this->plog->get_article_dir( $article_cd );
 		if( !is_dir( $base_path ) ){
 			if( !$this->dbh->mkdirall( $base_path ) ){
 				return	false;
@@ -229,7 +229,7 @@ WHERE article_cd = :N:article_cd
 		$UPDATE_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_article',
+			'tableName'=>$this->plog->table_name.'_article',
 			'article_cd'=>$article_cd,
 			'article_title'=>$article_title,
 			'article_summary'=>$ary_options['article_summary'],
@@ -249,7 +249,7 @@ WHERE article_cd = :N:article_cd
 
 		#--------------------------------------
 		#	コンテンツファイルの保存
-		$base_path = $this->plogconf->get_article_dir( $article_cd );
+		$base_path = $this->plog->get_article_dir( $article_cd );
 		if( !is_dir( $base_path ) ){
 			if( !$this->dbh->mkdirall( $base_path ) ){
 				return	false;
@@ -273,10 +273,10 @@ WHERE article_cd = :N:article_cd
 	function update_article_index( $article_cd ){
 
 		#	HTMLを取得
-		$operator = $this->plogconf->factory_articleparser();
+		$operator = $this->plog->factory_articleparser();
 		$ARTICLE_BODY_SRC = $operator->get_article_content( $article_cd );
 
-		if( $this->plogconf->article_summary_mode == 'auto' ){
+		if( $this->plog->article_summary_mode == 'auto' ){
 			#	記事サマリを自動的に作成するモードだった場合。
 			$article_summary = $operator->mk_summary_by_html( $ARTICLE_BODY_SRC );
 			$SQLPARTS_SUMMARY = $this->dbh->bind( '	article_summary = :S:article_summary ,' , array('article_summary'=>$article_summary) );
@@ -291,7 +291,7 @@ WHERE article_cd = :N:article_cd
 			$UPDATE_SQL = @ob_get_clean();
 
 			$bindData = array(
-				'tableName'=>$this->plogconf->table_name.'_article',
+				'tableName'=>$this->plog->table_name.'_article',
 				'article_cd'=>$article_cd,
 				'article_summary'=>$SQLPARTS_SUMMARY,
 				'now'=>date( 'Y-m-d H:i:s' ),
@@ -309,7 +309,7 @@ WHERE article_cd = :N:article_cd
 
 		#--------------------------------------
 		#	記事検索テーブルの値を更新
-		$dao_search = $this->plogconf->factory_dao( 'search' );
+		$dao_search = $this->plog->factory_dao( 'search' );
 		$dao_search->update_article_index( $article_cd );
 
 		return	true;
@@ -319,7 +319,7 @@ WHERE article_cd = :N:article_cd
 	#--------------------------------------
 	#	記事コンテンツのソースを得る
 	function get_contents_src( $article_cd ){
-		$base_path = $this->plogconf->get_article_dir( $article_cd );
+		$base_path = $this->plog->get_article_dir( $article_cd );
 		if( !is_dir( $base_path ) ){
 			return	false;
 		}
@@ -330,7 +330,7 @@ WHERE article_cd = :N:article_cd
 	#--------------------------------------
 	#	記事コンテンツに紐付く画像一覧を得る
 	function get_contents_image_list( $article_cd ){
-		$base_path = $this->plogconf->get_article_dir( $article_cd ).'/images';
+		$base_path = $this->plog->get_article_dir( $article_cd ).'/images';
 		if( !is_dir( $base_path ) ){
 			return	false;
 		}
@@ -341,7 +341,7 @@ WHERE article_cd = :N:article_cd
 	#--------------------------------------
 	#	記事コンテンツの画像を開く
 	function load_contents_image( $article_cd , $image_name ){
-		$base_path = $this->plogconf->get_article_dir( $article_cd ).'/images/'.$image_name;
+		$base_path = $this->plog->get_article_dir( $article_cd ).'/images/'.$image_name;
 		if( !is_file( $base_path ) ){
 			return	false;
 		}
@@ -352,7 +352,7 @@ WHERE article_cd = :N:article_cd
 	#--------------------------------------
 	#	記事コンテンツの画像を保存する
 	function save_contents_image( $article_cd , $image_name , $bin ){
-		$base_path = $this->plogconf->get_article_dir( $article_cd ).'/images';
+		$base_path = $this->plog->get_article_dir( $article_cd ).'/images';
 		if( !is_dir( $base_path ) ){
 			if( !$this->dbh->mkdirall( $base_path ) ){
 				return	false;
@@ -365,7 +365,7 @@ WHERE article_cd = :N:article_cd
 	#--------------------------------------
 	#	記事コンテンツの画像を削除する
 	function delete_contents_image( $article_cd , $image_name ){
-		$base_path = $this->plogconf->get_article_dir( $article_cd ).'/images';
+		$base_path = $this->plog->get_article_dir( $article_cd ).'/images';
 		if( !is_file( $base_path.'/'.$image_name ) ){
 			return	true;
 		}
@@ -387,7 +387,7 @@ ORDER BY category_title
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_category',
+			'tableName'=>$this->plog->table_name.'_category',
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
 		$res = $this->dbh->sendquery( $SELECT_SQL );
@@ -405,7 +405,7 @@ UPDATE :D:tableName SET parent_category_cd = :N:parent_category_cd;
 		$UPDATE_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_category',
+			'tableName'=>$this->plog->table_name.'_category',
 			'parent_category_cd'=>0,
 		);
 		$UPDATE_SQL = $this->dbh->bind( $UPDATE_SQL , $bindData );
@@ -432,7 +432,7 @@ WHERE category_cd = :N:category_cd
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_category' ,
+			'tableName'=>$this->plog->table_name.'_category' ,
 			'category_cd'=>$category_cd ,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -474,7 +474,7 @@ INSERT INTO :D:tableName(
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_category',
+			'tableName'=>$this->plog->table_name.'_category',
 			'category_title'=>$category_title,
 			'user_cd'=>intval($ary_options['user_cd']),
 			'category_subtitle'=>$category_subtitle,
@@ -491,7 +491,7 @@ INSERT INTO :D:tableName(
 		}
 		$this->dbh->commit();
 
-		$category_cd = $this->dbh->get_last_insert_id( null , $this->plogconf->table_name.'_category'.'_category_cd_seq' );//挿入された行のIDを取得
+		$category_cd = $this->dbh->get_last_insert_id( null , $this->plog->table_name.'_category'.'_category_cd_seq' );//挿入された行のIDを取得
 		if( !strlen( $category_cd ) ){
 			return	false;
 		}
@@ -523,7 +523,7 @@ WHERE category_cd = :N:category_cd
 		$UPDATE_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_category',
+			'tableName'=>$this->plog->table_name.'_category',
 			'category_cd'=>$category_cd,
 			'category_title'=>$category_title,
 			'category_subtitle'=>$category_subtitle,
@@ -592,8 +592,8 @@ ORDER BY c.comment_date
 		}
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name.'_article' ,
-			'tableName_comment'=>$this->plogconf->table_name.'_comment' ,
+			'tableName_article'=>$this->plog->table_name.'_article' ,
+			'tableName_comment'=>$this->plog->table_name.'_comment' ,
 			'limit_string'=>$limit_string,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -645,8 +645,8 @@ ORDER BY t.trackback_date
 		}
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name.'_article' ,
-			'tableName_trackback'=>$this->plogconf->table_name.'_trackback' ,
+			'tableName_article'=>$this->plog->table_name.'_article' ,
+			'tableName_trackback'=>$this->plog->table_name.'_trackback' ,
 			'limit_string'=>$limit_string,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -671,7 +671,7 @@ WHERE article_cd = :N:article_cd
 		$UPDATE_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_article',
+			'tableName'=>$this->plog->table_name.'_article',
 			'article_cd'=>$article_cd,
 			'now'=>$this->dbh->int2datetime( time() ),
 		);
@@ -747,8 +747,8 @@ ORDER BY atc.release_date DESC
 		}
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name.'_article' ,
-			'tableName_search'=>$this->plogconf->table_name.'_search' ,
+			'tableName_article'=>$this->plog->table_name.'_article' ,
+			'tableName_search'=>$this->plog->table_name.'_search' ,
 			'keyword'=>'%'.$keyword.'%' ,
 			'limit_string'=>$limit_string,
 			'sql_where'=>$SQL_WHERE,
@@ -793,8 +793,8 @@ WHERE
 		$SELECT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name.'_article' ,
-			'tableName_search'=>$this->plogconf->table_name.'_search' ,
+			'tableName_article'=>$this->plog->table_name.'_article' ,
+			'tableName_search'=>$this->plog->table_name.'_search' ,
 			'keyword'=>'%'.$keyword.'%' ,
 			'sql_where'=>$SQL_WHERE,
 		);

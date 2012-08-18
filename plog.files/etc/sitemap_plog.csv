@@ -1,6 +1,2 @@
 "*path","*content","*id","*title","*title_breadcrumb","*title_h1","*title_label","*logical_path","*list_flg","*authlevel","*layout","*extension","*orderby","*keywords","*description","*category_top_flg"
-"/plog/","/PLOG/plog.php",,"PLOGホーム",,,,,1,,,,,,,
-"/plog/{$page_num}.html","/PLOG/plog.php",,"PLOG",,,,,0,,,,,,,
-"/plog/{$mode}/{$article_id}/","/PLOG/plog.php",,"PLOG記事",,,,,0,,,,,,,
-"/plog/{$admin}/","/PLOG/plog.php",,"PLOG管理画面",,,,,0,,,,,,,
-"/plog/{$admin}/{$mode}/{$article_id}/","/PLOG/plog.php",,"PLOG管理画面",,,,,0,,,,,,,
+"/plog/{*}","/PLOG/plog.php",,"PLOG",,,,,1,,,,,,,

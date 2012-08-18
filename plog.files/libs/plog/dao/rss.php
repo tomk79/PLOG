@@ -7,7 +7,7 @@
 #------------------------------------------------------------------------------------------------------------------
 #	コンテンツオブジェクトクラス [ cont_plog_dao_rss ]
 class cont_plog_dao_rss{
-	var $plogconf;
+	var $plog;
 	var $conf;
 	var $errors;
 	var $dbh;
@@ -17,12 +17,12 @@ class cont_plog_dao_rss{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_plog_dao_rss( &$plogconf ){
-		$this->plogconf = &$plogconf;
-		$this->conf = &$plogconf->get_basicobj_conf();
-		$this->errors = &$plogconf->get_basicobj_errors();
-		$this->dbh = &$plogconf->get_basicobj_dbh();
-		$this->theme = &$plogconf->get_basicobj_theme();
+	function cont_plog_dao_rss( &$plog ){
+		$this->plog = &$plog;
+		$this->conf = &$plog->get_basicobj_conf();
+		$this->errors = &$plog->get_basicobj_errors();
+		$this->dbh = &$plog->get_basicobj_dbh();
+		$this->theme = &$plog->get_basicobj_theme();
 	}
 
 
@@ -59,8 +59,8 @@ ORDER BY release_date DESC
 		$SELECT_SQL = @ob_get_clean();
 
 		$limit_number = 50;
-		if( is_int( $this->plogconf->rss_limit_number ) ){
-			$limit_number = $this->plogconf->rss_limit_number;
+		if( is_int( $this->plog->rss_limit_number ) ){
+			$limit_number = $this->plog->rss_limit_number;
 		}
 
 		$limit_string = '';
@@ -75,8 +75,8 @@ ORDER BY release_date DESC
 		}
 
 		$bindData = array(
-			'tableName_article'=>$this->plogconf->table_name.'_article',
-			'tableName_category'=>$this->plogconf->table_name.'_category',
+			'tableName_article'=>$this->plog->table_name.'_article',
+			'tableName_category'=>$this->plog->table_name.'_category',
 			'limit_string'=>$limit_string,
 			'now'=>$this->dbh->int2datetime(time()),
 		);
@@ -99,7 +99,7 @@ ORDER BY release_date DESC
 			return	false;
 		}
 
-		$path_rss = $this->plogconf->path_rss;
+		$path_rss = $this->plog->path_rss;
 		if( !strlen( $path_rss ) ){
 			$this->internal_error( 'RSSファイルの保存先が指定されていません。' , __FILE__ , __LINE__ );
 			return	false;
@@ -154,8 +154,8 @@ ORDER BY release_date DESC
 	function generate_rss_0100( $article_array ){
 		$RTN = '';
 		$RTN .= '<'.'?xml version="1.0" encoding="'.strtolower( mb_internal_encoding() ).'" ?'.'>'."\n";
-		if( strlen( $this->plogconf->path_rss_xslt['rss1.0'] ) && $this->theme->resource_exists( $this->plogconf->path_rss_xslt['rss1.0'] ) ){
-			$RTN .= '<'.'?xml-stylesheet type="text/xsl" href="'.htmlspecialchars( $this->theme->resource( $this->plogconf->path_rss_xslt['rss1.0'] ) ).'" ?'.'>'."\n";
+		if( strlen( $this->plog->path_rss_xslt['rss1.0'] ) && $this->theme->resource_exists( $this->plog->path_rss_xslt['rss1.0'] ) ){
+			$RTN .= '<'.'?xml-stylesheet type="text/xsl" href="'.htmlspecialchars( $this->theme->resource( $this->plog->path_rss_xslt['rss1.0'] ) ).'" ?'.'>'."\n";
 		}
 		$RTN .= '<rdf:RDF';
 		$RTN .= ' xmlns="http://purl.org/rss/1.0/"';
@@ -169,13 +169,13 @@ ORDER BY release_date DESC
 		$RTN .= '		<items>'."\n";
 		$RTN .= '			<rdf:Seq>'."\n";
 		foreach( $article_array as $Line ){
-			$RTN .= '				<rdf:li rdf:resource="'.htmlspecialchars( $this->plogconf->get_article_url( $Line['article_cd'] , 'rss' ) ).'" />'."\n";
+			$RTN .= '				<rdf:li rdf:resource="'.htmlspecialchars( $this->plog->get_article_url( $Line['article_cd'] , 'rss' ) ).'" />'."\n";
 		}
 		$RTN .= '			</rdf:Seq>'."\n";
 		$RTN .= '		</items>'."\n";
 		$RTN .= '	</channel>'."\n";
 		foreach( $article_array as $Line ){
-			$article_url = $this->plogconf->get_article_url( $Line['article_cd'] , 'rss' );
+			$article_url = $this->plog->get_article_url( $Line['article_cd'] , 'rss' );
 			$RTN .= '		<item rdf:about="'.htmlspecialchars( $article_url ).'">'."\n";
 			$RTN .= '			<title>'.htmlspecialchars( $Line['article_title'] ).'</title>'."\n";
 			$RTN .= '			<link>'.htmlspecialchars( $article_url ).'</link>'."\n";
@@ -193,8 +193,8 @@ ORDER BY release_date DESC
 	function generate_rss_0200( $article_array ){
 		$RTN = '';
 		$RTN .= '<'.'?xml version="1.0" encoding="'.strtolower( mb_internal_encoding() ).'" ?'.'>'."\n";
-		if( strlen( $this->plogconf->path_rss_xslt['rss2.0'] ) && $this->theme->resource_exists( $this->plogconf->path_rss_xslt['rss2.0'] ) ){
-			$RTN .= '<'.'?xml-stylesheet type="text/xsl" href="'.htmlspecialchars( $this->theme->resource( $this->plogconf->path_rss_xslt['rss2.0'] ) ).'" ?'.'>'."\n";
+		if( strlen( $this->plog->path_rss_xslt['rss2.0'] ) && $this->theme->resource_exists( $this->plog->path_rss_xslt['rss2.0'] ) ){
+			$RTN .= '<'.'?xml-stylesheet type="text/xsl" href="'.htmlspecialchars( $this->theme->resource( $this->plog->path_rss_xslt['rss2.0'] ) ).'" ?'.'>'."\n";
 		}
 		$RTN .= '<rss version="2.0">'."\n";
 		$RTN .= '	<channel>'."\n";
@@ -207,10 +207,10 @@ ORDER BY release_date DESC
 		foreach( $article_array as $Line ){
 			$RTN .= '		<item>'."\n";
 			$RTN .= '			<title>'.htmlspecialchars( $Line['article_title'] ).'</title>'."\n";
-			$RTN .= '			<link>'.htmlspecialchars( $this->plogconf->get_article_url( $Line['article_cd'] , 'rss' ) ).'</link>'."\n";
+			$RTN .= '			<link>'.htmlspecialchars( $this->plog->get_article_url( $Line['article_cd'] , 'rss' ) ).'</link>'."\n";
 			$RTN .= '			<description><![CDATA['.htmlspecialchars( $Line['article_summary'] ).']]></description>'."\n";//descriptionはHTMLとして解釈されるのか？
 			$RTN .= '			<pubDate>'.$this->mk_releasedate_string( time::datetime2int( $Line['release_date'] ) ).'</pubDate>'."\n";
-			$RTN .= '			<guid isPermaLink="true">'.htmlspecialchars( $this->plogconf->get_article_url( $Line['article_cd'] , 'rss' ) ).'</guid>'."\n";
+			$RTN .= '			<guid isPermaLink="true">'.htmlspecialchars( $this->plog->get_article_url( $Line['article_cd'] , 'rss' ) ).'</guid>'."\n";
 			$RTN .= '		</item>'."\n";
 		}
 		$RTN .= '	</channel>'."\n";
@@ -223,8 +223,8 @@ ORDER BY release_date DESC
 	function generate_rss_atom( $article_array ){
 		$RTN = '';
 		$RTN .= '<'.'?xml version="1.0" encoding="'.strtolower( mb_internal_encoding() ).'" ?'.'>'."\n";
-		if( strlen( $this->plogconf->path_rss_xslt['atom1.0'] ) && $this->theme->resource_exists( $this->plogconf->path_rss_xslt['atom1.0'] ) ){
-			$RTN .= '<'.'?xml-stylesheet type="text/xsl" href="'.htmlspecialchars( $this->theme->resource( $this->plogconf->path_rss_xslt['atom1.0'] ) ).'" ?'.'>'."\n";
+		if( strlen( $this->plog->path_rss_xslt['atom1.0'] ) && $this->theme->resource_exists( $this->plog->path_rss_xslt['atom1.0'] ) ){
+			$RTN .= '<'.'?xml-stylesheet type="text/xsl" href="'.htmlspecialchars( $this->theme->resource( $this->plog->path_rss_xslt['atom1.0'] ) ).'" ?'.'>'."\n";
 		}
 		$RTN .= '<feed xmlns="http://www.w3.org/2005/Atom">'."\n";
 		$RTN .= '	<title>'.htmlspecialchars( $this->get_blog_info('blog_title') ).'</title>'."\n";
@@ -237,8 +237,8 @@ ORDER BY release_date DESC
 		foreach( $article_array as $Line ){
 			$RTN .= '	<entry>'."\n";
 			$RTN .= '		<title>'.htmlspecialchars( $Line['article_title'] ).'</title>'."\n";
-			$RTN .= '		<link rel="alternate" href="'.htmlspecialchars( $this->plogconf->get_article_url( $Line['article_cd'] , 'rss' ) ).'" type="text/html" />'."\n";
-			$RTN .= '		<id>'.htmlspecialchars( md5( $this->plogconf->get_article_url( $Line['article_cd'] , 'rss' ) ) ).'</id>'."\n";
+			$RTN .= '		<link rel="alternate" href="'.htmlspecialchars( $this->plog->get_article_url( $Line['article_cd'] , 'rss' ) ).'" type="text/html" />'."\n";
+			$RTN .= '		<id>'.htmlspecialchars( md5( $this->plog->get_article_url( $Line['article_cd'] , 'rss' ) ) ).'</id>'."\n";
 			$RTN .= '		<updated>'.$this->mk_releasedate_string( time::datetime2int( $Line['release_date'] ) ).'</updated>'."\n";
 			$RTN .= '		<summary>'.htmlspecialchars( $Line['article_summary'] ).'</summary>'."\n";//summary要素はHTMLとして解釈されない。type="html"をつけるとHTMLになるのかも。
 			$RTN .= '		<content>'.htmlspecialchars( $Line['article_summary'] ).'</content>'."\n";//content要素はHTMLとして解釈されない。type="html"をつけるとHTMLになるのかも。
@@ -267,15 +267,15 @@ ORDER BY release_date DESC
 	function get_blog_info( $name ){
 		switch( strtolower( $name ) ){
 			case 'blog_title':
-				return	$this->plogconf->blog_name; break;
+				return	$this->plog->blog_name; break;
 			case 'blog_index_url':
 				return	$this->conf->url_sitetop; break;
 			case 'blog_description':
-				return	$this->plogconf->blog_description; break;
+				return	$this->plog->blog_description; break;
 			case 'language':
-				return	$this->plogconf->blog_language; break;
+				return	$this->plog->blog_language; break;
 			case 'blog_author_name':
-				return	$this->plogconf->blog_author_name; break;
+				return	$this->plog->blog_author_name; break;
 			default:
 				return	false;
 				break;
@@ -288,7 +288,7 @@ ORDER BY release_date DESC
 	#--------------------------------------
 	#	RSSファイルのURLを得る
 	function get_rss_url( $version_name ){
-		$path_rss = $this->plogconf->path_rss;
+		$path_rss = $this->plog->path_rss;
 		if( !strlen( $path_rss ) ){
 			#	RSSファイルの保存先が指定されていなければ。
 			return	false;
@@ -313,7 +313,7 @@ ORDER BY release_date DESC
 	#--------------------------------------
 	#	RSSファイルの絶対パスを得る
 	function get_rss_realpath( $version_name = null ){
-		$path_rss = $this->plogconf->path_rss;
+		$path_rss = $this->plog->path_rss;
 		if( !strlen( $path_rss ) ){
 			#	RSSファイルの保存先が指定されていなければ。
 			return	false;

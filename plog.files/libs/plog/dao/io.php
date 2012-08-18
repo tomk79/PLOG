@@ -1,28 +1,27 @@
 <?php
 
-#	PxFW - Content - [PLOG]
-#	Copyright (C)Tomoya Koyanagi, All rights reserved.
-#	Last Update : 21:15 2008/10/06
-
-#	インポート系：anch_import_functions
-#	エクスポート系：anch_export_functions
-#	その他：anch_other_functions
-
-#------------------------------------------------------------------------------------------------------------------
-#	コンテンツオブジェクトクラス [ cont_plog_dao_io ]
+/**
+ * データIOオブジェクトクラス
+ * PxFW - Content - [PLOG]
+ * 
+ * インポート系：anch_import_functions
+ * エクスポート系：anch_export_functions
+ * その他：anch_other_functions
+ */
 class cont_plog_dao_io{
-	var $plogconf;
+	var $plog;
 	var $conf;
 	var $errors;
 	var $dbh;
 
-	#--------------------------------------
-	#	コンストラクタ
-	function cont_plog_dao_io( &$plogconf ){
-		$this->plogconf = &$plogconf;
-		$this->conf = &$plogconf->get_basicobj_conf();
-		$this->errors = &$plogconf->get_basicobj_errors();
-		$this->dbh = &$plogconf->get_basicobj_dbh();
+	/**
+	 * コンストラクタ
+	 */
+	public function cont_plog_dao_io( &$plog ){
+		$this->plog = &$plog;
+		$this->conf = &$plog->get_basicobj_conf();
+		$this->errors = &$plog->get_basicobj_errors();
+		$this->dbh = &$plog->get_basicobj_dbh();
 	}
 
 
@@ -71,13 +70,13 @@ class cont_plog_dao_io{
 
 		#--------------------------------------
 		#	データディレクトリを複製
-		$this->dbh->copyall( $this->plogconf->get_home_dir().'/article_datas' , $export_tmp_dir.'/tmp/article_datas' );
+		$this->dbh->copyall( $this->plog->get_home_dir().'/article_datas' , $export_tmp_dir.'/tmp/article_datas' );
 
 
 		#--------------------------------------
 		#	出力設定ファイルを保存
 		$export_ini = '';
-		$export_ini .= 'blog_name='.$this->plogconf->blog_name."\n";
+		$export_ini .= 'blog_name='.$this->plog->blog_name."\n";
 		$export_ini .= 'export_date='.date( 'Y-m-d H:i:s' )."\n";
 		$export_ini .= 'charset='.strtolower( mb_internal_encoding() )."\n";
 		$export_ini .= 'plog_version='.$this->get_plog_version()."\n";
@@ -108,7 +107,7 @@ SELECT * FROM :D:tableName :D:orderBy;
 		}
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name[$table_key],
+			'tableName'=>$this->plog->table_name[$table_key],
 			'orderBy'=>$orderBy,
 		);
 		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
@@ -249,7 +248,7 @@ INSERT INTO :D:tableName(
 		$INSERT_SQL = @ob_get_clean();
 
 		$bindData = array(
-			'tableName'=>$this->plogconf->table_name.'_article',
+			'tableName'=>$this->plog->table_name.'_article',
 			'article_title'=>$article_info['article_title'],
 			'user_cd'=>$article_info['user_cd'],
 			'article_summary'=>$article_info['article_summary'],
@@ -269,7 +268,7 @@ INSERT INTO :D:tableName(
 		}
 		$this->dbh->commit();
 
-		$article_cd = $this->dbh->get_last_insert_id( null , $this->plogconf->table_name.'_article'.'_article_cd_seq' );//挿入された行のIDを取得
+		$article_cd = $this->dbh->get_last_insert_id( null , $this->plog->table_name.'_article'.'_article_cd_seq' );//挿入された行のIDを取得
 		if( !strlen( $article_cd ) ){
 			return	false;
 		}
@@ -293,7 +292,7 @@ INSERT INTO :D:tableName(
 		}
 
 		$old_data_dir = $base_dir.$path_id.'/data';
-		$new_data_dir = $this->plogconf->get_article_dir( $new_article_cd );
+		$new_data_dir = $this->plog->get_article_dir( $new_article_cd );
 
 		$this->dbh->mkdirall( $new_data_dir );
 
@@ -346,7 +345,7 @@ INSERT INTO :D:tableName(
 			$INSERT_SQL = @ob_get_clean();
 
 			$bindData = array(
-				'tableName'=>$this->plogconf->table_name.'_comment',
+				'tableName'=>$this->plog->table_name.'_comment',
 				'article_cd'=>$new_article_cd ,
 				'keystr'=>md5( time::microtime() ) ,
 				'comment'=>$data_line['comment'] ,
@@ -418,7 +417,7 @@ INSERT INTO :D:tableName(
 			$INSERT_SQL = @ob_get_clean();
 
 			$bindData = array(
-				'tableName'=>$this->plogconf->table_name.'_trackback',
+				'tableName'=>$this->plog->table_name.'_trackback',
 				'article_cd'=>$new_article_cd ,
 				'keystr'=>md5( time::microtime() ) ,
 				'trackback_blog_name'=>$data_line['trackback_blog_name'] ,
@@ -621,14 +620,16 @@ INSERT INTO :D:tableName(
 
 	}
 
-
-
-
-
-
-	#--------------------------------------
-	#	PLOGプラグインのバージョン番号を得る
-	function get_plog_version(){
+	/**
+	 * PLOGプラグインのバージョン番号を得る
+	 */
+	private function get_plog_version(){
+		/*
+		UTODO: バージョンの管理方法について要検討。
+		一旦つぶしておく。
+		*/
+		return false;
+		/*
 		$filepath = $this->conf->path_lib_base.'/plugins/PLOG/_UPDATELOG_/setupHistory.log';
 		if( !is_file( $filepath ) ){
 			return	false;
@@ -655,10 +656,9 @@ INSERT INTO :D:tableName(
 		}
 
 		return	$final['version'];
-	}
-
+		*/
+	}//get_plog_version()
 
 }
-
 
 ?>

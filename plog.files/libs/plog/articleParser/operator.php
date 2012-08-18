@@ -6,7 +6,7 @@
 #------------------------------------------------------------------------------------------------------------------
 #	コンテンツ解析オブジェクトクラス [ cont_plog_articleParser_operator ]
 class cont_plog_articleParser_operator{
-	var $plogconf;
+	var $plog;
 	var $conf;
 	var $errors;
 	var $dbh;
@@ -22,16 +22,16 @@ class cont_plog_articleParser_operator{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_plog_articleParser_operator( &$plogconf ){
-		$this->plogconf = &$plogconf;
-		$this->conf = &$plogconf->get_basicobj_conf();
-		$this->errors = &$plogconf->get_basicobj_errors();
-		$this->dbh = &$plogconf->get_basicobj_dbh();
-		$this->req = &$plogconf->get_basicobj_req();
-		$this->user = &$plogconf->get_basicobj_user();
-		$this->site = &$plogconf->get_basicobj_site();
-		$this->theme = &$plogconf->get_basicobj_theme();
-		$this->custom = &$plogconf->get_basicobj_custom();
+	function cont_plog_articleParser_operator( &$plog ){
+		$this->plog = &$plog;
+		$this->conf = &$plog->get_basicobj_conf();
+		$this->errors = &$plog->get_basicobj_errors();
+		$this->dbh = &$plog->get_basicobj_dbh();
+		$this->req = &$plog->get_basicobj_req();
+		$this->user = &$plog->get_basicobj_user();
+		$this->site = &$plog->get_basicobj_site();
+		$this->theme = &$plog->get_basicobj_theme();
+		$this->custom = &$plog->get_basicobj_custom();
 	}
 
 
@@ -395,7 +395,7 @@ class cont_plog_articleParser_operator{
 	function finish_html( $BLOCK_SRC ){
 		$RTN = '';
 		if( strlen( $BLOCK_SRC ) ){
-			$className = $this->plogconf->require_lib( '/PLOG/articleParser/htmloperator.php' );
+			$className = $this->plog->require_lib( '/PLOG/articleParser/htmloperator.php' );
 			$htmloperator = new $className( $this->article_cd );
 			$htmloperator->html_parse( $BLOCK_SRC );
 			$RTN .= $htmloperator->publish();
@@ -466,13 +466,13 @@ class cont_plog_articleParser_operator{
 
 	#	キャッシュファイルのパスを得る
 	function get_cache_file_path( $article_cd ){
-		return	$this->plogconf->get_cache_dir().'/article_'.intval( $article_cd ).'.php';
+		return	$this->plog->get_cache_dir().'/article_'.intval( $article_cd ).'.php';
 	}
 
 	#	キャッシュが有効か調べる
 	function is_cache_file( $article_cd ){
 		$path_cache = $this->get_cache_file_path( $article_cd );
-		$path_article = $this->plogconf->get_article_dir( $article_cd ).'/contents.txt';
+		$path_article = $this->plog->get_article_dir( $article_cd ).'/contents.txt';
 
 		if( !is_file( $path_cache ) ){ return false; }
 		if( !is_file( $path_article ) ){ return false; }
@@ -510,7 +510,7 @@ class cont_plog_articleParser_operator{
 
 	#	オリジナルのソースを取得する
 	function get_original_src( $article_cd ){
-		$base_path = $this->plogconf->get_article_dir( $article_cd );
+		$base_path = $this->plog->get_article_dir( $article_cd );
 		if( !is_dir( $base_path ) ){
 			return	false;
 		}
@@ -579,7 +579,7 @@ class cont_plog_articleParser_operator{
 				$RTN .= ' />';
 				return $RTN;
 
-			}elseif( $resource_type == 'freemind' && $this->plogconf->helpers['freemind']['url_freemind_flash_browser'] ){
+			}elseif( $resource_type == 'freemind' && $this->plog->helpers['freemind']['url_freemind_flash_browser'] ){
 				#	FreeMind
 				$RTN .= '<span id="cont_plog_flashcontent_'.htmlspecialchars( $callNumber ).'" style="display:block; width:auto; height:300px; border:1px solid #999999; background-color:#ffffff;">';
 				$RTN .= 'マインドマップファイル「'.htmlspecialchars($filename).'」を表示します。<br />';
@@ -588,7 +588,7 @@ class cont_plog_articleParser_operator{
 				//	↓どうやら visorFreemind.swf をロードすると画像がリセットされてしまうようなので、
 				//	↓プレビューするのはやめた。
 				//	↓おそらく、visorFreemind.swf に、呼び出し側のURLをたたく癖があるのが原因ではないかと思う。
-#				$RTN .= '<script type="text/javascript" src="'.htmlspecialchars( $this->plogconf->helpers['freemind']['url_freemind_flash_browser'] ).'/flashobject.js"></script>'."\n";
+#				$RTN .= '<script type="text/javascript" src="'.htmlspecialchars( $this->plog->helpers['freemind']['url_freemind_flash_browser'] ).'/flashobject.js"></script>'."\n";
 #				$RTN .= '<script type="text/javascript">'."\n";
 #				$RTN .= '	// <![CDATA['."\n";
 #				$RTN .= '	function getMap(map){'."\n";
@@ -599,7 +599,7 @@ class cont_plog_articleParser_operator{
 #				$RTN .= '		}'."\n";
 #				$RTN .= '		return result;'."\n";
 #				$RTN .= '	}'."\n";
-#				$RTN .= '	var fo = new FlashObject('.text::data2jstext( $this->plogconf->helpers['freemind']['url_freemind_flash_browser'].'/visorFreemind.swf' ).', "visorFreeMind", "100%", "100%", 6, "#9999ff");'."\n";
+#				$RTN .= '	var fo = new FlashObject('.text::data2jstext( $this->plog->helpers['freemind']['url_freemind_flash_browser'].'/visorFreemind.swf' ).', "visorFreeMind", "100%", "100%", 6, "#9999ff");'."\n";
 #				$RTN .= '	fo.addParam("quality", "high");'."\n";
 #				$RTN .= '	fo.addParam("bgcolor", "#ffffff");'."\n";
 #				$RTN .= '	fo.addVariable("openUrl", "_blank");'."\n";
@@ -631,7 +631,7 @@ class cont_plog_articleParser_operator{
 		#	/ プレビューモードの処理
 		#--------------------------------------
 
-		$dao_visitor = &$this->plogconf->factory_dao('visitor');
+		$dao_visitor = &$this->plog->factory_dao('visitor');
 		$url_image = $dao_visitor->create_image_cache( $article_cd , $filename , array( 'width'=>$option['width'] , 'height'=>$option['height'] ) );
 		if( $url_image === false ){
 			return	'[イメージエラー]';
@@ -647,13 +647,13 @@ class cont_plog_articleParser_operator{
 			$RTN .= ' />';
 			return	$RTN;
 
-		}elseif( $resource_type == 'freemind' && $this->plogconf->helpers['freemind']['url_freemind_flash_browser'] ){
+		}elseif( $resource_type == 'freemind' && $this->plog->helpers['freemind']['url_freemind_flash_browser'] ){
 			#	FreeMind
 			$RTN .= '<span id="cont_plog_flashcontent_'.$callNumber.'" style="display:block; width:auto; height:300px; border:1px solid #999999; background-color:#ffffff;">';
 			$RTN .= 'マインドマップを表示します。';
 			$RTN .= '表示されない場合は、JavaScriptがオフになっていたり、Flash Player がインストールされていないなどの可能性があります。';
 			$RTN .= '</span>'."\n";
-			$RTN .= '<script type="text/javascript" src="'.htmlspecialchars( $this->plogconf->helpers['freemind']['url_freemind_flash_browser'] ).'/flashobject.js"></script>'."\n";
+			$RTN .= '<script type="text/javascript" src="'.htmlspecialchars( $this->plog->helpers['freemind']['url_freemind_flash_browser'] ).'/flashobject.js"></script>'."\n";
 			$RTN .= '<script type="text/javascript">'."\n";
 			$RTN .= '	// <![CDATA['."\n";
 			$RTN .= '	function getMap(map){'."\n";
@@ -664,7 +664,7 @@ class cont_plog_articleParser_operator{
 			$RTN .= '		}'."\n";
 			$RTN .= '		return result;'."\n";
 			$RTN .= '	}'."\n";
-			$RTN .= '	var fo = new FlashObject('.text::data2jstext( $this->plogconf->helpers['freemind']['url_freemind_flash_browser'].'/visorFreemind.swf' ).', "visorFreeMind", "100%", "100%", 6, "#9999ff");'."\n";
+			$RTN .= '	var fo = new FlashObject('.text::data2jstext( $this->plog->helpers['freemind']['url_freemind_flash_browser'].'/visorFreemind.swf' ).', "visorFreeMind", "100%", "100%", 6, "#9999ff");'."\n";
 			$RTN .= '	fo.addParam("quality", "high");'."\n";
 			$RTN .= '	fo.addParam("bgcolor", "#ffffff");'."\n";
 			$RTN .= '	fo.addVariable("openUrl", "_blank");'."\n";
