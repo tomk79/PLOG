@@ -54,10 +54,10 @@ ORDER BY trackback_date
 			'article_cd'=>$article_cd,
 			'limit_string'=>$limit_string,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
 
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		return	$RTN;
 
@@ -95,10 +95,10 @@ ORDER BY trackback_date
 			'article_cd'=>$article_cd,
 			'limit_string'=>$limit_string,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
 
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		return	$RTN;
 
@@ -140,9 +140,9 @@ LIMIT :N:limit
 			'tableName_article'=>$this->plog->table_name.'_article',
 			'limit'=>$count,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 
 		return	$DATA;
 
@@ -168,10 +168,10 @@ WHERE
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
 
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		return	$RTN[0];
 
@@ -203,15 +203,15 @@ WHERE
 			'keystr'=>$keystr,
 			'trackback_url'=>$trackback_url,
 			'status'=>$status,
-			'now'=>$this->dbh->int2datetime( time() ),
+			'now'=>$this->px->dbh()->int2datetime( time() ),
 		);
-		$INSERT_SQL = $this->dbh->bind( $INSERT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $INSERT_SQL );
+		$INSERT_SQL = $this->px->dbh()->bind( $INSERT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $INSERT_SQL );
 		if( !$res ){
-			$this->dbh->rollback();
+			$this->px->dbh()->rollback();
 			return	false;
 		}
-		$this->dbh->commit();
+		$this->px->dbh()->commit();
 
 		return	true;
 
@@ -245,9 +245,9 @@ WHERE
 			'article_cd'=>$article_cd,
 			'trackback_url'=>$url,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$count = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$count = $this->px->dbh()->get_results();
 		if( intval( $count[0]['count'] ) ){
 			#	すでに登録されている。
 			return	false;
@@ -295,22 +295,22 @@ INSERT INTO :D:tableName(
 			'trackback_excerpt'=>$excerpt ,
 			'client_ip'=>$client_ip ,
 			'status'=>$status ,
-			'now'=>$this->dbh->int2datetime( time() ) ,
+			'now'=>$this->px->dbh()->int2datetime( time() ) ,
 		);
-		$INSERT_SQL = $this->dbh->bind( $INSERT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $INSERT_SQL );
+		$INSERT_SQL = $this->px->dbh()->bind( $INSERT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $INSERT_SQL );
 		if( !$res ){
-			$this->dbh->rollback();
+			$this->px->dbh()->rollback();
 			return	false;
 		}
-		$this->dbh->commit();
+		$this->px->dbh()->commit();
 
 		if( strlen( $this->plog->reportmail_to ) ){
 			#--------------------------------------
 			#	レポートメールを送信する (PLOG 0.1.6 追加)
-			$className = $this->dbh->require_lib( '/resources/mail.php' );
+			$className = $this->px->dbh()->require_lib( '/resources/mail.php' );
 			if( !$className ){
-				$this->errors->error_log( '/resources/mail.php のロードに失敗しました。レポートメールの送信に失敗しました。' , __FILE__ , __LINE__ );
+				$this->px->error()->error_log( '/resources/mail.php のロードに失敗しました。レポートメールの送信に失敗しました。' , __FILE__ , __LINE__ );
 				return true;
 			}
 			$mail = new $className( &$this->conf , &$this->errors );
@@ -329,7 +329,7 @@ INSERT INTO :D:tableName(
 			$mail->setfrom( $this->plog->reportmail_to );
 
 			if( !$mail->send() ){//メール送信
-				$this->errors->error_log( 'レポートメールの送信に失敗しました。' , __FILE__ , __LINE__ );
+				$this->px->error()->error_log( 'レポートメールの送信に失敗しました。' , __FILE__ , __LINE__ );
 				return true;
 			}
 			#	/ レポートメールを送信する
@@ -368,15 +368,15 @@ WHERE
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 			'trackback_url'=>$trackback_url,
-			'now'=>$this->dbh->int2datetime( time() ),
+			'now'=>$this->px->dbh()->int2datetime( time() ),
 		);
-		$INSERT_SQL = $this->dbh->bind( $INSERT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $INSERT_SQL );
+		$INSERT_SQL = $this->px->dbh()->bind( $INSERT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $INSERT_SQL );
 		if( !$res ){
-			$this->dbh->rollback();
+			$this->px->dbh()->rollback();
 			return	false;
 		}
-		$this->dbh->commit();
+		$this->px->dbh()->commit();
 
 		return	true;
 
@@ -416,11 +416,11 @@ WHERE
 			$ROW .= '	'.$log_line['error_messages'];
 			$result = @error_log( $ROW."\n" , 3 , $path );
 			if( !$result ){
-				$this->errors->error_log( 'FAILD to save log. - '.preg_replace( '/\t/' , ' ' , $ROW ) , __FILE__ , __LINE__ );
+				$this->px->error()->error_log( 'FAILD to save log. - '.preg_replace( '/\t/' , ' ' , $ROW ) , __FILE__ , __LINE__ );
 			}
 		}
 
-		$this->dbh->chmod( $path );
+		$this->px->dbh()->chmod( $path );
 
 		return	true;
 	}

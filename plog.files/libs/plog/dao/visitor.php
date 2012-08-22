@@ -8,7 +8,8 @@
 #	コンテンツオブジェクトクラス [ cont_plog_dao_visitor ]
 class cont_plog_dao_visitor{
 	var $plog;
-	var $conf;
+	var $px;
+//	var $conf;
 	var $errors;
 	var $dbh;
 
@@ -16,9 +17,10 @@ class cont_plog_dao_visitor{
 	#	コンストラクタ
 	function cont_plog_dao_visitor( &$plog ){
 		$this->plog = &$plog;
-		$this->conf = &$plog->get_basicobj_conf();
-		$this->errors = &$plog->get_basicobj_errors();
-		$this->dbh = &$plog->get_basicobj_dbh();
+		$this->px = &$plog->px;
+//		$this->conf = &$plog->get_basicobj_conf();
+		$this->errors = &$plog->px->error();
+		$this->dbh = &$plog->px->dbh();
 	}
 
 
@@ -53,7 +55,7 @@ ORDER BY release_date DESC
 		$SELECT_SQL = @ob_get_clean();
 
 		$limit_string = '';
-		if( $this->conf->rdb['type'] == 'PostgreSQL' ){
+		if( $this->plog->px->get_conf('dbms.dbms') == 'PostgreSQL' ){
 			#	【 PostgreSQL 】
 			$limit_string .= ' OFFSET '.intval($limit_offset).' LIMIT '.intval($limit_count);
 		}else{
@@ -74,11 +76,11 @@ ORDER BY release_date DESC
 			'tableName_category'=>$this->plog->table_name.'_category',
 			'limit_string'=>$limit_string,
 			'category_cd_string'=>$category_cd_string,
-			'now'=>$this->dbh->int2datetime( $this->conf->time ),
+			'now'=>$this->px->dbh()->int2datetime( time() ),
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		return	$RTN;
 
@@ -104,15 +106,14 @@ WHERE
 			$category_cd_string = '	AND category_cd = '.intval( $category_cd );
 		}
 
-
 		$bindData = array(
 			'tableName'=>$this->plog->table_name.'_article',
 			'category_cd_string'=>$category_cd_string,
-			'now'=>$this->dbh->int2datetime( $this->conf->time ),
+			'now'=>$this->px->dbh()->int2datetime( time() ),
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		return	intval( $RTN[0]['count'] );
 
@@ -150,11 +151,11 @@ WHERE
 			'tableName_article'=>$this->plog->table_name.'_article',
 			'tableName_category'=>$this->plog->table_name.'_category',
 			'article_cd'=>$article_cd,
-			'now'=>$this->dbh->int2datetime( $this->conf->time ),
+			'now'=>$this->px->dbh()->int2datetime( time() ),
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		return	$RTN[0];
 
@@ -189,9 +190,9 @@ GROUP BY article_cd
 			'tableName'=>$this->plog->table_name.'_comment',
 			'target_article_cd'=>$target_article_cd,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 		$RTN = array();
 		foreach( $DATA as $line ){
 			$RTN[$line['article_cd']] = intval($line['count']);
@@ -227,9 +228,9 @@ GROUP BY article_cd
 			'tableName'=>$this->plog->table_name.'_comment',
 			'target_article_cd'=>$target_article_cd,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 		$RTN = array();
 		foreach( $DATA as $line ){
 			$RTN[$line['article_cd']] = intval($line['count']);
@@ -265,9 +266,9 @@ GROUP BY article_cd
 			'tableName'=>$this->plog->table_name.'_trackback',
 			'target_article_cd'=>$target_article_cd,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 		$RTN = array();
 		foreach( $DATA as $line ){
 			$RTN[$line['article_cd']] = intval($line['count']);
@@ -302,9 +303,9 @@ GROUP BY article_cd
 			'tableName'=>$this->plog->table_name.'_trackback',
 			'target_article_cd'=>$target_article_cd,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 		$RTN = array();
 		foreach( $DATA as $line ){
 			$RTN[$line['article_cd']] = intval($line['count']);
@@ -337,20 +338,20 @@ GROUP BY article_cd
 		#	キャッシュのパス
 		$path_cache_basedir = $this->plog->get_public_cache_dir();
 		if( !is_dir( $path_cache_basedir ) ){
-			if( !$this->dbh->mkdirall( $path_cache_basedir ) ){
+			if( !$this->px->dbh()->mkdirall( $path_cache_basedir ) ){
 				return	false;
 			}
 		}
 
 		$is_image = true;
-		switch( strtolower( $this->dbh->get_extension($filename) ) ){
+		switch( strtolower( $this->px->dbh()->get_extension($filename) ) ){
 			case 'gif':
 			case 'png':
 			case 'jpg':
 			case 'jpe':
 			case 'jpeg':
 			case 'bmp':
-				$real_image_name = $filename.'@m'.intval($this->plog->article_image_maxwidth).'w'.intval($option['width']).'h'.intval($option['height']).'.'.$this->dbh->get_extension($filename);
+				$real_image_name = $filename.'@m'.intval($this->plog->article_image_maxwidth).'w'.intval($option['width']).'h'.intval($option['height']).'.'.$this->px->dbh()->get_extension($filename);
 				$is_image = true;
 				break;
 			default:
@@ -370,20 +371,20 @@ GROUP BY article_cd
 
 		$path_cache_file = $path_cache_basedir.$path_id.'/'.$real_image_name;
 		if( !is_dir( dirname( $path_cache_file ) ) ){
-			$this->dbh->mkdirall( dirname( $path_cache_file ) );
+			$this->px->dbh()->mkdirall( dirname( $path_cache_file ) );
 		}
 		$RTN = $this->plog->get_url_public_cache_dir().$path_id.'/'.$real_image_name;
 
 		#--------------------------------------
 		#	更新日比較
-		if( $this->dbh->comp_filemtime( $path_cache_file , $path_original_file ) ){
+		if( $this->px->dbh()->comp_filemtime( $path_cache_file , $path_original_file ) ){
 			#	キャッシュが新しかったら、おしまい。
 			return	$RTN;
 		}
 
 		#######################################
 		#	キャッシュ作成
-		if( !$this->dbh->copy( $path_original_file , $path_cache_file ) ){
+		if( !$this->px->dbh()->copy( $path_original_file , $path_cache_file ) ){
 			#	仮に、単にコピーするだけ。
 			return	false;
 		}
@@ -392,16 +393,16 @@ GROUP BY article_cd
 			return	$RTN;
 		}
 
-		$className = $this->dbh->require_lib( '/resources/image.php' );
+		$className = $this->px->dbh()->require_lib( '/resources/image.php' );
 		if( !$className ){
 			#	画像オブジェクトの生成に失敗したら。エラーです。
-			$this->errors->error_log( 'FAILD to create object [/resources/image.php].' , __FILE__ , __LINE__ );
+			$this->px->error()->error_log( 'FAILD to create object [/resources/image.php].' , __FILE__ , __LINE__ );
 			return	$RTN;
 		}
 		$obj_image = new $className( &$this->conf , &$this->req , &$this->dbh , &$this->errors );
 		if( !$obj_image->enable() ){
 			#	画像オブジェクトの生成に失敗したら。エラーです。
-			$this->errors->error_log( 'image object is not active.' , __FILE__ , __LINE__ );
+			$this->px->error()->error_log( 'image object is not active.' , __FILE__ , __LINE__ );
 			return	$RTN;
 		}
 
@@ -443,7 +444,7 @@ GROUP BY article_cd
 		}
 
 		#	MIMEタイプをセットする
-		$obj_image->set_mime( $this->dbh->get_extension( $path_cache_file ) );
+		$obj_image->set_mime( $this->px->dbh()->get_extension( $path_cache_file ) );
 
 		#	編集した画像を保存する
 		$obj_image->saveimage();
@@ -472,9 +473,9 @@ WHERE
 		$bindData = array(
 			'tableName'=>$this->plog->table_name.'_category',
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 
 		return	$DATA;
 	}
@@ -497,9 +498,9 @@ WHERE
 			'tableName'=>$this->plog->table_name.'_category',
 			'category_cd'=>$category_cd,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 
 		return	$DATA[0];
 	}
@@ -523,7 +524,7 @@ WHERE
 		$SQL_WHERE_TPL = '( lower( atc.article_title ) LIKE :S:keyword OR lower( atc.article_summary ) LIKE :S:keyword OR lower( sch.article_bodytext ) LIKE :S:keyword )';
 		foreach( $keywords as $a_word ){
 			$bindData = array( 'keyword'=>'%'.strtolower( $a_word ).'%' );
-			array_push( $sql_wheres , $this->dbh->bind( $SQL_WHERE_TPL , $bindData ) );
+			array_push( $sql_wheres , $this->px->dbh()->bind( $SQL_WHERE_TPL , $bindData ) );
 		}
 		$SQL_WHERE = implode( ' AND ' , $sql_wheres );
 		#	/ マッチング用のWHERE句を作成
@@ -556,7 +557,7 @@ ORDER BY atc.release_date DESC
 		$SELECT_SQL = @ob_get_clean();
 
 		$limit_string = '';
-		if( $this->conf->rdb['type'] == 'PostgreSQL' ){
+		if( $this->plog->px->get_conf('dbms.dbms') == 'PostgreSQL' ){
 			#	【 PostgreSQL 】
 			$limit_string .= ' OFFSET '.intval($limit_offset).' LIMIT '.intval($limit_count);
 		}else{
@@ -571,11 +572,11 @@ ORDER BY atc.release_date DESC
 			'tableName_search'=>$this->plog->table_name.'_search' ,
 			'limit_string'=>$limit_string,
 			'sql_where'=>$SQL_WHERE,
-			'now'=>$this->dbh->int2datetime( $this->conf->time ),
+			'now'=>$this->px->dbh()->int2datetime( time() ),
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 
 		return	$DATA;
 	}
@@ -594,7 +595,7 @@ ORDER BY atc.release_date DESC
 		$SQL_WHERE_TPL = '( lower( atc.article_title ) LIKE :S:keyword OR lower( atc.article_summary ) LIKE :S:keyword OR lower( sch.article_bodytext ) LIKE :S:keyword )';
 		foreach( $keywords as $a_word ){
 			$bindData = array( 'keyword'=>'%'.strtolower( $a_word ).'%' );
-			array_push( $sql_wheres , $this->dbh->bind( $SQL_WHERE_TPL , $bindData ) );
+			array_push( $sql_wheres , $this->px->dbh()->bind( $SQL_WHERE_TPL , $bindData ) );
 		}
 		$SQL_WHERE = implode( ' AND ' , $sql_wheres );
 		#	/ マッチング用のWHERE句を作成
@@ -617,11 +618,11 @@ WHERE
 			'tableName_article'=>$this->plog->table_name.'_article' ,
 			'tableName_search'=>$this->plog->table_name.'_search' ,
 			'sql_where'=>$SQL_WHERE,
-			'now'=>$this->dbh->int2datetime( $this->conf->time ),
+			'now'=>$this->px->dbh()->int2datetime( time() ),
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 
 		$RTN = $DATA[0]['count'];
 		return	intval($RTN);
@@ -669,7 +670,7 @@ WHERE
 			#	↑1件だけ取ってくる。
 
 		$limit_string = '';
-		if( $this->conf->rdb['type'] == 'PostgreSQL' ){
+		if( $this->plog->px->get_conf('dbms.dbms') == 'PostgreSQL' ){
 			#	【 PostgreSQL 】
 			$limit_string .= ' OFFSET '.intval($limit_offset).' LIMIT '.intval($limit_count);
 		}else{
@@ -704,11 +705,11 @@ WHERE
 			'next_or_prev'=>$next_or_prev_string,
 			'orderby'=>$orderby_string,
 			'category_cd_string'=>$category_cd_string,
-			'now'=>$this->dbh->int2datetime( $this->conf->time ),
+			'now'=>$this->px->dbh()->int2datetime( time() ),
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		return	$RTN[0];
 

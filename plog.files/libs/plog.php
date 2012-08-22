@@ -6,10 +6,11 @@
  * @author Tomoya Koyanagi
  */
 class cont_plog{
-	var $px;
+	public $px;
 
 	private $path_lib = null;//ライブラリディレクトリのパスを記憶(コンストラクタで初期化)
 	private $queries = array();
+	private $content_mode = 'article';//コンテンツモード (article|admin)
 
 	#--------------------------------------
 	#	設定項目
@@ -29,7 +30,6 @@ class cont_plog{
 		#	何も存在しない場合は、それをファイル名として解釈し、その後ろに拡張子などを付加して生成します。
 		#	ファイルが存在する場合はエラーとなります。
 	var $path_rss_xslt = array( 'rss1.0'=>null , 'rss2.0'=>null , 'atom1.0'=>null );
-		#	12:04 2008/01/15 追加
 		#	RSSファイルに設定するXSLTのパス。
 		#	共有リソースディレクトリ内の相対パスで指定。
 	var $url_public_cache_dir = null;
@@ -78,7 +78,6 @@ class cont_plog{
 	);
 
 	var $helpers = array();
-		#	2:40 2008/11/08 追加。
 		#	リソースを取り扱うためのヘルパーの設定
 		#	$helpers['freemind'] = array(	//	*.mm を扱う FreeMind Flash Browser の設定
 		#		'url_freemind_flash_browser' => '～～～', //FreeMind Flash Browser をインストールしたURL
@@ -125,14 +124,13 @@ class cont_plog{
 	/**
 	 * コンストラクタ
 	 */
-	public function cont_plog( &$px , $dynamic_path_name ){
+	public function cont_plog( &$px , $query ){
 		$this->px = &$px;
 
 		$content_path = $px->get_local_resource_dir_realpath();
 		$this->path_lib = $this->px->dbh()->get_realpath($content_path.'/libs').'/';
 
-		$query = $this->px->req()->get_path_param( $dynamic_path_name );
-		$this->queries = $this->parse_query( $query );
+		$this->parse_query( $query );
 
 		/*
 		//↓UTODO: PxFWから削除された機能を使用するため、一時的にコメントアウト。
@@ -146,10 +144,48 @@ class cont_plog{
 	 * クエリを解析する。
 	 */
 	private function parse_query( $query ){
-		//UTODO: 未開発のメソッド
-		test::var_dump( $query );
-		return array();
+		if($query == 'index.html'){ $query = ''; } //←PxFWが補完した index.html を削除
+		$query = preg_replace( '/\/index\.html$/is','/',$query ); //←PxFWが補完した index.html を削除
+		$query = preg_replace( '/\.html$/is','',$query ); //←拡張子を削除
+		$query = preg_replace( '/\/$/is','',$query ); //←最後のスラッシュ閉じを削除
+		$this->queries = explode('/',$query);
+
+		if( $this->queries[0] == 'admin' ){
+			$this->content_mode = array_shift( $this->queries );
+		}
+
+		return true;
 	}
+
+	/**
+	 * クエリの一部分を取り出す
+	 */
+	public function get_query( $num = 0 ){
+		if(is_null($num)){$num=0;}
+		$rtn = $this->queries[$num];
+		return $rtn;
+	}
+
+	/**
+	 * コンテンツの処理を実行する。
+	 */
+	public function execute_content(){
+		#--------------------------------------
+		#	コンテンツの描画
+		if( $this->content_mode == 'admin' ){
+			#	管理画面
+			$plog_article = &$this->factory_admin();
+			$SRC = $plog_article->start();
+		}else{
+			#	ブログ
+			$plog_article = &$this->factory_article();
+			$SRC = $plog_article->start();
+		}
+		#	/ コンテンツの描画
+		#--------------------------------------
+
+		return	$SRC;
+	}//execute_content()
 
 	/**
 	 * ホームディレクトリのパスを得る
@@ -235,7 +271,7 @@ class cont_plog{
 	public function require_lib( $lib_localpath ){
 		$lib_localpath = preg_replace( '/^\/'.'*'.'/' , '/' , $lib_localpath );
 		$lib_localpath = preg_replace( '/\/+/' , '/' , $lib_localpath );
-		$classname_body = str_replace( '/' , '_' , text::trimext( $lib_localpath ) );
+		$classname_body = str_replace( '/' , '_' , t::trimext( $lib_localpath ) );
 
 		$layer = 'cont';
 
@@ -244,15 +280,15 @@ class cont_plog{
 			#	既にそのクラス名が存在していたら、そこでOK。
 			return	'cont'.$classname_body;
 		}
-		if( isolated::require_once_with_conf( $this->path_lib.$lib_localpath , &$this->conf ) ){
+		if( is_file( $this->path_lib.$lib_localpath ) ){
 			#	対象のファイルを見つけたら、
 			#	パスをセットしてswitchを抜ける。
+			include_once($this->path_lib.$lib_localpath);
 			if( class_exists( 'cont'.$classname_body ) ){
 				#	クラスがちゃんと存在したら。
 				$adoptLayer = 'cont';
 			}
 		}
-
 		if( !class_exists( $adoptLayer.$classname_body ) ){
 			return	false;
 		}
@@ -350,7 +386,7 @@ class cont_plog{
 			)
 		);
 		return	$RTN;
-	}
+	}//get_article_url()
 
 	#--------------------------------------
 	#	記事コード番号から、記事のページIDを求める
@@ -359,7 +395,7 @@ class cont_plog{
 		$RTN .= '.article';
 		$RTN .= '.'.intval($article_cd);
 		return	$RTN;
-	}
+	}//get_article_pid()
 
 	#--------------------------------------
 	#	トラックバックピング送信ログの保存先ディレクトリパスを得る
@@ -389,7 +425,7 @@ class cont_plog{
 
 		return	realpath( $path_log_dir );
 
-	}
+	}//get_send_tbp_log_dir()
 
 }
 

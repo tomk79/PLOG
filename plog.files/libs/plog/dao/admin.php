@@ -50,9 +50,9 @@ ORDER BY release_date DESC
 			'tableName'=>$this->plog->table_name.'_article',
 			'limit_string'=>$limit_string,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		return	$RTN;
 
@@ -80,11 +80,11 @@ WHERE
 		$bindData = array(
 			'tableName'=>$this->plog->table_name.'_article',
 			'category_cd_string'=>$category_cd_string,
-			'now'=>$this->dbh->int2datetime(time()),
+			'now'=>$this->px->dbh()->int2datetime(time()),
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		return	intval( $RTN[0]['count'] );
 
@@ -122,9 +122,9 @@ WHERE
 			'tableName_category'=>$this->plog->table_name.'_category',
 			'article_cd'=>$article_cd,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		return	$RTN[0];
 
@@ -173,16 +173,16 @@ INSERT INTO :D:tableName(
 			'release_date'=>$ary_options['release_date'],
 			'now'=>date( 'Y-m-d H:i:s' ),
 		);
-		$INSERT_SQL = $this->dbh->bind( $INSERT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $INSERT_SQL );
+		$INSERT_SQL = $this->px->dbh()->bind( $INSERT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $INSERT_SQL );
 
 		if( !$res ){
-			$this->dbh->rollback();
+			$this->px->dbh()->rollback();
 			return	false;
 		}
-		$this->dbh->commit();
+		$this->px->dbh()->commit();
 
-		$article_cd = $this->dbh->get_last_insert_id( null , $this->plog->table_name.'_article'.'_article_cd_seq' );//挿入された行のIDを取得
+		$article_cd = $this->px->dbh()->get_last_insert_id( null , $this->plog->table_name.'_article'.'_article_cd_seq' );//挿入された行のIDを取得
 		if( !strlen( $article_cd ) ){
 			return	false;
 		}
@@ -191,12 +191,12 @@ INSERT INTO :D:tableName(
 		#	コンテンツファイルの保存
 		$base_path = $this->plog->get_article_dir( $article_cd );
 		if( !is_dir( $base_path ) ){
-			if( !$this->dbh->mkdirall( $base_path ) ){
+			if( !$this->px->dbh()->mkdirall( $base_path ) ){
 				return	false;
 			}
 		}
 
-		if( !$this->dbh->file_overwrite( $base_path.'/contents.txt' , $contents ) ){//PLOG 0.1.9 : savefile()をfile_overwrite()に変更。Windowsでキャッシュを開けないバグへの対応。
+		if( !$this->px->dbh()->file_overwrite( $base_path.'/contents.txt' , $contents ) ){//PLOG 0.1.9 : savefile()をfile_overwrite()に変更。Windowsでキャッシュを開けないバグへの対応。
 			#	コンテンツファイルの保存に失敗
 			return	false;
 		}
@@ -238,25 +238,25 @@ WHERE article_cd = :N:article_cd
 			'release_date'=>$ary_options['release_date'],
 			'now'=>date( 'Y-m-d H:i:s' ),
 		);
-		$UPDATE_SQL = $this->dbh->bind( $UPDATE_SQL , $bindData );
-		$res = $this->dbh->sendquery( $UPDATE_SQL );
+		$UPDATE_SQL = $this->px->dbh()->bind( $UPDATE_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $UPDATE_SQL );
 
 		if( !$res ){
-			$this->dbh->rollback();
+			$this->px->dbh()->rollback();
 			return	false;
 		}
-		$this->dbh->commit();
+		$this->px->dbh()->commit();
 
 		#--------------------------------------
 		#	コンテンツファイルの保存
 		$base_path = $this->plog->get_article_dir( $article_cd );
 		if( !is_dir( $base_path ) ){
-			if( !$this->dbh->mkdirall( $base_path ) ){
+			if( !$this->px->dbh()->mkdirall( $base_path ) ){
 				return	false;
 			}
 		}
 
-		if( !$this->dbh->file_overwrite( $base_path.'/contents.txt' , $contents ) ){//PLOG 0.1.9 : savefile()をfile_overwrite()に変更。Windowsでキャッシュを開けないバグへの対応。
+		if( !$this->px->dbh()->file_overwrite( $base_path.'/contents.txt' , $contents ) ){//PLOG 0.1.9 : savefile()をfile_overwrite()に変更。Windowsでキャッシュを開けないバグへの対応。
 			#	コンテンツファイルの保存に失敗
 			return	false;
 		}
@@ -279,7 +279,7 @@ WHERE article_cd = :N:article_cd
 		if( $this->plog->article_summary_mode == 'auto' ){
 			#	記事サマリを自動的に作成するモードだった場合。
 			$article_summary = $operator->mk_summary_by_html( $ARTICLE_BODY_SRC );
-			$SQLPARTS_SUMMARY = $this->dbh->bind( '	article_summary = :S:article_summary ,' , array('article_summary'=>$article_summary) );
+			$SQLPARTS_SUMMARY = $this->px->dbh()->bind( '	article_summary = :S:article_summary ,' , array('article_summary'=>$article_summary) );
 
 			ob_start();?>
 UPDATE :D:tableName SET
@@ -296,14 +296,14 @@ WHERE article_cd = :N:article_cd
 				'article_summary'=>$SQLPARTS_SUMMARY,
 				'now'=>date( 'Y-m-d H:i:s' ),
 			);
-			$UPDATE_SQL = $this->dbh->bind( $UPDATE_SQL , $bindData );
-			$res = $this->dbh->sendquery( $UPDATE_SQL );
+			$UPDATE_SQL = $this->px->dbh()->bind( $UPDATE_SQL , $bindData );
+			$res = $this->px->dbh()->send_query( $UPDATE_SQL );
 
 			if( !$res ){
-				$this->dbh->rollback();
+				$this->px->dbh()->rollback();
 				return	false;
 			}
-			$this->dbh->commit();
+			$this->px->dbh()->commit();
 
 		}
 
@@ -324,7 +324,7 @@ WHERE article_cd = :N:article_cd
 			return	false;
 		}
 
-		return	$this->dbh->file_get_contents( $base_path.'/contents.txt' );
+		return	$this->px->dbh()->file_get_contents( $base_path.'/contents.txt' );
 	}
 
 	#--------------------------------------
@@ -335,7 +335,7 @@ WHERE article_cd = :N:article_cd
 			return	false;
 		}
 
-		return	$this->dbh->getfilelist( $base_path );
+		return	$this->px->dbh()->getfilelist( $base_path );
 	}
 
 	#--------------------------------------
@@ -346,7 +346,7 @@ WHERE article_cd = :N:article_cd
 			return	false;
 		}
 
-		return	$this->dbh->file_get_contents( $base_path );
+		return	$this->px->dbh()->file_get_contents( $base_path );
 	}
 
 	#--------------------------------------
@@ -354,12 +354,12 @@ WHERE article_cd = :N:article_cd
 	function save_contents_image( $article_cd , $image_name , $bin ){
 		$base_path = $this->plog->get_article_dir( $article_cd ).'/images';
 		if( !is_dir( $base_path ) ){
-			if( !$this->dbh->mkdirall( $base_path ) ){
+			if( !$this->px->dbh()->mkdirall( $base_path ) ){
 				return	false;
 			}
 		}
 
-		return	$this->dbh->file_overwrite( $base_path.'/'.$image_name , $bin );//PLOG 0.1.9 : savefile()をfile_overwrite()に変更。Windowsでキャッシュを開けないバグへの対応。
+		return	$this->px->dbh()->file_overwrite( $base_path.'/'.$image_name , $bin );//PLOG 0.1.9 : savefile()をfile_overwrite()に変更。Windowsでキャッシュを開けないバグへの対応。
 	}
 
 	#--------------------------------------
@@ -369,7 +369,7 @@ WHERE article_cd = :N:article_cd
 		if( !is_file( $base_path.'/'.$image_name ) ){
 			return	true;
 		}
-		return	$this->dbh->rmdir( $base_path.'/'.$image_name );
+		return	$this->px->dbh()->rmdir( $base_path.'/'.$image_name );
 	}
 
 
@@ -389,9 +389,9 @@ ORDER BY category_title
 		$bindData = array(
 			'tableName'=>$this->plog->table_name.'_category',
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 
 		return	$DATA;
 	}
@@ -408,14 +408,14 @@ UPDATE :D:tableName SET parent_category_cd = :N:parent_category_cd;
 			'tableName'=>$this->plog->table_name.'_category',
 			'parent_category_cd'=>0,
 		);
-		$UPDATE_SQL = $this->dbh->bind( $UPDATE_SQL , $bindData );
-		$res = $this->dbh->sendquery( $UPDATE_SQL );
+		$UPDATE_SQL = $this->px->dbh()->bind( $UPDATE_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $UPDATE_SQL );
 
 		if( !$res ){
-			$this->dbh->rollback();
+			$this->px->dbh()->rollback();
 			return	false;
 		}
-		$this->dbh->commit();
+		$this->px->dbh()->commit();
 
 		return	true;
 	}
@@ -435,9 +435,9 @@ WHERE category_cd = :N:category_cd
 			'tableName'=>$this->plog->table_name.'_category' ,
 			'category_cd'=>$category_cd ,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 
 		return	$DATA[0];
 	}
@@ -482,16 +482,16 @@ INSERT INTO :D:tableName(
 			'parent_category_cd'=>$parent_category_cd,
 			'now'=>date( 'Y-m-d H:i:s' ),
 		);
-		$INSERT_SQL = $this->dbh->bind( $INSERT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $INSERT_SQL );
+		$INSERT_SQL = $this->px->dbh()->bind( $INSERT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $INSERT_SQL );
 
 		if( !$res ){
-			$this->dbh->rollback();
+			$this->px->dbh()->rollback();
 			return	false;
 		}
-		$this->dbh->commit();
+		$this->px->dbh()->commit();
 
-		$category_cd = $this->dbh->get_last_insert_id( null , $this->plog->table_name.'_category'.'_category_cd_seq' );//挿入された行のIDを取得
+		$category_cd = $this->px->dbh()->get_last_insert_id( null , $this->plog->table_name.'_category'.'_category_cd_seq' );//挿入された行のIDを取得
 		if( !strlen( $category_cd ) ){
 			return	false;
 		}
@@ -531,14 +531,14 @@ WHERE category_cd = :N:category_cd
 			'parent_category_cd'=>$parent_category_cd,
 			'now'=>date( 'Y-m-d H:i:s' ),
 		);
-		$UPDATE_SQL = $this->dbh->bind( $UPDATE_SQL , $bindData );
-		$res = $this->dbh->sendquery( $UPDATE_SQL );
+		$UPDATE_SQL = $this->px->dbh()->bind( $UPDATE_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $UPDATE_SQL );
 
 		if( !$res ){
-			$this->dbh->rollback();
+			$this->px->dbh()->rollback();
 			return	false;
 		}
-		$this->dbh->commit();
+		$this->px->dbh()->commit();
 
 
 		return	intval( $category_cd );
@@ -596,9 +596,9 @@ ORDER BY c.comment_date
 			'tableName_comment'=>$this->plog->table_name.'_comment' ,
 			'limit_string'=>$limit_string,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 
 		return	$DATA;
 	}
@@ -649,9 +649,9 @@ ORDER BY t.trackback_date
 			'tableName_trackback'=>$this->plog->table_name.'_trackback' ,
 			'limit_string'=>$limit_string,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 
 		return	$DATA;
 	}
@@ -673,16 +673,16 @@ WHERE article_cd = :N:article_cd
 		$bindData = array(
 			'tableName'=>$this->plog->table_name.'_article',
 			'article_cd'=>$article_cd,
-			'now'=>$this->dbh->int2datetime( time() ),
+			'now'=>$this->px->dbh()->int2datetime( time() ),
 		);
-		$UPDATE_SQL = $this->dbh->bind( $UPDATE_SQL , $bindData );
-		$res = $this->dbh->sendquery( $UPDATE_SQL );
+		$UPDATE_SQL = $this->px->dbh()->bind( $UPDATE_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $UPDATE_SQL );
 
 		if( !$res ){
-			$this->dbh->rollback();
+			$this->px->dbh()->rollback();
 			return	false;
 		}
-		$this->dbh->commit();
+		$this->px->dbh()->commit();
 
 
 		return	true;
@@ -706,7 +706,7 @@ WHERE article_cd = :N:article_cd
 		$SQL_WHERE_TPL = '( lower( atc.article_title ) LIKE :S:keyword OR lower( atc.article_summary ) LIKE :S:keyword OR lower( sch.article_bodytext ) LIKE :S:keyword )';
 		foreach( $keywords as $a_word ){
 			$bindData = array( 'keyword'=>'%'.strtolower( $a_word ).'%' );
-			array_push( $sql_wheres , $this->dbh->bind( $SQL_WHERE_TPL , $bindData ) );
+			array_push( $sql_wheres , $this->px->dbh()->bind( $SQL_WHERE_TPL , $bindData ) );
 		}
 		$SQL_WHERE = implode( ' AND ' , $sql_wheres );
 		#	/ マッチング用のWHERE句を作成
@@ -753,9 +753,9 @@ ORDER BY atc.release_date DESC
 			'limit_string'=>$limit_string,
 			'sql_where'=>$SQL_WHERE,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 
 		return	$DATA;
 	}
@@ -776,7 +776,7 @@ ORDER BY atc.release_date DESC
 		$SQL_WHERE_TPL = '( lower( atc.article_title ) LIKE :S:keyword OR lower( atc.article_summary ) LIKE :S:keyword OR lower( sch.article_bodytext ) LIKE :S:keyword )';
 		foreach( $keywords as $a_word ){
 			$bindData = array( 'keyword'=>'%'.strtolower( $a_word ).'%' );
-			array_push( $sql_wheres , $this->dbh->bind( $SQL_WHERE_TPL , $bindData ) );
+			array_push( $sql_wheres , $this->px->dbh()->bind( $SQL_WHERE_TPL , $bindData ) );
 		}
 		$SQL_WHERE = implode( ' AND ' , $sql_wheres );
 		#	/ マッチング用のWHERE句を作成
@@ -798,9 +798,9 @@ WHERE
 			'keyword'=>'%'.$keyword.'%' ,
 			'sql_where'=>$SQL_WHERE,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 
 		$RTN = $DATA[0]['count'];
 		return	intval($RTN);

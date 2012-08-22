@@ -261,21 +261,21 @@ CREATE TABLE :D:tableName(
 		#	ダウンロード用に作成するソース
 		$SQL4DOWNLOAD = $sqlComment['headerinfo']."\n";
 
-		$this->dbh->start_transaction();
+		$this->px->dbh()->start_transaction();
 
 		foreach( $targetTableNames as $tableName ){
 			foreach( $sql[$tableName] as $sql_content ){
 				$bindData = array(
 					'tableName'=>$this->plog->table_name.'_'.$tableName,
 				);
-				$sqlFinal = $this->dbh->bind( $sql_content , $bindData );
+				$sqlFinal = $this->px->dbh()->bind( $sql_content , $bindData );
 				if( !strlen( $sqlFinal ) ){ continue; }
 				$SQL4DOWNLOAD .= $sqlFinal."\n";
 
 				if( !strlen( $exec_mode ) ){
 					#	$exec_modeが空白ならば、
 					#	SQLを流すモード
-					$this->dbh->sendquery( $sqlFinal );
+					$this->px->dbh()->send_query( $sqlFinal );
 				}
 			}
 		}
@@ -283,7 +283,7 @@ CREATE TABLE :D:tableName(
 		if( !strlen( $exec_mode ) ){
 			#	$exec_modeが空白ならば、
 			#	SQLを流すモード
-			$this->dbh->commit();
+			$this->px->dbh()->commit();
 		}elseif( $exec_mode == 'GET_SQL_SOURCE' ){
 			return	$SQL4DOWNLOAD;
 		}

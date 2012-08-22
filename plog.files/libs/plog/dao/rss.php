@@ -78,11 +78,11 @@ ORDER BY release_date DESC
 			'tableName_article'=>$this->plog->table_name.'_article',
 			'tableName_category'=>$this->plog->table_name.'_category',
 			'limit_string'=>$limit_string,
-			'now'=>$this->dbh->int2datetime(time()),
+			'now'=>$this->px->dbh()->int2datetime(time()),
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		return	$RTN;
 
@@ -118,21 +118,21 @@ ORDER BY release_date DESC
 		#	RSSを生成して保存する。
 		$path_rss = $this->get_rss_realpath( 'rss1.0' );
 		$SRC_RSS = $this->generate_rss_0100( $target_article_list );//RSS 1.0
-		if( !$this->dbh->savefile( $path_rss , $SRC_RSS ) ){
+		if( !$this->px->dbh()->savefile( $path_rss , $SRC_RSS ) ){
 			$this->internal_error( 'FAILD to save feed RSS 1.0 ['.$path_rss.']' , __FILE__ , __LINE__ );
 		}
 		unset( $path_rss , $SRC_RSS );
 
 		$path_rss = $this->get_rss_realpath( 'rss2.0' );
 		$SRC_RSS = $this->generate_rss_0200( $target_article_list );//RSS 2.0
-		if( !$this->dbh->savefile( $path_rss , $SRC_RSS ) ){
+		if( !$this->px->dbh()->savefile( $path_rss , $SRC_RSS ) ){
 			$this->internal_error( 'FAILD to save feed RSS 2.0 ['.$path_rss.']' , __FILE__ , __LINE__ );
 		}
 		unset( $path_rss , $SRC_RSS );
 
 		$path_rss = $this->get_rss_realpath( 'atom1.0' );
 		$SRC_RSS = $this->generate_rss_atom( $target_article_list );//ATOM
-		if( !$this->dbh->savefile( $path_rss , $SRC_RSS ) ){
+		if( !$this->px->dbh()->savefile( $path_rss , $SRC_RSS ) ){
 			$this->internal_error( 'FAILD to save feed ATOM ['.$path_rss.']' , __FILE__ , __LINE__ );
 		}
 		unset( $path_rss , $SRC_RSS );
@@ -334,7 +334,7 @@ ORDER BY release_date DESC
 			#	それをプリフィックスとして扱う。
 			$prefix = basename( $realpath_rss );
 			$dirname = dirname( $realpath_rss );
-			if( !$this->dbh->mkdirall( $dirname ) ){
+			if( !$this->px->dbh()->mkdirall( $dirname ) ){
 				$this->internal_error( '書き出し先ディレクトリの作成に失敗しました。' , __FILE__ , __LINE__ );
 				return	false;
 			}

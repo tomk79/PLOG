@@ -14,10 +14,10 @@
 
 	$className = 'cont_plog';
 	if( !$className ){
-		$errors->error_log( '$plogをロードできません。' , __FILE__ , __LINE__ );
+		$px->error()->error_log( '$plogをロードできません。' , __FILE__ , __LINE__ );
 		return	false;
 	}
-	$plog = new $className( &$px , '' );
+	$plog = new $className( &$px , $px->req()->get_path_param('') );
 	#	/ ライブラリをロード
 	#--------------------------------------
 
@@ -108,24 +108,7 @@
 	#	/ 設定項目を反映
 	#--------------------------------------
 
-test::var_dump('開発中です。('.__LINE__.')');
-test::var_dump($plog);
-return;
-
-	#--------------------------------------
-	#	コンテンツの描画
-	if( $px->req()->poelm(-1) == 'admin' ){
-		#	管理画面
-		$plog_article = &$plog->factory_admin();
-		$SRC = $plog_article->start();
-	}else{
-		#	ブログ
-		$plog_article = &$plog->factory_article();
-		$SRC = $plog_article->start();
-	}
-	#	/ コンテンツの描画
-	#--------------------------------------
-
-	return	$SRC;
+	//コンテンツを実行して標準出力
+	print $plog->execute_content();
 
 ?>

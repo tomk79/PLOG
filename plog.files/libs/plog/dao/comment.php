@@ -57,10 +57,10 @@ ORDER BY comment_date
 			'article_cd'=>$article_cd,
 			'limit_string'=>$limit_string,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
 
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		return	$RTN;
 
@@ -97,10 +97,10 @@ ORDER BY comment_date
 			'article_cd'=>$article_cd,
 			'limit_string'=>$limit_string,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
 
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		return	$RTN;
 
@@ -142,9 +142,9 @@ LIMIT :N:limit
 			'tableName_article'=>$this->plog->table_name.'_article',
 			'limit'=>$count,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 
 		return	$DATA;
 
@@ -169,10 +169,10 @@ WHERE
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
 
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		return	$RTN[0];
 
@@ -205,15 +205,15 @@ WHERE
 			'create_date'=>$create_date,
 			'client_ip'=>$client_ip,
 			'status'=>$status,
-			'now'=>$this->dbh->int2datetime( time() ),
+			'now'=>$this->px->dbh()->int2datetime( time() ),
 		);
-		$UPDATE_SQL = $this->dbh->bind( $UPDATE_SQL , $bindData );
-		$res = $this->dbh->sendquery( $UPDATE_SQL );
+		$UPDATE_SQL = $this->px->dbh()->bind( $UPDATE_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $UPDATE_SQL );
 		if( !$res ){
-			$this->dbh->rollback();
+			$this->px->dbh()->rollback();
 			return	false;
 		}
-		$this->dbh->commit();
+		$this->px->dbh()->commit();
 
 		return	true;
 
@@ -272,22 +272,22 @@ INSERT INTO :D:tableName(
 			'client_ip'=>$client_ip,
 			'status'=>$status,
 			'password'=>$password,
-			'now'=>$this->dbh->int2datetime( time() ),
+			'now'=>$this->px->dbh()->int2datetime( time() ),
 		);
-		$INSERT_SQL = $this->dbh->bind( $INSERT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $INSERT_SQL );
+		$INSERT_SQL = $this->px->dbh()->bind( $INSERT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $INSERT_SQL );
 		if( !$res ){
-			$this->dbh->rollback();
+			$this->px->dbh()->rollback();
 			return	false;
 		}
-		$this->dbh->commit();
+		$this->px->dbh()->commit();
 
 		if( strlen( $this->plog->reportmail_to ) ){
 			#--------------------------------------
 			#	レポートメールを送信する (PLOG 0.1.6 追加)
-			$className = $this->dbh->require_lib( '/resources/mail.php' );
+			$className = $this->px->dbh()->require_lib( '/resources/mail.php' );
 			if( !$className ){
-				$this->errors->error_log( '/resources/mail.php のロードに失敗しました。レポートメールの送信に失敗しました。' , __FILE__ , __LINE__ );
+				$this->px->error()->error_log( '/resources/mail.php のロードに失敗しました。レポートメールの送信に失敗しました。' , __FILE__ , __LINE__ );
 				return true;
 			}
 			$mail = new $className( &$this->conf , &$this->errors );
@@ -310,7 +310,7 @@ INSERT INTO :D:tableName(
 			$mail->setfrom( $this->plog->reportmail_to );
 
 			if( !$mail->send() ){//メール送信
-				$this->errors->error_log( 'レポートメールの送信に失敗しました。' , __FILE__ , __LINE__ );
+				$this->px->error()->error_log( 'レポートメールの送信に失敗しました。' , __FILE__ , __LINE__ );
 				return true;
 			}
 			#	/ レポートメールを送信する
@@ -333,9 +333,9 @@ INSERT INTO :D:tableName(
 
 		$path_lockfile_dir = $this->plog->path_home_dir.'/lockfiles/comment_contribute_lock';
 		if( !is_dir( $path_lockfile_dir ) ){
-			if( !$this->dbh->mkdirall( $path_lockfile_dir ) ){
+			if( !$this->px->dbh()->mkdirall( $path_lockfile_dir ) ){
 				#	ディレクトリを作れません。
-				$this->errors->error_log( 'FAILED to create directory ['.$path_lockfile_dir.'].' , __FILE__ , __LINE__ );
+				$this->px->error()->error_log( 'FAILED to create directory ['.$path_lockfile_dir.'].' , __FILE__ , __LINE__ );
 				return	false;
 			}
 		}
@@ -347,7 +347,7 @@ INSERT INTO :D:tableName(
 			#	既にロックされていた場合
 			if( filemtime( $path_lockfile ) >= time() - (60*60*6) ){
 				#	現在時刻よりも 6時間 以内であれば、NGとする
-				$this->errors->error_log( $locked_error_message , __FILE__ , __LINE__ );
+				$this->px->error()->error_log( $locked_error_message , __FILE__ , __LINE__ );
 				return	false;
 			}
 		}
@@ -369,20 +369,20 @@ WHERE
 			'tableName'=>$this->plog->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'client_ip'=>$client_ip,
-			'timelimit'=>$this->dbh->int2datetime( time()-60 ),//60秒以内で計測(仮)
+			'timelimit'=>$this->px->dbh()->int2datetime( time()-60 ),//60秒以内で計測(仮)
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
 		if( !$res ){
 			return	false;
 		}
-		$RTN = $this->dbh->getval();
+		$RTN = $this->px->dbh()->get_results();
 
 		if( intval( $RTN[0]['count'] ) >= 6 ){
 			#	もし抵触するようならば、
 			#	ロックファイルを作成して終了
 			touch( $path_lockfile );
-			$this->errors->error_log( $locked_error_message , __FILE__ , __LINE__ );
+			$this->px->error()->error_log( $locked_error_message , __FILE__ , __LINE__ );
 			return	false;
 		}
 
@@ -419,15 +419,15 @@ WHERE
 			'tableName'=>$this->plog->table_name.'_comment',
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
-			'now'=>$this->dbh->int2datetime( time() ),
+			'now'=>$this->px->dbh()->int2datetime( time() ),
 		);
-		$UPDATE_SQL = $this->dbh->bind( $UPDATE_SQL , $bindData );
-		$res = $this->dbh->sendquery( $UPDATE_SQL );
+		$UPDATE_SQL = $this->px->dbh()->bind( $UPDATE_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $UPDATE_SQL );
 		if( !$res ){
-			$this->dbh->rollback();
+			$this->px->dbh()->rollback();
 			return	false;
 		}
-		$this->dbh->commit();
+		$this->px->dbh()->commit();
 
 		return	true;
 
@@ -453,10 +453,10 @@ WHERE
 			'article_cd'=>$article_cd,
 			'keystr'=>$keystr,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
 
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$gotValues = $this->dbh->getval();
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$gotValues = $this->px->dbh()->get_results();
 
 		if( $gotValues[0]['password'] == $password ){
 			#	照合の結果、OKだったら true を返す。

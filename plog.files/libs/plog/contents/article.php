@@ -8,6 +8,7 @@
 #	コンテンツオブジェクトクラス [ cont_plog_contents_article ]
 class cont_plog_contents_article{
 	var $plog;
+	var $px;
 	var $conf;
 	var $errors;
 	var $dbh;
@@ -17,68 +18,58 @@ class cont_plog_contents_article{
 	var $theme;
 	var $custom;
 
-	#--------------------------------------
-	#	コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	function cont_plog_contents_article( &$plog ){
 		$this->plog = &$plog;
-		$this->conf = &$plog->get_basicobj_conf();
-		$this->errors = &$plog->get_basicobj_errors();
-		$this->dbh = &$plog->get_basicobj_dbh();
-		$this->req = &$plog->get_basicobj_req();
-		$this->user = &$plog->get_basicobj_user();
-		$this->site = &$plog->get_basicobj_site();
-		$this->theme = &$plog->get_basicobj_theme();
-		$this->custom = &$plog->get_basicobj_custom();
-
-		$this->additional_setup();
-	}
-
-	#--------------------------------------
-	#	コンストラクタの追加処理
-	function additional_setup(){
+		$this->px = &$plog->px;
+#		$this->conf = &$plog->get_basicobj_conf();
+#		$this->errors = &$plog->get_basicobj_errors();
+#		$this->dbh = &$plog->get_basicobj_dbh();
+#		$this->req = &$plog->get_basicobj_req();
+#		$this->user = &$plog->get_basicobj_user();
+#		$this->site = &$plog->get_basicobj_site();
+#		$this->theme = &$plog->get_basicobj_theme();
+#		$this->custom = &$plog->get_basicobj_custom();
 	}
 
 
+	/**
+	 * コンテンツ処理を開始
+	 */
+	public function start(){
 
-	#--------------------------------------
-	#	開始
-	function start(){
-
-		$cattitleby = $this->site->getpageinfo( $this->req->po() , 'cattitleby' );
-
+/*
 		$this->site->setpageinfoall(
 			$this->req->po().'.list' ,
 			array(
 				'title'=>'カテゴリ別記事一覧' ,
-				'cattitleby'=>$cattitleby,
-				'path'=>$this->site->getpageinfo( $this->req->po() , 'path' ) ,
+				'path'=>$this->px->site()->get_page_info( $this->req->po() , 'path' ) ,
 			)
 		);
-		if( strlen( $this->req->pvelm(1) ) ){
+		if( strlen( $this->plog->get_query(1) ) ){
 			$this->site->setpageinfoall(
-				$this->req->po().'.article.'.$this->req->pvelm(1) ,
+				$this->req->po().'.article.'.$this->plog->get_query(1) ,
 				array(
 					'title'=>'記事本文' ,
-					'cattitleby'=>$cattitleby,
-					'path'=>$this->site->getpageinfo( $this->req->po() , 'path' ) ,
+					'path'=>$this->px->site()->get_page_info( $this->req->po() , 'path' ) ,
 				)
 			);
 			if( $this->plog->enable_comments ){
 				$this->site->setpageinfoall(
-					$this->req->po().'.create_comment.'.$this->req->pvelm(1) ,
+					$this->req->po().'.create_comment.'.$this->plog->get_query(1) ,
 					array(
 						'title'=>'コメントの投稿' ,
-						'cattitleby'=>$cattitleby,
-						'path'=>$this->site->getpageinfo( $this->req->po().'.article.'.$this->req->pvelm(1) , 'path' ) ,
+						'path'=>$this->px->site()->get_page_info( $this->req->po().'.article.'.$this->plog->get_query(1) , 'path' ) ,
 						'list_flg'=>true ,
 					)
 				);
 				$this->site->setpageinfoall(
-					$this->req->po().'.delete_comment.'.$this->req->pvelm(1) ,
+					$this->req->po().'.delete_comment.'.$this->plog->get_query(1) ,
 					array(
 						'title'=>'コメントの削除' ,
-						'cattitleby'=>$cattitleby,
-						'path'=>$this->site->getpageinfo( $this->req->po().'.article.'.$this->req->pvelm(1) , 'path' ) ,
+						'path'=>$this->px->site()->get_page_info( $this->req->po().'.article.'.$this->plog->get_query(1) , 'path' ) ,
 						'list_flg'=>false ,
 					)
 				);
@@ -88,8 +79,7 @@ class cont_plog_contents_article{
 			$this->req->po().'.search' ,
 			array(
 				'title'=>'記事検索' ,
-				'cattitleby'=>$cattitleby,
-				'path'=>$this->site->getpageinfo( $this->req->po() , 'path' ) ,
+				'path'=>$this->px->site()->get_page_info( $this->req->po() , 'path' ) ,
 				'list_flg'=>true ,
 			)
 		);
@@ -97,29 +87,30 @@ class cont_plog_contents_article{
 			$this->req->po().'.entrylist' ,
 			array(
 				'title'=>'エントリの一覧' ,
-				'cattitleby'=>$cattitleby,
-				'path'=>$this->site->getpageinfo( $this->req->po() , 'path' ) ,
+				'path'=>$this->px->site()->get_page_info( $this->req->po() , 'path' ) ,
 				'list_flg'=>true ,
 			)
 		);
+*/
 
-		if( $this->req->pvelm() == 'article' ){
+		if( $this->plog->get_query() == 'article' ){
 			return	$this->page_article();
-		}elseif( $this->req->pvelm() == 'list' ){
-			return	$this->page_start( $this->req->pvelm(1) );
-		}elseif( $this->req->pvelm() == 'create_comment' ){
+		}elseif( $this->plog->get_query() == 'list' ){
+			return	$this->page_start( $this->plog->get_query(1) );
+		}elseif( $this->plog->get_query() == 'create_comment' ){
 			return	$this->start_create_comment();
-		}elseif( $this->req->pvelm() == 'delete_comment' ){
+		}elseif( $this->plog->get_query() == 'delete_comment' ){
 			return	$this->start_delete_comment();
-		}elseif( $this->req->pvelm() == 'tb' ){
+		}elseif( $this->plog->get_query() == 'tb' ){
 			return	$this->execute_trackback_ping_execute();
-		}elseif( $this->req->pvelm() == 'search' ){
+		}elseif( $this->plog->get_query() == 'search' ){
 			return	$this->start_search();
-		}elseif( $this->req->pvelm() == 'entrylist' ){
+		}elseif( $this->plog->get_query() == 'entrylist' ){
 			return	$this->page_entrylist();
-		}elseif( !preg_match( '/^[0-9]*$/is' , $this->req->pvelm() ) ){
+		}elseif( !preg_match( '/^[0-9]*$/is' , $this->plog->get_query() ) ){
 			return	$this->theme->printnotfound();
 		}
+
 		return	$this->page_start();
 	}
 
@@ -127,18 +118,17 @@ class cont_plog_contents_article{
 	#--------------------------------------
 	#	最初のページ
 	function page_start( $category_cd = null ){
-		if( $this->req->pvelm() == 'list' && strlen( $this->req->pvelm(1) ) ){
-			$page_number = intval( $this->req->pvelm(2) );
+		if( $this->plog->get_query() == 'list' && strlen( $this->plog->get_query(1) ) ){
+			$page_number = intval( $this->plog->get_query(2) );
 		}else{
-			$page_number = intval( $this->req->pvelm() );
+			$page_number = intval( $this->plog->get_query() );
 		}
 		if( $page_number < 1 ){
 			$page_number = 1;
 		}
 
 		$dao = $this->plog->factory_dao( 'visitor' );
-		$pager_info = $this->dbh->get_pager_info( $dao->get_article_count( $category_cd ) , $page_number , 5 );
-
+		$pager_info = $this->px->theme()->get_pager_info( $dao->get_article_count( $category_cd ) , $page_number , 5 );
 
 		$article_list = $dao->get_article_list( $category_cd , $pager_info['offset'] , $pager_info['dpp'] );
 		$target_article_cd_list = array();
@@ -155,7 +145,7 @@ class cont_plog_contents_article{
 		$SRCMEMO = '';
 		foreach( $article_list as $line ){
 			$SRCMEMO .= '<div class="cont_plog_article">'."\n";
-			$SRCMEMO .= $this->theme->mk_hx( '<span class="date">'.htmlspecialchars( $this->theme->dateformat( 'date' , time::datetime2int($line['release_date']) ) ).'</span> '.$this->theme->mk_link( ':article.'.$line['article_cd'] , array( 'label'=>$line['article_title'] ) ) , null , array('allow_html'=>true) )."\n";
+			$SRCMEMO .= $this->theme->mk_hx( '<span class="date">'.htmlspecialchars( $this->theme->dateformat( 'date' , time::datetime2int($line['release_date']) ) ).'</span> '.$this->px->theme()->mk_link( ':article.'.$line['article_cd'] , array( 'label'=>$line['article_title'] ) ) , null , array('allow_html'=>true) )."\n";
 
 			$operator = $this->plog->factory_articleparser();
 			$operator->default_hxnum = -1;
@@ -178,38 +168,38 @@ class cont_plog_contents_article{
 			if( $this->user->is_mp() ){
 				$SRCMEMO .= '<div><font size="1">'."\n";
 				if( !strlen($line['category_title']) ){
-					$SRCMEMO .= '	カテゴリ：'.$this->theme->mk_link( ':list.'.$line['category_cd'] , array( 'label'=>'(未分類)' , 'style'=>'inside' , 'active'=>false ) ).'<br />'."\n";
+					$SRCMEMO .= '	カテゴリ：'.$this->px->theme()->mk_link( ':list.'.$line['category_cd'] , array( 'label'=>'(未分類)' , 'style'=>'inside' , 'active'=>false ) ).'<br />'."\n";
 				}else{
-					$SRCMEMO .= '	カテゴリ：'.$this->theme->mk_link( ':list.'.$line['category_cd'] , array( 'label'=>$line['category_title'] , 'style'=>'inside' , 'active'=>false ) ).'<br />'."\n";
+					$SRCMEMO .= '	カテゴリ：'.$this->px->theme()->mk_link( ':list.'.$line['category_cd'] , array( 'label'=>$line['category_title'] , 'style'=>'inside' , 'active'=>false ) ).'<br />'."\n";
 				}
 				$SRCMEMO .= '	公開日：'.htmlspecialchars( $this->theme->dateformat( 'datetime' , time::datetime2int($line['release_date']) ) ).'<br />'."\n";
 				$SRCMEMO .= '</font></div>'."\n";
 				$SRCMEMO .= '<div><font size="1">'."\n";
-				$SRCMEMO .= '	'.$this->theme->mk_link( ':article.'.$line['article_cd'] , array('label'=>'記事を読む','style'=>'inside') ).'<br />'."\n";
+				$SRCMEMO .= '	'.$this->px->theme()->mk_link( ':article.'.$line['article_cd'] , array('label'=>'記事を読む','style'=>'inside') ).'<br />'."\n";
 				if( $this->plog->enable_comments ){
-					$SRCMEMO .= '	'.$this->theme->mk_link( ':article.'.$line['article_cd'].'#cont_article_comment' , array('label'=>'コメント['.intval($comment_count[$line['article_cd']]).']件','style'=>'inside') ).'<br />'."\n";
+					$SRCMEMO .= '	'.$this->px->theme()->mk_link( ':article.'.$line['article_cd'].'#cont_article_comment' , array('label'=>'コメント['.intval($comment_count[$line['article_cd']]).']件','style'=>'inside') ).'<br />'."\n";
 				}
 				if( $this->plog->enable_trackback ){
-					$SRCMEMO .= '	'.$this->theme->mk_link( ':article.'.$line['article_cd'].'#cont_article_trackback' , array('label'=>'トラックバック['.intval($trackback_count[$line['article_cd']]).']件','style'=>'inside') ).'<br />'."\n";
+					$SRCMEMO .= '	'.$this->px->theme()->mk_link( ':article.'.$line['article_cd'].'#cont_article_trackback' , array('label'=>'トラックバック['.intval($trackback_count[$line['article_cd']]).']件','style'=>'inside') ).'<br />'."\n";
 				}
 				$SRCMEMO .= '</font></div>'."\n";
 				$SRCMEMO .= '<div><font size="1"><br /></font></div>'."\n";
 			}else{
 				$SRCMEMO .= '<div class="ttrs">'."\n";
 				if( !strlen($line['category_title']) ){
-					$SRCMEMO .= '	カテゴリ：'.$this->theme->mk_link( ':list.'.$line['category_cd'] , array( 'label'=>'(未分類)' , 'style'=>'inside' , 'active'=>false ) ).''."\n";
+					$SRCMEMO .= '	カテゴリ：'.$this->px->theme()->mk_link( ':list.'.$line['category_cd'] , array( 'label'=>'(未分類)' , 'style'=>'inside' , 'active'=>false ) ).''."\n";
 				}else{
-					$SRCMEMO .= '	カテゴリ：'.$this->theme->mk_link( ':list.'.$line['category_cd'] , array( 'label'=>$line['category_title'] , 'style'=>'inside' , 'active'=>false ) ).''."\n";
+					$SRCMEMO .= '	カテゴリ：'.$this->px->theme()->mk_link( ':list.'.$line['category_cd'] , array( 'label'=>$line['category_title'] , 'style'=>'inside' , 'active'=>false ) ).''."\n";
 				}
 				$SRCMEMO .= '	公開日：'.htmlspecialchars( $this->theme->dateformat( 'datetime' , time::datetime2int($line['release_date']) ) ).''."\n";
 				$SRCMEMO .= '</div>'."\n";
 				$SRCMEMO .= '<ul class="horizontal">'."\n";
-				$SRCMEMO .= '	<li class="ttrs">'.$this->theme->mk_link( ':article.'.$line['article_cd'] , array('label'=>'記事を読む','style'=>'inside') ).'</li>'."\n";
+				$SRCMEMO .= '	<li class="ttrs">'.$this->px->theme()->mk_link( ':article.'.$line['article_cd'] , array('label'=>'記事を読む','style'=>'inside') ).'</li>'."\n";
 				if( $this->plog->enable_comments ){
-					$SRCMEMO .= '	<li class="ttrs">'.$this->theme->mk_link( ':article.'.$line['article_cd'].'#cont_article_comment' , array('label'=>'コメント['.intval($comment_count[$line['article_cd']]).']件','style'=>'inside') ).'</li>'."\n";
+					$SRCMEMO .= '	<li class="ttrs">'.$this->px->theme()->mk_link( ':article.'.$line['article_cd'].'#cont_article_comment' , array('label'=>'コメント['.intval($comment_count[$line['article_cd']]).']件','style'=>'inside') ).'</li>'."\n";
 				}
 				if( $this->plog->enable_trackback ){
-					$SRCMEMO .= '	<li class="ttrs">'.$this->theme->mk_link( ':article.'.$line['article_cd'].'#cont_article_trackback' , array('label'=>'トラックバック['.intval($trackback_count[$line['article_cd']]).']件','style'=>'inside') ).'</li>'."\n";
+					$SRCMEMO .= '	<li class="ttrs">'.$this->px->theme()->mk_link( ':article.'.$line['article_cd'].'#cont_article_trackback' , array('label'=>'トラックバック['.intval($trackback_count[$line['article_cd']]).']件','style'=>'inside') ).'</li>'."\n";
 				}
 				$SRCMEMO .= '</ul>'."\n";
 			}
@@ -221,8 +211,8 @@ class cont_plog_contents_article{
 		#--------------------------------------
 		#	ページャ生成
 		$PID_BASE = '';
-		if( $this->req->pvelm() == 'list' && strlen( $this->req->pvelm(1) ) ){
-			$PID_BASE = 'list.'.$this->req->pvelm(1).'.';
+		if( $this->plog->get_query() == 'list' && strlen( $this->plog->get_query(1) ) ){
+			$PID_BASE = 'list.'.$this->plog->get_query(1).'.';
 		}
 
 		if( $pager_info['total_page_count'] > 1 ){
@@ -232,17 +222,17 @@ class cont_plog_contents_article{
 			}else{
 				$PAGER_ARY = array();
 				if( $pager_info['prev'] ){
-					array_push( $PAGER_ARY , $this->theme->mk_link( ':'.$PID_BASE.$pager_info['prev'] , array('label'=>'<前の'.$pager_info['dpp'].'件','active'=>false) ) );
+					array_push( $PAGER_ARY , $this->px->theme()->mk_link( ':'.$PID_BASE.$pager_info['prev'] , array('label'=>'<前の'.$pager_info['dpp'].'件','active'=>false) ) );
 				}
 				for( $i = intval($pager_info['index_start']); $i <= intval($pager_info['index_end']); $i ++ ){
 					if( $i == $pager_info['current'] ){
 						array_push( $PAGER_ARY , '<strong>'.$i.'</strong>' );
 					}else{
-						array_push( $PAGER_ARY , $this->theme->mk_link( ':'.$PID_BASE.$i , array('label'=>$i,'active'=>false) ) );
+						array_push( $PAGER_ARY , $this->px->theme()->mk_link( ':'.$PID_BASE.$i , array('label'=>$i,'active'=>false) ) );
 					}
 				}
 				if( $pager_info['next'] ){
-					array_push( $PAGER_ARY , $this->theme->mk_link( ':'.$PID_BASE.$pager_info['next'] , array('label'=>'次の'.$pager_info['dpp'].'件>','active'=>false) ) );
+					array_push( $PAGER_ARY , $this->px->theme()->mk_link( ':'.$PID_BASE.$pager_info['next'] , array('label'=>'次の'.$pager_info['dpp'].'件>','active'=>false) ) );
 				}
 				$PAGER = '';
 				if( $pager_info['total_page_count'] > 1 ){
@@ -276,27 +266,26 @@ class cont_plog_contents_article{
 		}
 		$RTN .= $PAGER;
 
-
-		$this_pid = $this->site->getpageinfo( $this->req->p() , 'id' );
-		if( $this->req->pvelm() == 'list' && strlen( $this->req->pvelm(1) ) ){
+		$this_pid = $this->px->site()->get_page_info( $this->px->req()->get_request_file_path() , 'id' );
+		if( $this->plog->get_query() == 'list' && strlen( $this->plog->get_query(1) ) ){
 			#	【カテゴリ別一覧】ページ名を変えてみる。
-			$category_info = $dao->get_category_info( $this->req->pvelm(1) );
+			$category_info = $dao->get_category_info( $this->plog->get_query(1) );
 			$title = 'カテゴリ『'.$category_info['category_title'].'』の記事';
 			if( !strlen( $category_info['category_title'] ) ){
 				$title = 'カテゴリに分類されていない記事';
 			}
-			$this->site->setpageinfo( $this_pid , 'title' , $title.' ('.$pager_info['current'].'/'.$pager_info['total_page_count'].')' );
-			$this->site->setpageinfo( $this_pid , 'title_page' , $title );
-			$this->site->setpageinfo( $this_pid , 'title_breadcrumb' , $title );
-			$this->site->setpageinfo( $this_pid , 'title_label' , $title );//21:41 2009/05/20 PLOG 0.1.5
+#			$this->site->setpageinfo( $this_pid , 'title' , $title.' ('.$pager_info['current'].'/'.$pager_info['total_page_count'].')' );
+#			$this->site->setpageinfo( $this_pid , 'title_page' , $title );
+#			$this->site->setpageinfo( $this_pid , 'title_breadcrumb' , $title );
+#			$this->site->setpageinfo( $this_pid , 'title_label' , $title );//21:41 2009/05/20 PLOG 0.1.5
 		}else{
 			#	【全部の一覧】ページ名を変えてみる。
 			if( $pager_info['current'] != 1 ){
-				$title = $this->site->getpageinfo( $this->req->p() , 'title' );
-				$this->site->setpageinfo( $this_pid , 'title' , $title.' ('.$pager_info['current'].'/'.$pager_info['total_page_count'].')' );
-				$this->site->setpageinfo( $this_pid , 'title_page' , $title );
-				$this->site->setpageinfo( $this_pid , 'title_breadcrumb' , $title );
-				$this->site->setpageinfo( $this_pid , 'title_label' , $title );//21:41 2009/05/20 PLOG 0.1.5
+				$title = $this->px->site()->get_page_info( $this->px->req()->get_request_file_path() , 'title' );
+#				$this->site->setpageinfo( $this_pid , 'title' , $title.' ('.$pager_info['current'].'/'.$pager_info['total_page_count'].')' );
+#				$this->site->setpageinfo( $this_pid , 'title_page' , $title );
+#				$this->site->setpageinfo( $this_pid , 'title_breadcrumb' , $title );
+#				$this->site->setpageinfo( $this_pid , 'title_label' , $title );//21:41 2009/05/20 PLOG 0.1.5
 			}
 		}
 
@@ -307,13 +296,13 @@ class cont_plog_contents_article{
 	#--------------------------------------
 	#	エントリの一覧
 	function page_entrylist( $category_cd = null ){
-		$page_number = intval( $this->req->pvelm(1) );
+		$page_number = intval( $this->plog->get_query(1) );
 		if( $page_number < 1 ){
 			$page_number = 1;
 		}
 
 		$dao = $this->plog->factory_dao( 'visitor' );
-		$pager_info = $this->dbh->get_pager_info( $dao->get_article_count( $category_cd ) , $page_number , 50 );
+		$pager_info = $this->px->dbh()->get_pager_info( $dao->get_article_count( $category_cd ) , $page_number , 50 );
 
 
 		$article_list = $dao->get_article_list( $category_cd , $pager_info['offset'] , $pager_info['dpp'] );
@@ -330,7 +319,7 @@ class cont_plog_contents_article{
 		#	記事全件分のHTMLソースを作成
 		$SRCMEMO = '';
 		foreach( $article_list as $line ){
-			$SRCMEMO .= '<li><span class="date">'.htmlspecialchars( $this->theme->dateformat( 'date' , time::datetime2int($line['release_date']) ) ).'</span> '.$this->theme->mk_link( ':article.'.$line['article_cd'] , array( 'label'=>$line['article_title'] ) ).'</li>'."\n";
+			$SRCMEMO .= '<li><span class="date">'.htmlspecialchars( $this->theme->dateformat( 'date' , time::datetime2int($line['release_date']) ) ).'</span> '.$this->px->theme()->mk_link( ':article.'.$line['article_cd'] , array( 'label'=>$line['article_title'] ) ).'</li>'."\n";
 		}
 		#	/ 記事全件分のHTMLソースを作成
 		#--------------------------------------
@@ -346,17 +335,17 @@ class cont_plog_contents_article{
 			}else{
 				$PAGER_ARY = array();
 				if( $pager_info['prev'] ){
-					array_push( $PAGER_ARY , $this->theme->mk_link( ':'.$PID_BASE.$pager_info['prev'] , array('label'=>'<前の'.$pager_info['dpp'].'件','active'=>false) ) );
+					array_push( $PAGER_ARY , $this->px->theme()->mk_link( ':'.$PID_BASE.$pager_info['prev'] , array('label'=>'<前の'.$pager_info['dpp'].'件','active'=>false) ) );
 				}
 				for( $i = intval($pager_info['index_start']); $i <= intval($pager_info['index_end']); $i ++ ){
 					if( $i == $pager_info['current'] ){
 						array_push( $PAGER_ARY , '<strong>'.$i.'</strong>' );
 					}else{
-						array_push( $PAGER_ARY , $this->theme->mk_link( ':'.$PID_BASE.$i , array('label'=>$i,'active'=>false) ) );
+						array_push( $PAGER_ARY , $this->px->theme()->mk_link( ':'.$PID_BASE.$i , array('label'=>$i,'active'=>false) ) );
 					}
 				}
 				if( $pager_info['next'] ){
-					array_push( $PAGER_ARY , $this->theme->mk_link( ':'.$PID_BASE.$pager_info['next'] , array('label'=>'次の'.$pager_info['dpp'].'件>','active'=>false) ) );
+					array_push( $PAGER_ARY , $this->px->theme()->mk_link( ':'.$PID_BASE.$pager_info['next'] , array('label'=>'次の'.$pager_info['dpp'].'件>','active'=>false) ) );
 				}
 				$PAGER = '';
 				if( $pager_info['total_page_count'] > 1 ){
@@ -386,8 +375,8 @@ class cont_plog_contents_article{
 
 		#	ページ名を変えてみる。
 		if( $pager_info['current'] != 1 ){
-			$title = $this->site->getpageinfo( $this->req->p() , 'title' );
-			$this_pid = $this->site->getpageinfo( $this->req->p() , 'id' );
+			$title = $this->px->site()->get_page_info( $this->px->req()->get_request_file_path() , 'title' );
+			$this_pid = $this->px->site()->get_page_info( $this->px->req()->get_request_file_path() , 'id' );
 			$this->site->setpageinfo( $this_pid , 'title' , $title.' ('.$pager_info['current'].'/'.$pager_info['total_page_count'].')' );
 			$this->site->setpageinfo( $this_pid , 'title_page' , $title );
 			$this->site->setpageinfo( $this_pid , 'title_breadcrumb' , $title );
@@ -402,17 +391,17 @@ class cont_plog_contents_article{
 	#	記事本文ページ
 	function page_article(){
 		$dao_visitor = $this->plog->factory_dao( 'visitor' );
-		$article_info = $dao_visitor->get_article_info( $this->req->pvelm(1) );
+		$article_info = $dao_visitor->get_article_info( $this->plog->get_query(1) );
 		if( !is_array( $article_info ) ){
 			return	$this->theme->printnotfound();
 		}
 
 		#	サイトマップ登録
-		$this->site->setpageinfo( $this->site->getpageinfo( $this->req->p() , 'id' ) , 'title' , $article_info['article_title'] );
-		$this->site->setpageinfo( $this->site->getpageinfo( $this->req->p() , 'id' ) , 'list_flg' , true );
+		$this->site->setpageinfo( $this->px->site()->get_page_info( $this->px->req()->get_request_file_path() , 'id' ) , 'title' , $article_info['article_title'] );
+		$this->site->setpageinfo( $this->px->site()->get_page_info( $this->px->req()->get_request_file_path() , 'id' ) , 'list_flg' , true );
 
 		$operator = $this->plog->factory_articleparser();
-		$ARTICLE_BODY_SRC = $operator->get_article_content( $this->req->pvelm(1) );
+		$ARTICLE_BODY_SRC = $operator->get_article_content( $this->plog->get_query(1) );
 
 		$RTN = '';
 		$RTN .= ''."\n";
@@ -423,9 +412,9 @@ class cont_plog_contents_article{
 		$RTN .= '<p class="ttrs alignR">'."\n";
 		$RTN .= '	公開日：'.htmlspecialchars( $this->theme->dateformat( 'datetime' , time::datetime2int( $article_info['release_date'] ) ) ).'<br />'."\n";
 		if( !strlen($article_info['category_title']) ){
-			$RTN .= '	カテゴリ：'.$this->theme->mk_link( ':list.'.$article_info['category_cd'] , array( 'label'=>'(未分類)' , 'style'=>'inside' , 'active'=>false ) ).'<br />'."\n";
+			$RTN .= '	カテゴリ：'.$this->px->theme()->mk_link( ':list.'.$article_info['category_cd'] , array( 'label'=>'(未分類)' , 'style'=>'inside' , 'active'=>false ) ).'<br />'."\n";
 		}else{
-			$RTN .= '	カテゴリ：'.$this->theme->mk_link( ':list.'.$article_info['category_cd'] , array( 'label'=>$article_info['category_title'] , 'style'=>'inside' , 'active'=>false ) ).'<br />'."\n";
+			$RTN .= '	カテゴリ：'.$this->px->theme()->mk_link( ':list.'.$article_info['category_cd'] , array( 'label'=>$article_info['category_title'] , 'style'=>'inside' , 'active'=>false ) ).'<br />'."\n";
 		}
 		$RTN .= '</p>'."\n";
 		$RTN .= $this->plog->get_src('article_footer')."\n";
@@ -439,10 +428,10 @@ class cont_plog_contents_article{
 			$RTN .= '<div class="cont_plog_article_prev_and_next">'."\n";
 			$RTN .= '<ul>'."\n";
 			if( is_array( $prev_article_info ) ){
-				$RTN .= '	<li class="ttr cont_plog_prev_article">'.$this->theme->mk_link( $this->plog->get_article_pid( $prev_article_info['article_cd'] ) , array( 'label'=>mb_strimwidth( $prev_article_info['article_title'] , 0 , 36 , '...' ) , 'style'=>'prev' ) ).'</li>'."\n";
+				$RTN .= '	<li class="ttr cont_plog_prev_article">'.$this->px->theme()->mk_link( $this->plog->get_article_pid( $prev_article_info['article_cd'] ) , array( 'label'=>mb_strimwidth( $prev_article_info['article_title'] , 0 , 36 , '...' ) , 'style'=>'prev' ) ).'</li>'."\n";
 			}
 			if( is_array( $next_article_info ) ){
-				$RTN .= '	<li class="ttr cont_plog_next_article">'.$this->theme->mk_link( $this->plog->get_article_pid( $next_article_info['article_cd'] ) , array( 'label'=>mb_strimwidth( $next_article_info['article_title'] , 0 , 36 , '...' ) , 'style'=>'next' ) ).'</li>'."\n";
+				$RTN .= '	<li class="ttr cont_plog_next_article">'.$this->px->theme()->mk_link( $this->plog->get_article_pid( $next_article_info['article_cd'] ) , array( 'label'=>mb_strimwidth( $next_article_info['article_title'] , 0 , 36 , '...' ) , 'style'=>'next' ) ).'</li>'."\n";
 			}
 			$RTN .= '</ul>'."\n";
 			$RTN .= '</div>'."\n";
@@ -451,15 +440,15 @@ class cont_plog_contents_article{
 		if( $this->plog->enable_trackback ){
 			#--------------------------------------
 			#	トラックバックを表示
-			$trackback_count = $dao_visitor->get_trackback_count( $this->req->pvelm(1) );
+			$trackback_count = $dao_visitor->get_trackback_count( $this->plog->get_query(1) );
 			$dao_trackback = &$this->plog->factory_dao( 'trackback' );
-			$trackback_list = $dao_trackback->get_trackback_list( $this->req->pvelm(1) );
+			$trackback_list = $dao_trackback->get_trackback_list( $this->plog->get_query(1) );
 
 			$SRCMEMO = '';
 			foreach( $trackback_list as $Line ){
-				$SRCMEMO .= $this->theme->mk_hx( '<span class="date">'.htmlspecialchars( $this->theme->dateformat( 'datetime' , time::datetime2int( $Line['trackback_date'] ) ) ).'</span> '.$this->theme->mk_link( $Line['trackback_url'] , array( 'label'=>$Line['trackback_title'] ) ) , -1 , array( 'allow_html'=>true ) )."\n";
+				$SRCMEMO .= $this->theme->mk_hx( '<span class="date">'.htmlspecialchars( $this->theme->dateformat( 'datetime' , time::datetime2int( $Line['trackback_date'] ) ) ).'</span> '.$this->px->theme()->mk_link( $Line['trackback_url'] , array( 'label'=>$Line['trackback_title'] ) ) , -1 , array( 'allow_html'=>true ) )."\n";
 				$SRCMEMO .= '<p>'.text::text2html( $Line['trackback_excerpt'] ).'</p>'."\n";
-				$SRCMEMO .= '<p class="ttrs alignR">( '.htmlspecialchars( $Line['trackback_blog_name'] ).' - '.$this->theme->mk_link( $Line['trackback_url'] , array( 'label'=>'記事を開く','style'=>'inside' ) ).')</p>'."\n";
+				$SRCMEMO .= '<p class="ttrs alignR">( '.htmlspecialchars( $Line['trackback_blog_name'] ).' - '.$this->px->theme()->mk_link( $Line['trackback_url'] , array( 'label'=>'記事を開く','style'=>'inside' ) ).')</p>'."\n";
 				$SRCMEMO .= $this->theme->mk_hr()."\n";
 			}
 
@@ -475,9 +464,9 @@ class cont_plog_contents_article{
 				'LANG',
 				'T1',
 			);
-			$RTN .= '		<div style="overflow:auto;">'.htmlspecialchars( $this->theme->href( ':tb.'.$this->req->pvelm(1) , array('protocol'=>'http','gene_deltemp'=>$gene_deltemp) ) ).'</div>'."\n";
+			$RTN .= '		<div style="overflow:auto;">'.htmlspecialchars( $this->theme->href( ':tb.'.$this->plog->get_query(1) , array('protocol'=>'http','gene_deltemp'=>$gene_deltemp) ) ).'</div>'."\n";
 			$RTN .= '	</div>'."\n";
-			$RTN .= $this->theme->mk_hx('トラックバック ('.intval($trackback_count[$this->req->pvelm(1)]).'件)')."\n";
+			$RTN .= $this->theme->mk_hx('トラックバック ('.intval($trackback_count[$this->plog->get_query(1)]).'件)')."\n";
 			if( strlen( $SRCMEMO ) ){
 				$RTN .= $SRCMEMO;
 			}else{
@@ -492,9 +481,9 @@ class cont_plog_contents_article{
 		if( $this->plog->enable_comments ){
 			#--------------------------------------
 			#	コメントを表示
-			$comment_count = $dao_visitor->get_comment_count( $this->req->pvelm(1) );
+			$comment_count = $dao_visitor->get_comment_count( $this->plog->get_query(1) );
 			$obj_comment = &$this->plog->factory_dao( 'comment' );
-			$comment_list = $obj_comment->get_comment_list( $this->req->pvelm(1) );
+			$comment_list = $obj_comment->get_comment_list( $this->plog->get_query(1) );
 
 			$SRCMEMO = '';
 			foreach( $comment_list as $Line ){
@@ -508,7 +497,7 @@ class cont_plog_contents_article{
 				$SRCMEMO .= $this->theme->mk_hx( '<span class="date">'.htmlspecialchars( $this->theme->dateformat( 'datetime' , time::datetime2int( $Line['comment_date'] ) ) ).'</span> '.$commentator_name , -1 , array('allow_html'=>true) )."\n";
 				if( $this->plog->comment_userinfo_passwd && strlen( $Line['password'] ) ){
 					$SRCMEMO .= '<ul class="horizontal floatR">'."\n";
-					$SRCMEMO .= '	<li class="ttrs">'.$this->theme->mk_link( ':delete_comment.'.$this->req->pvelm(1).'.'.$Line['keystr'] , array( 'label'=>'このコメントを削除する','style'=>'inside' ) ).'</li>'."\n";
+					$SRCMEMO .= '	<li class="ttrs">'.$this->px->theme()->mk_link( ':delete_comment.'.$this->plog->get_query(1).'.'.$Line['keystr'] , array( 'label'=>'このコメントを削除する','style'=>'inside' ) ).'</li>'."\n";
 					$SRCMEMO .= '</ul>'."\n";
 				}
 				$SRCMEMO .= '<p>'.$obj_comment->view_comment2html( $Line['comment'] ).'</p>'."\n";
@@ -517,13 +506,13 @@ class cont_plog_contents_article{
 
 			$RTN .= '<div id="cont_article_comment">'."\n";
 			if( strlen( $SRCMEMO ) ){
-				$RTN .= $this->theme->mk_hx('コメント ('.intval($comment_count[$this->req->pvelm(1)]).'件)')."\n";
+				$RTN .= $this->theme->mk_hx('コメント ('.intval($comment_count[$this->plog->get_query(1)]).'件)')."\n";
 				$RTN .= $SRCMEMO;
 				$RTN .= $this->theme->mk_hx('この記事にコメントする',-1)."\n";
 			}else{
 				$RTN .= $this->theme->mk_hx('この記事にコメントする')."\n";
 			}
-			$RTN .= '<form action="'.htmlspecialchars( $this->theme->act( $this->req->po().'.create_comment.'.$this->req->pvelm(1) ) ).'" method="post">'."\n";
+			$RTN .= '<form action="'.htmlspecialchars( $this->theme->act( $this->req->po().'.create_comment.'.$this->plog->get_query(1) ) ).'" method="post">'."\n";
 			$RTN .= '<div>'."\n";
 			$RTN .= '	<table width="100%">'."\n";
 			$mustmark = array( 'must'=>' <span class="must">*</span>' );
@@ -570,7 +559,7 @@ class cont_plog_contents_article{
 			$RTN .= '	<p class="ttr alignC"><textarea name="comment" class="inputitems" rows="11" cols="20">'.htmlspecialchars( $this->req->in('comment') ).'</textarea></p>'."\n";
 			$RTN .= '	<p class="ttr alignC"><input type="submit" name="s" value="コメントを投稿する" /></p>'."\n";
 			$RTN .= '	<input type="hidden" name="mode" value="confirm" />'."\n";
-			$RTN .= $this->theme->mk_form_defvalues( $this->req->po().'.create_comment.'.$this->req->pvelm(1) )."\n";
+			$RTN .= $this->theme->mk_form_defvalues( $this->req->po().'.create_comment.'.$this->plog->get_query(1) )."\n";
 			$RTN .= '</div>'."\n";
 			$RTN .= '</form>'."\n";
 			$RTN .= '</div>'."\n";
@@ -591,7 +580,7 @@ class cont_plog_contents_article{
 		if( !$this->plog->enable_comments ){
 			return	$this->theme->printnotfound();
 		}
-		if( !strlen( $this->req->pvelm(1) ) ){
+		if( !strlen( $this->plog->get_query(1) ) ){
 			return	$this->theme->printnotfound();
 		}
 		$error = $this->check_create_comment_check();
@@ -852,7 +841,7 @@ class cont_plog_contents_article{
 	function execute_create_comment_execute(){
 		if( !$this->user->save_t_lastaction() ){
 			#	2重書き込み防止
-			return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
+			return	$this->theme->redirect( $this->px->req()->get_request_file_path() , 'mode=thanks' );
 		}
 
 		$status = 0;
@@ -863,7 +852,7 @@ class cont_plog_contents_article{
 
 		$comment_dao = &$this->plog->factory_dao( 'comment' );
 		$result = $comment_dao->add_comment(
-			$this->req->pvelm(1) ,
+			$this->plog->get_query(1) ,
 			$this->req->in('comment').'' ,
 			$this->req->in('commentator_name').'' ,
 			$this->req->in('commentator_email').'' ,
@@ -877,16 +866,16 @@ class cont_plog_contents_article{
 			return	'<p class="ttr error">申し訳ございません。<br />コメントの保存に失敗しました。</p>';
 		}
 
-		return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
+		return	$this->theme->redirect( $this->px->req()->get_request_file_path() , 'mode=thanks' );
 	}
 	#--------------------------------------
 	#	コメントの投稿：完了
 	function page_create_comment_thanks(){
 		$RTN = ''."\n";
 		$RTN .= '<p>コメントの投稿処理を完了しました。</p>';
-		$RTN .= '<form action="'.htmlspecialchars( $this->theme->act( ':article.'.$this->req->pvelm(1) ) ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->theme->act( ':article.'.$this->plog->get_query(1) ) ).'" method="post">'."\n";
 		$RTN .= '	<input type="submit" name="s" value="戻る" />'."\n";
-		$RTN .= '	'.$this->theme->mk_form_defvalues( ':article.'.$this->req->pvelm(1) )."\n";
+		$RTN .= '	'.$this->theme->mk_form_defvalues( ':article.'.$this->plog->get_query(1) )."\n";
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
@@ -897,7 +886,7 @@ class cont_plog_contents_article{
 		if( !$this->plog->enable_comments ){
 			return	$this->theme->printnotfound();
 		}
-		if( !strlen( $this->req->pvelm(1) ) || !strlen( $this->req->pvelm(2) ) ){
+		if( !strlen( $this->plog->get_query(1) ) || !strlen( $this->plog->get_query(2) ) ){
 			return	$this->theme->printnotfound();
 		}
 		$error = $this->check_delete_comment_check();
@@ -967,8 +956,8 @@ class cont_plog_contents_article{
 		$RTN .= '</form>'."\n";
 		$RTN .= '</div>'."\n";
 		$RTN .= $this->theme->mk_hr()."\n";
-		$RTN .= '<form action="'.htmlspecialchars( $this->theme->act( ':article.'.$this->req->pvelm(1) ) ).'" method="post">'."\n";
-		$RTN .= '	'.$this->theme->mk_form_defvalues( ':article.'.$this->req->pvelm(1) )."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->theme->act( ':article.'.$this->plog->get_query(1) ) ).'" method="post">'."\n";
+		$RTN .= '	'.$this->theme->mk_form_defvalues( ':article.'.$this->plog->get_query(1) )."\n";
 		$RTN .= '	<div align="center"><input type="submit" name="s" value="キャンセル" /></div>'."\n";
 		$RTN .= '</form>'."\n";
 		return	$RTN;
@@ -982,7 +971,7 @@ class cont_plog_contents_article{
 			$RTN['commentpw'] = 'パスワードを入力してください。';
 		}else{
 			$comment_dao = &$this->plog->factory_dao( 'comment' );
-			if( !$comment_dao->check_password( $this->req->pvelm(1) , $this->req->pvelm(2) , $this->req->in('commentpw') ) ){
+			if( !$comment_dao->check_password( $this->plog->get_query(1) , $this->plog->get_query(2) , $this->req->in('commentpw') ) ){
 				$RTN['commentpw'] = 'パスワードが違います。';
 			}
 		}
@@ -994,25 +983,25 @@ class cont_plog_contents_article{
 	function execute_delete_comment_execute(){
 		if( !$this->user->save_t_lastaction() ){
 			#	2重書き込み防止
-			return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
+			return	$this->theme->redirect( $this->px->req()->get_request_file_path() , 'mode=thanks' );
 		}
 
 		$comment_dao = &$this->plog->factory_dao( 'comment' );
-		$result = $comment_dao->delete_comment( $this->req->pvelm(1) , $this->req->pvelm(2) );
+		$result = $comment_dao->delete_comment( $this->plog->get_query(1) , $this->plog->get_query(2) );
 		if( !$result ){
 			return	'<p class="ttr error">コメントの削除に失敗しました。</p>';
 		}
 
-		return	$this->theme->redirect( $this->req->p() , 'mode=thanks' );
+		return	$this->theme->redirect( $this->px->req()->get_request_file_path() , 'mode=thanks' );
 	}
 	#--------------------------------------
 	#	コメントの削除：完了
 	function page_delete_comment_thanks(){
 		$RTN = ''."\n";
 		$RTN .= '<p>コメントを削除しました。</p>';
-		$RTN .= '<form action="'.htmlspecialchars( $this->theme->act( ':article.'.$this->req->pvelm(1) ) ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->theme->act( ':article.'.$this->plog->get_query(1) ) ).'" method="post">'."\n";
 		$RTN .= '	<input type="submit" name="s" value="記事本文へ戻る" />'."\n";
-		$RTN .= '	'.$this->theme->mk_form_defvalues( ':article.'.$this->req->pvelm(1) )."\n";
+		$RTN .= '	'.$this->theme->mk_form_defvalues( ':article.'.$this->plog->get_query(1) )."\n";
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
@@ -1038,7 +1027,7 @@ class cont_plog_contents_article{
 		}
 
 		$tbp = new $className( &$this->plog , &$this->conf , &$this->dbh , &$this->theme );
-		return	$tbp->receive_trackback_ping( $this->req->in() , $this->req->pvelm(1) );
+		return	$tbp->receive_trackback_ping( $this->req->in() , $this->plog->get_query(1) );
 
 	}
 
@@ -1066,7 +1055,7 @@ class cont_plog_contents_article{
 		return	$RTN;
 	}
 	function page_search_result(){
-		$page_number = intval( $this->req->pvelm(1) );
+		$page_number = intval( $this->plog->get_query(1) );
 		if( $page_number < 1 ){
 			$page_number = 1;
 		}
@@ -1074,13 +1063,13 @@ class cont_plog_contents_article{
 		$option = array();
 		$dao_admin = &$this->plog->factory_dao('visitor');
 		$hit_count = $dao_admin->search_article_count( $this->req->in('keyword') , $option );
-		$pager_info = $this->dbh->get_pager_info( $hit_count , $page_number , 10 );
+		$pager_info = $this->px->dbh()->get_pager_info( $hit_count , $page_number , 10 );
 		$search_result = $dao_admin->search_article( $this->req->in('keyword') , $pager_info['offset'] , $pager_info['dpp'] , $option );
 
 		$SRCMEMO = '';
 		foreach( $search_result as $result_line ){
 			#	仮に結果を出力してみる。
-			$SRCMEMO .= '	<dt>'.$this->theme->mk_link( ':article.'.intval($result_line['article_cd']) , array('label'=>$result_line['article_title']) ).'</dt>'."\n";
+			$SRCMEMO .= '	<dt>'.$this->px->theme()->mk_link( ':article.'.intval($result_line['article_cd']) , array('label'=>$result_line['article_title']) ).'</dt>'."\n";
 			$SRCMEMO .= '		<dd>'.text::text2html($result_line['article_summary']).'</dd>'."\n";
 		}
 		
@@ -1093,17 +1082,17 @@ class cont_plog_contents_article{
 				$PAGER = $this->theme->mk_pager( $pager_info['tc'] , $pager_info['current'] , $pager_info['dpp'] , array( 'href'=>':search.${num}?keyword='.urlencode($this->req->in('keyword')) ) );
 			}else{
 				if( $pager_info['prev'] ){
-					array_push( $PAGER_ARY , $this->theme->mk_link( ':search.'.$pager_info['prev'].'?keyword='.urlencode($this->req->in('keyword')) , array('label'=>'<前の'.$pager_info['dpp'].'件','active'=>false) ) );
+					array_push( $PAGER_ARY , $this->px->theme()->mk_link( ':search.'.$pager_info['prev'].'?keyword='.urlencode($this->req->in('keyword')) , array('label'=>'<前の'.$pager_info['dpp'].'件','active'=>false) ) );
 				}
 				for( $i = intval($pager_info['index_start']); $i <= intval($pager_info['index_end']); $i ++ ){
 					if( $i == $pager_info['current'] ){
 						array_push( $PAGER_ARY , '<strong>'.$i.'</strong>' );
 					}else{
-						array_push( $PAGER_ARY , $this->theme->mk_link( ':search.'.$i.'?keyword='.urlencode($this->req->in('keyword')) , array('label'=>$i,'active'=>false) ) );
+						array_push( $PAGER_ARY , $this->px->theme()->mk_link( ':search.'.$i.'?keyword='.urlencode($this->req->in('keyword')) , array('label'=>$i,'active'=>false) ) );
 					}
 				}
 				if( $pager_info['next'] ){
-					array_push( $PAGER_ARY , $this->theme->mk_link( ':search.'.$pager_info['next'].'?keyword='.urlencode($this->req->in('keyword')) , array('label'=>'次の'.$pager_info['dpp'].'件>','active'=>false) ) );
+					array_push( $PAGER_ARY , $this->px->theme()->mk_link( ':search.'.$pager_info['next'].'?keyword='.urlencode($this->req->in('keyword')) , array('label'=>'次の'.$pager_info['dpp'].'件>','active'=>false) ) );
 				}
 				$PAGER = '';
 				if( $pager_info['total_page_count'] > 1 ){

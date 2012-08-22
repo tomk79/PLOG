@@ -42,12 +42,12 @@ class cont_plog_dao_io{
 		}
 
 		if( is_dir( $export_tmp_dir.'/tmp' ) ){
-			if( !$this->dbh->rmdir( $export_tmp_dir.'/tmp' ) ){
+			if( !$this->px->dbh()->rmdir( $export_tmp_dir.'/tmp' ) ){
 				#	一時ディレクトリを一旦削除
 				return	false;
 			}
 		}
-		if( !$this->dbh->mkdir( $export_tmp_dir.'/tmp' ) ){
+		if( !$this->px->dbh()->mkdir( $export_tmp_dir.'/tmp' ) ){
 			#	一時ディレクトリを作成
 			return	false;
 		}
@@ -70,7 +70,7 @@ class cont_plog_dao_io{
 
 		#--------------------------------------
 		#	データディレクトリを複製
-		$this->dbh->copyall( $this->plog->get_home_dir().'/article_datas' , $export_tmp_dir.'/tmp/article_datas' );
+		$this->px->dbh()->copyall( $this->plog->get_home_dir().'/article_datas' , $export_tmp_dir.'/tmp/article_datas' );
 
 
 		#--------------------------------------
@@ -80,7 +80,7 @@ class cont_plog_dao_io{
 		$export_ini .= 'export_date='.date( 'Y-m-d H:i:s' )."\n";
 		$export_ini .= 'charset='.strtolower( mb_internal_encoding() )."\n";
 		$export_ini .= 'plog_version='.$this->get_plog_version()."\n";
-		$this->dbh->savefile( $export_tmp_dir.'/tmp/export.ini' , $export_ini );
+		$this->px->dbh()->savefile( $export_tmp_dir.'/tmp/export.ini' , $export_ini );
 
 		#--------------------------------------
 		#	圧縮する
@@ -88,7 +88,7 @@ class cont_plog_dao_io{
 
 		#--------------------------------------
 		#	一時ファイルを削除する
-		$this->dbh->rmdir( $export_tmp_dir.'/tmp' );
+		$this->px->dbh()->rmdir( $export_tmp_dir.'/tmp' );
 
 		return	$export_tmp_dir.'/export.tgz';
 	}
@@ -110,12 +110,12 @@ SELECT * FROM :D:tableName :D:orderBy;
 			'tableName'=>$this->plog->table_name[$table_key],
 			'orderBy'=>$orderBy,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$RTN = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$RTN = $this->px->dbh()->get_results();
 
 		foreach( $RTN as $Line ){
-			$row = $this->dbh->mk_csv( array( $Line ) , mb_internal_encoding() );
+			$row = $this->px->dbh()->mk_csv( array( $Line ) , mb_internal_encoding() );
 			error_log( $row , 3 , $export_tmp_dir.'/tmp/table_'.urlencode( $table_key ).'_datas.csv' );
 		}
 
@@ -123,7 +123,7 @@ SELECT * FROM :D:tableName :D:orderBy;
 		foreach( $RTN[0] as $key=>$val ){
 			$keys .= $key."\n";
 		}
-		$this->dbh->savefile( $export_tmp_dir.'/tmp/table_'.urlencode( $table_key ).'_define.dat' , $keys );
+		$this->px->dbh()->savefile( $export_tmp_dir.'/tmp/table_'.urlencode( $table_key ).'_define.dat' , $keys );
 
 		return	true;
 	}
@@ -149,12 +149,12 @@ SELECT * FROM :D:tableName :D:orderBy;
 		}
 
 		if( is_dir( $import_tmp_dir.'/tmp' ) ){
-			if( !$this->dbh->rmdir( $import_tmp_dir.'/tmp' ) ){
+			if( !$this->px->dbh()->rmdir( $import_tmp_dir.'/tmp' ) ){
 				#	一時ディレクトリを一旦削除
 				return	false;
 			}
 		}
-		if( !$this->dbh->mkdir( $import_tmp_dir.'/tmp' ) ){
+		if( !$this->px->dbh()->mkdir( $import_tmp_dir.'/tmp' ) ){
 			#	一時ディレクトリを作成
 			return	false;
 		}
@@ -165,26 +165,26 @@ SELECT * FROM :D:tableName :D:orderBy;
 
 		if( !is_file( $import_tmp_dir.'/tmp/export.ini' ) ){
 			#	export.ini がなければ、不正なアップロードファイルです。
-			$this->dbh->rmdir( $import_tmp_dir.'/tmp' );
+			$this->px->dbh()->rmdir( $import_tmp_dir.'/tmp' );
 			return	false;
 		}
 
 		#--------------------------------------
 		#	export.iniを読み込み
-		$export_ini = $this->dbh->read_ini( $import_tmp_dir.'/tmp/export.ini' );
+		$export_ini = $this->px->dbh()->read_ini( $import_tmp_dir.'/tmp/export.ini' );
 
 		#--------------------------------------
 		#	出力時のテーブル定義の一覧を得る
-		$article_define = $this->dbh->file_get_lines( $import_tmp_dir.'/tmp/table_article_define.dat' );
+		$article_define = $this->px->dbh()->file_get_lines( $import_tmp_dir.'/tmp/table_article_define.dat' );
 		foreach( $article_define as $key=>$val ){ $article_define[$key] = trim($val); }
-		$comment_define = $this->dbh->file_get_lines( $import_tmp_dir.'/tmp/table_comment_define.dat' );
+		$comment_define = $this->px->dbh()->file_get_lines( $import_tmp_dir.'/tmp/table_comment_define.dat' );
 		foreach( $comment_define as $key=>$val ){ $comment_define[$key] = trim($val); }
-		$trackback_define = $this->dbh->file_get_lines( $import_tmp_dir.'/tmp/table_trackback_define.dat' );
+		$trackback_define = $this->px->dbh()->file_get_lines( $import_tmp_dir.'/tmp/table_trackback_define.dat' );
 		foreach( $trackback_define as $key=>$val ){ $trackback_define[$key] = trim($val); }
 
 		#--------------------------------------
 		#	article の一覧を読み込む
-		$article_list = $this->dbh->read_csv( $import_tmp_dir.'/tmp/table_article_datas.csv' , null , null , null , $export_ini['common']['charset'] );
+		$article_list = $this->px->dbh()->read_csv( $import_tmp_dir.'/tmp/table_article_datas.csv' , null , null , null , $export_ini['common']['charset'] );
 
 		foreach( $article_list as $tmp_article_info ){
 			$article_info = array();
@@ -199,19 +199,19 @@ SELECT * FROM :D:tableName :D:orderBy;
 
 			#--------------------------------------
 			#	コメントを移植する
-			$comment_list = $this->dbh->read_csv( $import_tmp_dir.'/tmp/table_comment_datas.csv' , null , null , null , $export_ini['common']['charset'] );
+			$comment_list = $this->px->dbh()->read_csv( $import_tmp_dir.'/tmp/table_comment_datas.csv' , null , null , null , $export_ini['common']['charset'] );
 			$this->import_comment_data( $comment_list , $comment_define , $article_info['article_cd'] , $new_article_cd );
 
 			#--------------------------------------
 			#	トラックバックを移植する
-			$trackback_list = $this->dbh->read_csv( $import_tmp_dir.'/tmp/table_trackback_datas.csv' , null , null , null , $export_ini['common']['charset'] );
+			$trackback_list = $this->px->dbh()->read_csv( $import_tmp_dir.'/tmp/table_trackback_datas.csv' , null , null , null , $export_ini['common']['charset'] );
 			$this->import_trackback_data( $trackback_list , $trackback_define , $article_info['article_cd'] , $new_article_cd );
 
 		}
 
 		#--------------------------------------
 		#	一時ディレクトリを削除
-		$this->dbh->rmdir( $import_tmp_dir.'/tmp' );
+		$this->px->dbh()->rmdir( $import_tmp_dir.'/tmp' );
 		return	true;
 	}
 
@@ -259,16 +259,16 @@ INSERT INTO :D:tableName(
 			'update_date'=>$article_info['update_date'],
 			'del_flg'=>$article_info['del_flg'],
 		);
-		$INSERT_SQL = $this->dbh->bind( $INSERT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $INSERT_SQL );
+		$INSERT_SQL = $this->px->dbh()->bind( $INSERT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $INSERT_SQL );
 
 		if( !$res ){
-			$this->dbh->rollback();
+			$this->px->dbh()->rollback();
 			return	false;
 		}
-		$this->dbh->commit();
+		$this->px->dbh()->commit();
 
-		$article_cd = $this->dbh->get_last_insert_id( null , $this->plog->table_name.'_article'.'_article_cd_seq' );//挿入された行のIDを取得
+		$article_cd = $this->px->dbh()->get_last_insert_id( null , $this->plog->table_name.'_article'.'_article_cd_seq' );//挿入された行のIDを取得
 		if( !strlen( $article_cd ) ){
 			return	false;
 		}
@@ -294,9 +294,9 @@ INSERT INTO :D:tableName(
 		$old_data_dir = $base_dir.$path_id.'/data';
 		$new_data_dir = $this->plog->get_article_dir( $new_article_cd );
 
-		$this->dbh->mkdirall( $new_data_dir );
+		$this->px->dbh()->mkdirall( $new_data_dir );
 
-		$this->dbh->copyall( $old_data_dir , $new_data_dir );
+		$this->px->dbh()->copyall( $old_data_dir , $new_data_dir );
 
 		return	true;
 	}
@@ -359,14 +359,14 @@ INSERT INTO :D:tableName(
 				'update_date'=>$data_line['update_date'] ,
 				'del_flg'=>$data_line['del_flg'] ,
 			);
-			$INSERT_SQL = $this->dbh->bind( $INSERT_SQL , $bindData );
-			$res = $this->dbh->sendquery( $INSERT_SQL );
+			$INSERT_SQL = $this->px->dbh()->bind( $INSERT_SQL , $bindData );
+			$res = $this->px->dbh()->send_query( $INSERT_SQL );
 
 			if( !$res ){
-				$this->dbh->rollback();
+				$this->px->dbh()->rollback();
 				return	false;
 			}
-			$this->dbh->commit();
+			$this->px->dbh()->commit();
 
 		}
 
@@ -431,14 +431,14 @@ INSERT INTO :D:tableName(
 				'update_date'=>$data_line['update_date'] ,
 				'del_flg'=>$data_line['del_flg'] ,
 			);
-			$INSERT_SQL = $this->dbh->bind( $INSERT_SQL , $bindData );
-			$res = $this->dbh->sendquery( $INSERT_SQL );
+			$INSERT_SQL = $this->px->dbh()->bind( $INSERT_SQL , $bindData );
+			$res = $this->px->dbh()->send_query( $INSERT_SQL );
 
 			if( !$res ){
-				$this->dbh->rollback();
+				$this->px->dbh()->rollback();
 				return	false;
 			}
-			$this->dbh->commit();
+			$this->px->dbh()->commit();
 
 		}
 
@@ -466,14 +466,14 @@ INSERT INTO :D:tableName(
 	function zip( $path_target , $path_zipto ){
 		#	$path_target => 圧縮する元ファイル/ディレクトリ
 		#	$path_zipto => 作成したzipファイルの保存先パス
-		$path_target = $this->dbh->get_realpath($path_target);
-		$path_zipto = $this->dbh->get_realpath($path_zipto);
+		$path_target = $this->px->dbh()->get_realpath($path_target);
+		$path_zipto = $this->px->dbh()->get_realpath($path_zipto);
 
 		if( !$this->enable_zip() ){ return false; }
 
 		if( !is_dir( $path_target ) && !is_file( $path_target ) ){
 			#	ファイルでもディレクトリでもなければ、ダメ。
-			$this->errors->error_log( 'ZIP対象['.$path_target.']は、ファイルでもディレクトリでもありません。' );
+			$this->px->error()->error_log( 'ZIP対象['.$path_target.']は、ファイルでもディレクトリでもありません。' );
 			return	false;
 		}
 
@@ -544,32 +544,32 @@ INSERT INTO :D:tableName(
 	function unzip( $path_target , $path_unzipto ){
 		#	$path_target => 圧縮する元ファイル/ディレクトリ
 		#	$path_unzipto => 作成したzipファイルの保存先パス
-		$path_target = $this->dbh->get_realpath($path_target);
-		$path_unzipto = $this->dbh->get_realpath($path_unzipto);
+		$path_target = $this->px->dbh()->get_realpath($path_target);
+		$path_unzipto = $this->px->dbh()->get_realpath($path_unzipto);
 
 		if( !$this->enable_zip() ){ return false; }
 
 		if( !is_file( $path_target ) ){
 			#	ファイルじゃなければ、ダメ。
-			$this->errors->error_log( 'UNZIP対象['.$path_target.']は、ファイルでありません。' );
+			$this->px->error()->error_log( 'UNZIP対象['.$path_target.']は、ファイルでありません。' );
 			return	false;
 		}
 
 		if( is_file( $path_unzipto ) ){
 			#	展開先がファイルだったらダメ。
-			$this->errors->error_log( 'UNZIP先['.$path_unzipto.']は、ファイルです。' );
+			$this->px->error()->error_log( 'UNZIP先['.$path_unzipto.']は、ファイルです。' );
 			return	false;
 		}
 
 		if( !is_dir( $path_unzipto ) ){
 			#	展開先ディレクトリがなかったらダメ。
-			$this->errors->error_log( 'UNZIP先ディレクトリ['.$path_unzipto.']は、存在しません。' );
+			$this->px->error()->error_log( 'UNZIP先ディレクトリ['.$path_unzipto.']は、存在しません。' );
 			return	false;
 		}
 
-		if( !$this->dbh->is_writable( $path_unzipto ) ){
+		if( !$this->px->dbh()->is_writable( $path_unzipto ) ){
 			#	展開先ディレクトリが書き込めなかったらダメ。
-			$this->errors->error_log( 'UNZIP先ディレクトリ['.$path_unzipto.']は、書き込めません。' );
+			$this->px->error()->error_log( 'UNZIP先ディレクトリ['.$path_unzipto.']は、書き込めません。' );
 			return	false;
 		}
 
@@ -636,7 +636,7 @@ INSERT INTO :D:tableName(
 		}elseif( !is_readable( $filepath ) ){
 			return	false;
 		}
-		$rows = $this->dbh->file_get_lines( $filepath );
+		$rows = $this->px->dbh()->file_get_lines( $filepath );
 		$final = array(
 			'inst_datetime'=>0 ,
 			'version'=>'0.0.0' ,

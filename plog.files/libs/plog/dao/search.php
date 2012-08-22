@@ -34,9 +34,9 @@ SELECT article_cd FROM :D:tableName
 		$bindData = array(
 			'tableName'=>$this->plog->table_name.'_article' ,
 		);
-		$SELECT_SQL = $this->dbh->bind( $SELECT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $SELECT_SQL );
-		$DATA = $this->dbh->getval();
+		$SELECT_SQL = $this->px->dbh()->bind( $SELECT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $SELECT_SQL );
+		$DATA = $this->px->dbh()->get_results();
 		if( !is_array( $DATA ) ){
 			return	false;
 		}
@@ -70,8 +70,8 @@ WHERE article_cd = :N:article_cd
 			'tableName'=>$this->plog->table_name.'_search' ,
 			'article_cd'=>$article_cd ,
 		);
-		$DELETE_SQL = $this->dbh->bind( $DELETE_SQL , $bindData );
-		$res = $this->dbh->sendquery( $DELETE_SQL );
+		$DELETE_SQL = $this->px->dbh()->bind( $DELETE_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $DELETE_SQL );
 		#	/ 一旦削除
 		#--------------------------------------
 
@@ -98,18 +98,18 @@ INSERT INTO :D:tableName (
 			'article_bodytext'=>$this->mk_bodytext4search_by_html( $ARTICLE_BODY_SRC ) ,
 			'now'=>date( 'Y-m-d H:i:s' ) ,
 		);
-		$INSERT_SQL = $this->dbh->bind( $INSERT_SQL , $bindData );
-		$res = $this->dbh->sendquery( $INSERT_SQL );
+		$INSERT_SQL = $this->px->dbh()->bind( $INSERT_SQL , $bindData );
+		$res = $this->px->dbh()->send_query( $INSERT_SQL );
 
 		#	/更新
 		#--------------------------------------
 
 		if( !$res ){
-			$this->dbh->rollback();
+			$this->px->dbh()->rollback();
 			return	false;
 		}
 
-		$this->dbh->commit();
+		$this->px->dbh()->commit();
 
 		return	true;
 	}
