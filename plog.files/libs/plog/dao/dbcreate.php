@@ -8,37 +8,30 @@
 #	コンテンツオブジェクトクラス [ cont_plog_dao_dbcreate ]
 class cont_plog_dao_dbcreate{
 	var $plog;
-	var $conf;
-	var $errors;
-	var $dbh;
+	var $px;
 
-	#--------------------------------------
-	#	コンストラクタ
+	/**
+	 * コンストラクタ
+	 */
 	function cont_plog_dao_dbcreate( &$plog ){
 		$this->plog = &$plog;
-		$this->conf = &$plog->get_basicobj_conf();
-		$this->errors = &$plog->get_basicobj_errors();
-		$this->dbh = &$plog->get_basicobj_dbh();
+		$this->px = &$plog->px;
 	}
 
 
-	#--------------------------------------
-	#	テーブルを作成する
-	function create_tables( $exec_mode = null ){
+	/**
+	 * PLOGのテーブルを作成する
+	 */
+	public function create_tables( $exec_mode = null ){
 
 		#--------------------------------------
 		#	article: 記事マスタテーブル
-		#	Updated : 19:41 2008/03/30
-		#		article_bodytext4search を削除。検索用テーブルを作ったため。
-		#	Updated : 17:08 2008/01/17
-		#		user_cd を追加。ユーザ別の記事管理を想定。
-		#			(ユーザに紐付けない場合、ユーザがファイル管理の場合は、ゼロを入れる)
 		ob_start();?>
-<?php if( $this->conf->rdb['type'] == 'PostgreSQL' ){ ?>
+<?php if( $this->plog->px->get_conf('dbms.dbms') == 'postgresql' ){ ?>
 CREATE TABLE :D:tableName(
     article_cd    SERIAL NOT NULL,
     category_cd    INT NOT NULL,
-    user_cd    INT NOT NULL DEFAULT '0',
+    user_id    VARCHAR NOT NULL,
     article_title    VARCHAR NOT NULL,
     article_summary    TEXT,
     status    INT2 NOT NULL DEFAULT '0',
@@ -47,11 +40,11 @@ CREATE TABLE :D:tableName(
     update_date    TIMESTAMP DEFAULT 'NOW',
     del_flg    INT2 NOT NULL DEFAULT '0'
 );
-<?php }elseif( $this->conf->rdb['type'] == 'SQLite' ){ ?>
+<?php }elseif( $this->plog->px->get_conf('dbms.dbms') == 'sqlite' ){ ?>
 CREATE TABLE :D:tableName(
     article_cd    INTEGER NOT NULL PRIMARY KEY,
     category_cd    INT(11) NOT NULL,
-    user_cd    INT(11) NOT NULL DEFAULT '0',
+    user_id    VARCHAR(64) NOT NULL,
     article_title    VARCHAR(64) NOT NULL,
     article_summary    TEXT,
     status    INT(1) NOT NULL DEFAULT '0',
@@ -64,7 +57,7 @@ CREATE TABLE :D:tableName(
 CREATE TABLE :D:tableName(
     article_cd    INT(11) NOT NULL,
     category_cd    INT(11) NOT NULL,
-    user_cd    INT(11) NOT NULL DEFAULT '0',
+    user_id    VARCHAR(64) NOT NULL,
     article_title    VARCHAR(64) NOT NULL,
     article_summary    TEXT,
     status    INT(1) NOT NULL DEFAULT '0',
@@ -77,10 +70,10 @@ CREATE TABLE :D:tableName(
 <?php
 		$sql['article'] = array();
 		array_push( $sql['article'] , @ob_get_clean() );
-		if( $this->conf->rdb['type'] == 'PostgreSQL' ){
+		if( $this->plog->px->get_conf('dbms.dbms') == 'postgresql' ){
 			#	PostgreSQL
 			array_push( $sql['article'] , 'ALTER TABLE :D:tableName ADD PRIMARY KEY ( article_cd );' );
-		}elseif( $this->conf->rdb['type'] == 'MySQL' ){
+		}elseif( $this->plog->px->get_conf('dbms.dbms') == 'mysql' ){
 			#	MySQL
 			array_push( $sql['article'] , 'ALTER TABLE :D:tableName ADD PRIMARY KEY ( article_cd );' );
 			array_push( $sql['article'] , 'ALTER TABLE :D:tableName CHANGE article_cd article_cd INT(11) NOT NULL AUTO_INCREMENT;' );
@@ -92,10 +85,10 @@ CREATE TABLE :D:tableName(
 		#		user_cd を追加。ユーザ別の記事管理を想定。
 		#			(ユーザに紐付けない場合、ユーザがファイル管理の場合は、ゼロを入れる)
 		ob_start();?>
-<?php if( $this->conf->rdb['type'] == 'PostgreSQL' ){ ?>
+<?php if( $this->plog->px->get_conf('dbms.dbms') == 'postgresql' ){ ?>
 CREATE TABLE :D:tableName(
     category_cd    SERIAL NOT NULL,
-    user_cd    INT NOT NULL DEFAULT '0',
+    user_id    VARCHAR NOT NULL,
     parent_category_cd    INT NOT NULL,
     category_title    VARCHAR NOT NULL,
     category_subtitle    TEXT,
@@ -104,10 +97,10 @@ CREATE TABLE :D:tableName(
     update_date    TIMESTAMP DEFAULT 'NOW',
     del_flg    INT2 NOT NULL DEFAULT '0'
 );
-<?php }elseif( $this->conf->rdb['type'] == 'SQLite' ){ ?>
+<?php }elseif( $this->plog->px->get_conf('dbms.dbms') == 'sqlite' ){ ?>
 CREATE TABLE :D:tableName(
     category_cd    INTEGER NOT NULL PRIMARY KEY,
-    user_cd    INT(11) NOT NULL DEFAULT '0',
+    user_id    VARCHAR(64) NOT NULL,
     parent_category_cd    INT(11) NOT NULL,
     category_title    VARCHAR(64) NOT NULL,
     category_subtitle    TEXT,
@@ -119,7 +112,7 @@ CREATE TABLE :D:tableName(
 <?php }else{ ?>
 CREATE TABLE :D:tableName(
     category_cd    INT(11) NOT NULL,
-    user_cd    INT(11) NOT NULL DEFAULT '0',
+    user_id    VARCHAR(64) NOT NULL,
     parent_category_cd    INT(11) NOT NULL,
     category_title    VARCHAR(64) NOT NULL,
     category_subtitle    TEXT,
@@ -132,10 +125,10 @@ CREATE TABLE :D:tableName(
 <?php
 		$sql['category'] = array();
 		array_push( $sql['category'] , @ob_get_clean() );
-		if( $this->conf->rdb['type'] == 'PostgreSQL' ){
+		if( $this->plog->px->get_conf('dbms.dbms') == 'postgresql' ){
 			#	PostgreSQL
 			array_push( $sql['category'] , 'ALTER TABLE :D:tableName ADD PRIMARY KEY ( category_cd );' );
-		}elseif( $this->conf->rdb['type'] == 'MySQL' ){
+		}elseif( $this->plog->px->get_conf('dbms.dbms') == 'mysql' ){
 			#	MySQL
 			array_push( $sql['category'] , 'ALTER TABLE :D:tableName ADD PRIMARY KEY ( category_cd );' );
 			array_push( $sql['category'] , 'ALTER TABLE :D:tableName CHANGE category_cd category_cd INT(11) NOT NULL AUTO_INCREMENT;' );
@@ -145,7 +138,7 @@ CREATE TABLE :D:tableName(
 		#--------------------------------------
 		#	trackback: トラックバック受信テーブル
 		ob_start();?>
-<?php if( $this->conf->rdb['type'] == 'PostgreSQL' ){ ?>
+<?php if( $this->plog->px->get_conf('dbms.dbms') == 'postgresql' ){ ?>
 CREATE TABLE :D:tableName(
     article_cd    INT NOT NULL,
     keystr    VARCHAR NOT NULL,
@@ -186,7 +179,7 @@ CREATE TABLE :D:tableName(
 		#	Updated : 17:17 2007/12/06
 		#		password を追加。投稿者が自分で削除できるようにするため。
 		ob_start();?>
-<?php if( $this->conf->rdb['type'] == 'PostgreSQL' ){ ?>
+<?php if( $this->plog->px->get_conf('dbms.dbms') == 'postgresql' ){ ?>
 CREATE TABLE :D:tableName(
     article_cd    INT NOT NULL,
     keystr    VARCHAR NOT NULL,
@@ -228,7 +221,7 @@ CREATE TABLE :D:tableName(
 		#	Created : 18:27 2008/03/30
 		#	Updated : 18:27 2008/03/30
 		ob_start();?>
-<?php if( $this->conf->rdb['type'] == 'PostgreSQL' ){ ?>
+<?php if( $this->plog->px->get_conf('dbms.dbms') == 'postgresql' ){ ?>
 CREATE TABLE :D:tableName(
     article_cd    INT NOT NULL,
     article_bodytext    TEXT,
@@ -291,13 +284,6 @@ CREATE TABLE :D:tableName(
 
 	}
 
-
-
-
-
-
-
 }
-
 
 ?>

@@ -64,7 +64,7 @@ ORDER BY release_date DESC
 		}
 
 		$limit_string = '';
-		if( $this->conf->rdb['type'] == 'PostgreSQL' ){
+		if( $this->plog->px->get_conf('dbms.dbms') == 'PostgreSQL' ){
 			#	【 PostgreSQL 】
 			$limit_string .= ' OFFSET '.intval(0).' LIMIT '.intval($limit_number);
 		}else{

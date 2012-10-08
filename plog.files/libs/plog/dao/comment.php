@@ -42,7 +42,7 @@ ORDER BY comment_date
 		$SELECT_SQL = @ob_get_clean();
 
 		$limit_string = '';
-		if( $this->conf->rdb['type'] == 'PostgreSQL' ){
+		if( $this->plog->px->get_conf('dbms.dbms') == 'PostgreSQL' ){
 			#	【 PostgreSQL 】
 			$limit_string .= ' OFFSET '.intval($limit_offset).' LIMIT '.intval($limit_count);
 		}else{
@@ -82,7 +82,7 @@ ORDER BY comment_date
 		$SELECT_SQL = @ob_get_clean();
 
 		$limit_string = '';
-		if( $this->conf->rdb['type'] == 'PostgreSQL' ){
+		if( $this->plog->px->get_conf('dbms.dbms') == 'PostgreSQL' ){
 			#	【 PostgreSQL 】
 			$limit_string .= ' OFFSET '.intval($limit_offset).' LIMIT '.intval($limit_count);
 		}else{

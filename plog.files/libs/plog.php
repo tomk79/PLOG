@@ -167,6 +167,36 @@ class cont_plog{
 	}
 
 	/**
+	 * コンテンツ内へのリンク先を調整する。
+	 */
+	public function href( $linkto ){
+		$linkto = preg_replace('/^\:/s', '', $linkto);
+		$linkto = preg_replace('/\./s', '/', $linkto);
+
+		$page_info = $this->px->site()->get_page_info( $this->px->req()->get_request_file_path() );
+		$rtn = $this->px->site()->bind_dynamic_path_param( $page_info['path'] , array(''=>($this->content_mode=='admin'?'admin/':'').$linkto.'/'));
+		$rtn = preg_replace('/\/+/','/',$rtn);
+
+		$rtn = $this->px->theme()->href( $rtn );
+		return $rtn;
+	}
+
+	/**
+	 * コンテンツ内へのリンクを生成する。
+	 */
+	public function mk_link( $linkto ){
+		$linkto = preg_replace('/^\:/s', '', $linkto);
+		$linkto = preg_replace('/\./s', '/', $linkto);
+
+		$page_info = $this->px->site()->get_page_info( $this->px->req()->get_request_file_path() );
+		$rtn = $this->px->site()->bind_dynamic_path_param( $page_info['path'] , array(''=>($this->content_mode=='admin'?'admin/':'').$linkto.'/'));
+		$rtn = preg_replace('/\/+/','/',$rtn);
+
+		$rtn = $this->px->theme()->mk_link( $rtn );
+		return $rtn;
+	}
+
+	/**
 	 * コンテンツの処理を実行する。
 	 */
 	public function execute_content(){
