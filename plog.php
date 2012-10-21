@@ -7,7 +7,7 @@
 
 	#--------------------------------------
 	#	ライブラリをロード
-	$contentpath = $px->get_local_resource_dir_realpath();
+	$contentpath = $px->realpath_files();
 	if( !include_once( $contentpath.'/libs/plog.php' ) ){
 		return false;
 	}
@@ -17,7 +17,7 @@
 		$px->error()->error_log( '$plogをロードできません。' , __FILE__ , __LINE__ );
 		return	false;
 	}
-	$plog = new $className( &$px , $px->req()->get_path_param('') );
+	$plog = new $className( &$px );
 	#	/ ライブラリをロード
 	#--------------------------------------
 
@@ -25,7 +25,7 @@
 	#--------------------------------------
 	#	コンテンツCSSを登録
 	$StyleSheet = '';
-	$StyleSheet .= '<link rel="stylesheet" href="'.t::h($px->get_local_resource_dir()).'res/css/contents.css" type="text/css" />'."\n";
+	$StyleSheet .= '<link rel="stylesheet" href="'.t::h($px->path_files()).'res/css/contents.css" type="text/css" />'."\n";
 	$px->theme()->send_content( $StyleSheet , 'head' );
 	#	/ コンテンツCSSを登録
 	#--------------------------------------
@@ -76,7 +76,7 @@
 	$plog->comment_userinfo_passwd = true;		#	コメント編集用パスワードを取得するか否か false=取得しない true=取得する 'must'=必須項目
 
 	#	表示しようとした画像が存在しなかった場合に採用するNoImage画像。
-	$plog->no_image_realpath = $px->get_local_resource_dir_realpath().'res/img/noimage_base.jpg';
+	$plog->no_image_realpath = $px->realpath_files().'res/img/noimage_base.jpg';
 
 	#	レポートメールのあて先
 	//$plog->reportmail_to = 'youremail@example.com';
@@ -93,14 +93,14 @@
 		/*
 		'freemind'=>array(
 			// FreeMind
-			'url_freemind_flash_browser'=>$px->get_local_resource_dir().'res/freemind_flash_browser' ,
+			'url_freemind_flash_browser'=>$px->path_files().'res/freemind_flash_browser' ,
 		) ,
 		*/
 		/*
 		'captcha'=>array(
 			// kcaptcha
 			'name'=>'kcaptcha' ,
-			'url'=>$px->get_local_resource_dir().'res/kcaptcha-2008-04-06' ,
+			'url'=>$px->path_files().'res/kcaptcha-2008-04-06' ,
 		) ,
 		*/
 	);

@@ -1,24 +1,20 @@
 <?php
 
-#	PxFW - Content - [PLOG]
-#	Copyright (C)Tomoya Koyanagi, All rights reserved.
-#	Last Update : 1:17 2008/03/20
-
-#------------------------------------------------------------------------------------------------------------------
-#	記事検索オブジェクトクラス [ cont_plog_dao_search ]
+/**
+ * 記事検索オブジェクトクラス [ cont_plog_dao_search ]
+ * PxFW - Content - [PLOG]
+ * (C)Tomoya Koyanagi
+ */
 class cont_plog_dao_search{
-	var $plog;
-	var $conf;
-	var $errors;
-	var $dbh;
+	private $plog;
+	private $px;
 
-	#--------------------------------------
-	#	コンストラクタ
-	function cont_plog_dao_search( &$plog ){
-		$this->plog = &$plog;
-		$this->conf = &$plog->get_basicobj_conf();
-		$this->errors = &$plog->get_basicobj_errors();
-		$this->dbh = &$plog->get_basicobj_dbh();
+	/**
+	 * コンストラクタ
+	 */
+	public function __construct( $plog ){
+		$this->plog = $plog;
+		$this->px = $plog->px;
 	}
 
 

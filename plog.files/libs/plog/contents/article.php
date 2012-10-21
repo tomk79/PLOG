@@ -1,29 +1,29 @@
 <?php
 
-#	PxFW - Content - [PLOG]
-#	Copyright (C)Tomoya Koyanagi, All rights reserved.
-#	Last Update : 13:54 2011/07/17
-
-#------------------------------------------------------------------------------------------------------------------
-#	コンテンツオブジェクトクラス [ cont_plog_contents_article ]
+/**
+ * PxFW - Content - [PLOG]
+ * (C)Tomoya Koyanagi
+ * コンテンツオブジェクトクラス [ cont_plog_contents_article ]
+ */
 class cont_plog_contents_article{
-	var $plog;
-	var $px;
-	var $conf;
-	var $errors;
-	var $dbh;
-	var $req;
-	var $user;
-	var $site;
-	var $theme;
-	var $custom;
+	public $plog;
+	public $px;
+	public $pagemgr;
+#	public $conf;
+#	public $errors;
+#	public $dbh;
+#	public $req;
+#	public $user;
+#	public $site;
+#	public $theme;
+#	public $custom;
 
 	/**
 	 * コンストラクタ
 	 */
-	function cont_plog_contents_article( &$plog ){
-		$this->plog = &$plog;
-		$this->px = &$plog->px;
+	function cont_plog_contents_article( $plog ){
+		$this->plog = $plog;
+		$this->px = $plog->px;
 #		$this->conf = &$plog->get_basicobj_conf();
 #		$this->errors = &$plog->get_basicobj_errors();
 #		$this->dbh = &$plog->get_basicobj_dbh();
@@ -32,6 +32,13 @@ class cont_plog_contents_article{
 #		$this->site = &$plog->get_basicobj_site();
 #		$this->theme = &$plog->get_basicobj_theme();
 #		$this->custom = &$plog->get_basicobj_custom();
+
+		$contentpath = $this->px->realpath_files();
+		if( !include_once( $contentpath.'/libs/pagemgr.php' ) ){
+			$this->px->error()->error_log('pagemgrのロードに失敗しました。',__FILE__,__LINE__);
+		}
+		$this->pagemgr = new cont_pagemgr($this->px);
+
 	}
 
 
@@ -48,9 +55,9 @@ class cont_plog_contents_article{
 				'path'=>$this->px->site()->get_page_info( $this->req->po() , 'path' ) ,
 			)
 		);
-		if( strlen( $this->plog->get_query(1) ) ){
+		if( strlen( $this->pagemgr->get_query(1) ) ){
 			$this->site->setpageinfoall(
-				$this->req->po().'.article.'.$this->plog->get_query(1) ,
+				$this->req->po().'.article.'.$this->pagemgr->get_query(1) ,
 				array(
 					'title'=>'記事本文' ,
 					'path'=>$this->px->site()->get_page_info( $this->req->po() , 'path' ) ,
@@ -58,18 +65,18 @@ class cont_plog_contents_article{
 			);
 			if( $this->plog->enable_comments ){
 				$this->site->setpageinfoall(
-					$this->req->po().'.create_comment.'.$this->plog->get_query(1) ,
+					$this->req->po().'.create_comment.'.$this->pagemgr->get_query(1) ,
 					array(
 						'title'=>'コメントの投稿' ,
-						'path'=>$this->px->site()->get_page_info( $this->req->po().'.article.'.$this->plog->get_query(1) , 'path' ) ,
+						'path'=>$this->px->site()->get_page_info( $this->req->po().'.article.'.$this->pagemgr->get_query(1) , 'path' ) ,
 						'list_flg'=>true ,
 					)
 				);
 				$this->site->setpageinfoall(
-					$this->req->po().'.delete_comment.'.$this->plog->get_query(1) ,
+					$this->req->po().'.delete_comment.'.$this->pagemgr->get_query(1) ,
 					array(
 						'title'=>'コメントの削除' ,
-						'path'=>$this->px->site()->get_page_info( $this->req->po().'.article.'.$this->plog->get_query(1) , 'path' ) ,
+						'path'=>$this->px->site()->get_page_info( $this->req->po().'.article.'.$this->pagemgr->get_query(1) , 'path' ) ,
 						'list_flg'=>false ,
 					)
 				);
@@ -93,21 +100,21 @@ class cont_plog_contents_article{
 		);
 */
 
-		if( $this->plog->get_query() == 'article' ){
+		if( $this->pagemgr->get_query() == 'article' ){
 			return	$this->page_article();
-		}elseif( $this->plog->get_query() == 'list' ){
-			return	$this->page_start( $this->plog->get_query(1) );
-		}elseif( $this->plog->get_query() == 'create_comment' ){
+		}elseif( $this->pagemgr->get_query() == 'list' ){
+			return	$this->page_start( $this->pagemgr->get_query(1) );
+		}elseif( $this->pagemgr->get_query() == 'create_comment' ){
 			return	$this->start_create_comment();
-		}elseif( $this->plog->get_query() == 'delete_comment' ){
+		}elseif( $this->pagemgr->get_query() == 'delete_comment' ){
 			return	$this->start_delete_comment();
-		}elseif( $this->plog->get_query() == 'tb' ){
+		}elseif( $this->pagemgr->get_query() == 'tb' ){
 			return	$this->execute_trackback_ping_execute();
-		}elseif( $this->plog->get_query() == 'search' ){
+		}elseif( $this->pagemgr->get_query() == 'search' ){
 			return	$this->start_search();
-		}elseif( $this->plog->get_query() == 'entrylist' ){
+		}elseif( $this->pagemgr->get_query() == 'entrylist' ){
 			return	$this->page_entrylist();
-		}elseif( !preg_match( '/^[0-9]*$/is' , $this->plog->get_query() ) ){
+		}elseif( !preg_match( '/^[0-9]*$/is' , $this->pagemgr->get_query() ) ){
 			return	$this->px->theme()->printnotfound();
 		}
 
@@ -118,10 +125,10 @@ class cont_plog_contents_article{
 	#--------------------------------------
 	#	最初のページ
 	function page_start( $category_cd = null ){
-		if( $this->plog->get_query() == 'list' && strlen( $this->plog->get_query(1) ) ){
-			$page_number = intval( $this->plog->get_query(2) );
+		if( $this->pagemgr->get_query() == 'list' && strlen( $this->pagemgr->get_query(1) ) ){
+			$page_number = intval( $this->pagemgr->get_query(2) );
 		}else{
-			$page_number = intval( $this->plog->get_query() );
+			$page_number = intval( $this->pagemgr->get_query() );
 		}
 		if( $page_number < 1 ){
 			$page_number = 1;
@@ -211,8 +218,8 @@ class cont_plog_contents_article{
 		#--------------------------------------
 		#	ページャ生成
 		$PID_BASE = '';
-		if( $this->plog->get_query() == 'list' && strlen( $this->plog->get_query(1) ) ){
-			$PID_BASE = 'list.'.$this->plog->get_query(1).'.';
+		if( $this->pagemgr->get_query() == 'list' && strlen( $this->pagemgr->get_query(1) ) ){
+			$PID_BASE = 'list.'.$this->pagemgr->get_query(1).'.';
 		}
 
 		if( $pager_info['total_page_count'] > 1 ){
@@ -267,9 +274,9 @@ class cont_plog_contents_article{
 		$RTN .= $PAGER;
 
 		$this_pid = $this->px->site()->get_page_info( $this->px->req()->get_request_file_path() , 'id' );
-		if( $this->plog->get_query() == 'list' && strlen( $this->plog->get_query(1) ) ){
+		if( $this->pagemgr->get_query() == 'list' && strlen( $this->pagemgr->get_query(1) ) ){
 			#	【カテゴリ別一覧】ページ名を変えてみる。
-			$category_info = $dao->get_category_info( $this->plog->get_query(1) );
+			$category_info = $dao->get_category_info( $this->pagemgr->get_query(1) );
 			$title = 'カテゴリ『'.$category_info['category_title'].'』の記事';
 			if( !strlen( $category_info['category_title'] ) ){
 				$title = 'カテゴリに分類されていない記事';
@@ -296,7 +303,7 @@ class cont_plog_contents_article{
 	#--------------------------------------
 	#	エントリの一覧
 	function page_entrylist( $category_cd = null ){
-		$page_number = intval( $this->plog->get_query(1) );
+		$page_number = intval( $this->pagemgr->get_query(1) );
 		if( $page_number < 1 ){
 			$page_number = 1;
 		}
@@ -391,7 +398,7 @@ class cont_plog_contents_article{
 	#	記事本文ページ
 	function page_article(){
 		$dao_visitor = $this->plog->factory_dao( 'visitor' );
-		$article_info = $dao_visitor->get_article_info( $this->plog->get_query(1) );
+		$article_info = $dao_visitor->get_article_info( $this->pagemgr->get_query(1) );
 		if( !is_array( $article_info ) ){
 			return	$this->px->theme()->printnotfound();
 		}
@@ -401,7 +408,7 @@ class cont_plog_contents_article{
 		$this->site->setpageinfo( $this->px->site()->get_page_info( $this->px->req()->get_request_file_path() , 'id' ) , 'list_flg' , true );
 
 		$operator = $this->plog->factory_articleparser();
-		$ARTICLE_BODY_SRC = $operator->get_article_content( $this->plog->get_query(1) );
+		$ARTICLE_BODY_SRC = $operator->get_article_content( $this->pagemgr->get_query(1) );
 
 		$RTN = '';
 		$RTN .= ''."\n";
@@ -440,9 +447,9 @@ class cont_plog_contents_article{
 		if( $this->plog->enable_trackback ){
 			#--------------------------------------
 			#	トラックバックを表示
-			$trackback_count = $dao_visitor->get_trackback_count( $this->plog->get_query(1) );
+			$trackback_count = $dao_visitor->get_trackback_count( $this->pagemgr->get_query(1) );
 			$dao_trackback = &$this->plog->factory_dao( 'trackback' );
-			$trackback_list = $dao_trackback->get_trackback_list( $this->plog->get_query(1) );
+			$trackback_list = $dao_trackback->get_trackback_list( $this->pagemgr->get_query(1) );
 
 			$SRCMEMO = '';
 			foreach( $trackback_list as $Line ){
@@ -464,9 +471,9 @@ class cont_plog_contents_article{
 				'LANG',
 				'T1',
 			);
-			$RTN .= '		<div style="overflow:auto;">'.htmlspecialchars( $this->px->theme()->href( ':tb.'.$this->plog->get_query(1) , array('protocol'=>'http','gene_deltemp'=>$gene_deltemp) ) ).'</div>'."\n";
+			$RTN .= '		<div style="overflow:auto;">'.htmlspecialchars( $this->px->theme()->href( ':tb.'.$this->pagemgr->get_query(1) , array('protocol'=>'http','gene_deltemp'=>$gene_deltemp) ) ).'</div>'."\n";
 			$RTN .= '	</div>'."\n";
-			$RTN .= $this->px->theme()->mk_hx('トラックバック ('.intval($trackback_count[$this->plog->get_query(1)]).'件)')."\n";
+			$RTN .= $this->px->theme()->mk_hx('トラックバック ('.intval($trackback_count[$this->pagemgr->get_query(1)]).'件)')."\n";
 			if( strlen( $SRCMEMO ) ){
 				$RTN .= $SRCMEMO;
 			}else{
@@ -481,9 +488,9 @@ class cont_plog_contents_article{
 		if( $this->plog->enable_comments ){
 			#--------------------------------------
 			#	コメントを表示
-			$comment_count = $dao_visitor->get_comment_count( $this->plog->get_query(1) );
+			$comment_count = $dao_visitor->get_comment_count( $this->pagemgr->get_query(1) );
 			$obj_comment = &$this->plog->factory_dao( 'comment' );
-			$comment_list = $obj_comment->get_comment_list( $this->plog->get_query(1) );
+			$comment_list = $obj_comment->get_comment_list( $this->pagemgr->get_query(1) );
 
 			$SRCMEMO = '';
 			foreach( $comment_list as $Line ){
@@ -497,7 +504,7 @@ class cont_plog_contents_article{
 				$SRCMEMO .= $this->px->theme()->mk_hx( '<span class="date">'.htmlspecialchars( $this->px->theme()->dateformat( 'datetime' , time::datetime2int( $Line['comment_date'] ) ) ).'</span> '.$commentator_name , -1 , array('allow_html'=>true) )."\n";
 				if( $this->plog->comment_userinfo_passwd && strlen( $Line['password'] ) ){
 					$SRCMEMO .= '<ul class="horizontal floatR">'."\n";
-					$SRCMEMO .= '	<li class="ttrs">'.$this->plog->mk_link( ':delete_comment.'.$this->plog->get_query(1).'.'.$Line['keystr'] , array( 'label'=>'このコメントを削除する','style'=>'inside' ) ).'</li>'."\n";
+					$SRCMEMO .= '	<li class="ttrs">'.$this->plog->mk_link( ':delete_comment.'.$this->pagemgr->get_query(1).'.'.$Line['keystr'] , array( 'label'=>'このコメントを削除する','style'=>'inside' ) ).'</li>'."\n";
 					$SRCMEMO .= '</ul>'."\n";
 				}
 				$SRCMEMO .= '<p>'.$obj_comment->view_comment2html( $Line['comment'] ).'</p>'."\n";
@@ -506,13 +513,13 @@ class cont_plog_contents_article{
 
 			$RTN .= '<div id="cont_article_comment">'."\n";
 			if( strlen( $SRCMEMO ) ){
-				$RTN .= $this->px->theme()->mk_hx('コメント ('.intval($comment_count[$this->plog->get_query(1)]).'件)')."\n";
+				$RTN .= $this->px->theme()->mk_hx('コメント ('.intval($comment_count[$this->pagemgr->get_query(1)]).'件)')."\n";
 				$RTN .= $SRCMEMO;
 				$RTN .= $this->px->theme()->mk_hx('この記事にコメントする',-1)."\n";
 			}else{
 				$RTN .= $this->px->theme()->mk_hx('この記事にコメントする')."\n";
 			}
-			$RTN .= '<form action="'.htmlspecialchars( $this->px->theme()->act( $this->req->po().'.create_comment.'.$this->plog->get_query(1) ) ).'" method="post">'."\n";
+			$RTN .= '<form action="'.htmlspecialchars( $this->pagemgr->href( $this->req->po().'.create_comment.'.$this->pagemgr->get_query(1) ) ).'" method="post">'."\n";
 			$RTN .= '<div>'."\n";
 			$RTN .= '	<table width="100%">'."\n";
 			$mustmark = array( 'must'=>' <span class="must">*</span>' );
@@ -559,7 +566,7 @@ class cont_plog_contents_article{
 			$RTN .= '	<p class="ttr alignC"><textarea name="comment" class="inputitems" rows="11" cols="20">'.htmlspecialchars( $this->px->req()->get_param('comment') ).'</textarea></p>'."\n";
 			$RTN .= '	<p class="ttr alignC"><input type="submit" name="s" value="コメントを投稿する" /></p>'."\n";
 			$RTN .= '	<input type="hidden" name="mode" value="confirm" />'."\n";
-			$RTN .= $this->px->theme()->mk_form_defvalues( $this->req->po().'.create_comment.'.$this->plog->get_query(1) )."\n";
+			$RTN .= $this->px->theme()->mk_form_defvalues( $this->req->po().'.create_comment.'.$this->pagemgr->get_query(1) )."\n";
 			$RTN .= '</div>'."\n";
 			$RTN .= '</form>'."\n";
 			$RTN .= '</div>'."\n";
@@ -580,7 +587,7 @@ class cont_plog_contents_article{
 		if( !$this->plog->enable_comments ){
 			return	$this->px->theme()->printnotfound();
 		}
-		if( !strlen( $this->plog->get_query(1) ) ){
+		if( !strlen( $this->pagemgr->get_query(1) ) ){
 			return	$this->px->theme()->printnotfound();
 		}
 		$error = $this->check_create_comment_check();
@@ -602,7 +609,7 @@ class cont_plog_contents_article{
 	function page_create_comment_input( $error ){
 		$RTN = ''."\n";
 		$RTN .= '<div id="cont_article_comment">'."\n";
-		$RTN .= '<form action="'.htmlspecialchars( $this->px->theme()->act() ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->pagemgr->href() ).'" method="post">'."\n";
 		$RTN .= '<div>'."\n";
 		$RTN .= '<table width="100%">'."\n";
 		$mustmark = array( 'must'=>' <span class="must">*</span>' );
@@ -744,13 +751,13 @@ class cont_plog_contents_article{
 		$RTN .= '</table>'."\n";
 
 		$RTN .= '<div class="alignC">'."\n";
-		$RTN .= '<form action="'.htmlspecialchars( $this->px->theme()->act() ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->pagemgr->href() ).'" method="post">'."\n";
 		$RTN .= '	<input type="hidden" name="mode" value="execute" />'."\n";
 		$RTN .= $HIDDEN;
 		$RTN .= '	'.$this->px->theme()->mk_form_defvalues()."\n";
 		$RTN .= '	<input type="submit" name="s" value="コメントを投稿する" />'."\n";
 		$RTN .= '</form>'."\n";
-		$RTN .= '<form action="'.htmlspecialchars( $this->px->theme()->act() ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->pagemgr->href() ).'" method="post">'."\n";
 		$RTN .= '	<input type="hidden" name="mode" value="input" />'."\n";
 		$RTN .= $HIDDEN;
 		$RTN .= '	'.$this->px->theme()->mk_form_defvalues()."\n";
@@ -758,7 +765,7 @@ class cont_plog_contents_article{
 		$RTN .= '</form>'."\n";
 		$RTN .= '</div>'."\n";
 		$RTN .= $this->px->theme()->mk_hr()."\n";
-		$RTN .= '<form action="'.htmlspecialchars( $this->px->theme()->act( ':' ) ).'" method="get">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->pagemgr->href( ':' ) ).'" method="get">'."\n";
 		$RTN .= '	'.$this->px->theme()->mk_form_defvalues( ':' )."\n";
 		$RTN .= '	<div align="center"><input type="submit" name="s" value="キャンセル" /></div>'."\n";
 		$RTN .= '</form>'."\n";
@@ -852,7 +859,7 @@ class cont_plog_contents_article{
 
 		$comment_dao = &$this->plog->factory_dao( 'comment' );
 		$result = $comment_dao->add_comment(
-			$this->plog->get_query(1) ,
+			$this->pagemgr->get_query(1) ,
 			$this->px->req()->get_param('comment').'' ,
 			$this->px->req()->get_param('commentator_name').'' ,
 			$this->px->req()->get_param('commentator_email').'' ,
@@ -873,9 +880,9 @@ class cont_plog_contents_article{
 	function page_create_comment_thanks(){
 		$RTN = ''."\n";
 		$RTN .= '<p>コメントの投稿処理を完了しました。</p>';
-		$RTN .= '<form action="'.htmlspecialchars( $this->px->theme()->act( ':article.'.$this->plog->get_query(1) ) ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->pagemgr->href( ':article.'.$this->pagemgr->get_query(1) ) ).'" method="post">'."\n";
 		$RTN .= '	<input type="submit" name="s" value="戻る" />'."\n";
-		$RTN .= '	'.$this->px->theme()->mk_form_defvalues( ':article.'.$this->plog->get_query(1) )."\n";
+		$RTN .= '	'.$this->px->theme()->mk_form_defvalues( ':article.'.$this->pagemgr->get_query(1) )."\n";
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
@@ -886,7 +893,7 @@ class cont_plog_contents_article{
 		if( !$this->plog->enable_comments ){
 			return	$this->px->theme()->printnotfound();
 		}
-		if( !strlen( $this->plog->get_query(1) ) || !strlen( $this->plog->get_query(2) ) ){
+		if( !strlen( $this->pagemgr->get_query(1) ) || !strlen( $this->pagemgr->get_query(2) ) ){
 			return	$this->px->theme()->printnotfound();
 		}
 		$error = $this->check_delete_comment_check();
@@ -906,7 +913,7 @@ class cont_plog_contents_article{
 	function page_delete_comment_input( $error ){
 		$RTN = ''."\n";
 
-		$RTN .= '<form action="'.htmlspecialchars( $this->px->theme()->act() ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->pagemgr->href() ).'" method="post">'."\n";
 		$RTN .= '<p>'."\n";
 		$RTN .= '	コメントを削除します。コメントの削除には、コメント投稿時に指定したパスワードが必要です。<br />'."\n";
 		$RTN .= '</p>'."\n";
@@ -948,7 +955,7 @@ class cont_plog_contents_article{
 		$HIDDEN .= '<input type="hidden" name="commentpw" value="'.htmlspecialchars( $this->px->req()->get_param('commentpw') ).'" />';
 
 		$RTN .= '<div class="alignC">'."\n";
-		$RTN .= '<form action="'.htmlspecialchars( $this->px->theme()->act() ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->pagemgr->href() ).'" method="post">'."\n";
 		$RTN .= '	<input type="hidden" name="mode" value="execute" />'."\n";
 		$RTN .= $HIDDEN;
 		$RTN .= '	'.$this->px->theme()->mk_form_defvalues()."\n";
@@ -956,8 +963,8 @@ class cont_plog_contents_article{
 		$RTN .= '</form>'."\n";
 		$RTN .= '</div>'."\n";
 		$RTN .= $this->px->theme()->mk_hr()."\n";
-		$RTN .= '<form action="'.htmlspecialchars( $this->px->theme()->act( ':article.'.$this->plog->get_query(1) ) ).'" method="post">'."\n";
-		$RTN .= '	'.$this->px->theme()->mk_form_defvalues( ':article.'.$this->plog->get_query(1) )."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->pagemgr->href( ':article.'.$this->pagemgr->get_query(1) ) ).'" method="post">'."\n";
+		$RTN .= '	'.$this->px->theme()->mk_form_defvalues( ':article.'.$this->pagemgr->get_query(1) )."\n";
 		$RTN .= '	<div align="center"><input type="submit" name="s" value="キャンセル" /></div>'."\n";
 		$RTN .= '</form>'."\n";
 		return	$RTN;
@@ -971,7 +978,7 @@ class cont_plog_contents_article{
 			$RTN['commentpw'] = 'パスワードを入力してください。';
 		}else{
 			$comment_dao = &$this->plog->factory_dao( 'comment' );
-			if( !$comment_dao->check_password( $this->plog->get_query(1) , $this->plog->get_query(2) , $this->px->req()->get_param('commentpw') ) ){
+			if( !$comment_dao->check_password( $this->pagemgr->get_query(1) , $this->pagemgr->get_query(2) , $this->px->req()->get_param('commentpw') ) ){
 				$RTN['commentpw'] = 'パスワードが違います。';
 			}
 		}
@@ -987,7 +994,7 @@ class cont_plog_contents_article{
 		}
 
 		$comment_dao = &$this->plog->factory_dao( 'comment' );
-		$result = $comment_dao->delete_comment( $this->plog->get_query(1) , $this->plog->get_query(2) );
+		$result = $comment_dao->delete_comment( $this->pagemgr->get_query(1) , $this->pagemgr->get_query(2) );
 		if( !$result ){
 			return	'<p class="ttr error">コメントの削除に失敗しました。</p>';
 		}
@@ -999,9 +1006,9 @@ class cont_plog_contents_article{
 	function page_delete_comment_thanks(){
 		$RTN = ''."\n";
 		$RTN .= '<p>コメントを削除しました。</p>';
-		$RTN .= '<form action="'.htmlspecialchars( $this->px->theme()->act( ':article.'.$this->plog->get_query(1) ) ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->pagemgr->href( ':article.'.$this->pagemgr->get_query(1) ) ).'" method="post">'."\n";
 		$RTN .= '	<input type="submit" name="s" value="記事本文へ戻る" />'."\n";
-		$RTN .= '	'.$this->px->theme()->mk_form_defvalues( ':article.'.$this->plog->get_query(1) )."\n";
+		$RTN .= '	'.$this->px->theme()->mk_form_defvalues( ':article.'.$this->pagemgr->get_query(1) )."\n";
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
@@ -1027,7 +1034,7 @@ class cont_plog_contents_article{
 		}
 
 		$tbp = new $className( &$this->plog , &$this->conf , &$this->dbh , &$this->theme );
-		return	$tbp->receive_trackback_ping( $this->px->req()->get_param() , $this->plog->get_query(1) );
+		return	$tbp->receive_trackback_ping( $this->px->req()->get_param() , $this->pagemgr->get_query(1) );
 
 	}
 
@@ -1048,14 +1055,14 @@ class cont_plog_contents_article{
 		$RTN .= '	<p>'."\n";
 		$RTN .= '		探したいキーワードを入力して、「検索する」ボタンをクリックしてください。<br />'."\n";
 		$RTN .= '	</p>'."\n";
-		$RTN .= '<form action="'.htmlspecialchars( $this->px->theme()->act( ':search' ) ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->pagemgr->href( ':search' ) ).'" method="post">'."\n";
 		$RTN .= '	<p class="ttr alignC"><input type="text" name="keyword" value="'.htmlspecialchars( $this->px->req()->get_param('keyword') ).'" /><input type="submit" name="s" value="検索する" /></p>'."\n";
 		$RTN .= '	'.$this->px->theme()->mk_form_defvalues( ':search' )."\n";
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
 	function page_search_result(){
-		$page_number = intval( $this->plog->get_query(1) );
+		$page_number = intval( $this->pagemgr->get_query(1) );
 		if( $page_number < 1 ){
 			$page_number = 1;
 		}
@@ -1122,7 +1129,7 @@ class cont_plog_contents_article{
 				$RTN .= $this->px->theme()->mk_hr()."\n";
 			}
 		}
-		$RTN .= '<form action="'.htmlspecialchars( $this->px->theme()->act( ':search' ) ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->pagemgr->href( ':search' ) ).'" method="post">'."\n";
 		$RTN .= '	<p class="ttr alignC"><input type="text" name="keyword" value="'.htmlspecialchars( $this->px->req()->get_param('keyword') ).'" /><input type="submit" name="s" value="再検索" /></p>'."\n";
 		$RTN .= '	'.$this->px->theme()->mk_form_defvalues( ':search' )."\n";
 		$RTN .= '</form>'."\n";

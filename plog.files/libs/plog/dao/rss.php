@@ -1,33 +1,24 @@
 <?php
 
-#	PxFW - Content - [PLOG]
-#	Copyright (C)Tomoya Koyanagi, All rights reserved.
-#	Last Update : 13:19 2010/11/07
-
-#------------------------------------------------------------------------------------------------------------------
-#	コンテンツオブジェクトクラス [ cont_plog_dao_rss ]
+/**
+ * コンテンツオブジェクトクラス [ cont_plog_dao_rss ]
+ * PxFW - Content - [PLOG]
+ * (C)Tomoya Koyanagi
+ */
 class cont_plog_dao_rss{
-	var $plog;
-	var $conf;
-	var $errors;
-	var $dbh;
-	var $theme;
+	private $plog;
+	private $error_list = array();
 
-	var $error_list = array();
-
-	#--------------------------------------
-	#	コンストラクタ
-	function cont_plog_dao_rss( &$plog ){
+	/**
+	 * コンストラクタ
+	 */
+	public function __construct( &$plog ){
 		$this->plog = &$plog;
-		$this->conf = &$plog->get_basicobj_conf();
-		$this->errors = &$plog->get_basicobj_errors();
-		$this->dbh = &$plog->get_basicobj_dbh();
-		$this->theme = &$plog->get_basicobj_theme();
-	}
-
-
-
-
+//		$this->conf = &$plog->get_basicobj_conf();
+//		$this->errors = &$plog->get_basicobj_errors();
+//		$this->dbh = &$plog->get_basicobj_dbh();
+//		$this->theme = &$plog->get_basicobj_theme();
+	}//__construct()
 
 	#--------------------------------------
 	#	記事一覧を取得
@@ -64,7 +55,7 @@ ORDER BY release_date DESC
 		}
 
 		$limit_string = '';
-		if( $this->plog->px->get_conf('dbms.dbms') == 'PostgreSQL' ){
+		if( $this->plog->px->get_conf('dbms.dbms') == 'postgresql' ){
 			#	【 PostgreSQL 】
 			$limit_string .= ' OFFSET '.intval(0).' LIMIT '.intval($limit_number);
 		}else{
@@ -87,8 +78,6 @@ ORDER BY release_date DESC
 		return	$RTN;
 
 	}
-
-
 
 
 	#--------------------------------------
@@ -250,21 +239,23 @@ ORDER BY release_date DESC
 
 
 
-	#--------------------------------------
-	#	リリース日を表す文字列を生成する
-	function mk_releasedate_string( $releaseDate ){
+	/**
+	 * リリース日を表す文字列を生成する
+	 */
+	private function mk_releasedate_string( $releaseDate ){
 		$Ymd = date( 'Y-m-d' , $releaseDate );
 		$His = date( 'H:i:s' , $releaseDate );
 		$dit = date( 'O' , $releaseDate );
 		$dit = preg_replace( '/^(.*)([0-9]{2})$/' , '$1:$2' , $dit );
 		return	$Ymd.'T'.$His.$dit;
-	}
+	}//mk_releasedate_string()
 
 
 
-	#--------------------------------------
-	#	ブログに関する諸情報を得る
-	function get_blog_info( $name ){
+	/**
+	 * ブログに関する諸情報を得る
+	 */
+	private function get_blog_info( $name ){
 		switch( strtolower( $name ) ){
 			case 'blog_title':
 				return	$this->plog->blog_name; break;
@@ -281,13 +272,14 @@ ORDER BY release_date DESC
 				break;
 		}
 		return	false;
-	}
+	}//get_blog_info()
 
 
 
-	#--------------------------------------
-	#	RSSファイルのURLを得る
-	function get_rss_url( $version_name ){
+	/**
+	 * RSSファイルのURLを得る
+	 */
+	public function get_rss_url( $version_name ){
 		$path_rss = $this->plog->path_rss;
 		if( !strlen( $path_rss ) ){
 			#	RSSファイルの保存先が指定されていなければ。
@@ -309,10 +301,12 @@ ORDER BY release_date DESC
 			$RTN = dirname( $RTN ).'/'.basename( $this->get_rss_realpath( $version_name ) );
 		}
 		return	$RTN;
-	}
-	#--------------------------------------
-	#	RSSファイルの絶対パスを得る
-	function get_rss_realpath( $version_name = null ){
+	}//get_rss_url()
+
+	/**
+	 * RSSファイルの絶対パスを得る
+	 */
+	public function get_rss_realpath( $version_name = null ){
 		$path_rss = $this->plog->path_rss;
 		if( !strlen( $path_rss ) ){
 			#	RSSファイルの保存先が指定されていなければ。
@@ -367,25 +361,30 @@ ORDER BY release_date DESC
 		}
 
 		return	$RTN;
-	}
+	}//get_rss_realpath()
 
-	#--------------------------------------
-	#	オブジェクト内部エラーを記憶
-	function internal_error( $error_msg , $FILE = '' , $LINE = 0 ){
+	/**
+	 * オブジェクト内部エラーを記憶
+	 */
+	private function internal_error( $error_msg , $FILE = '' , $LINE = 0 ){
 		if( !is_array( $this->error_list ) ){ $this->error_list = array(); }
 		array_push( $this->error_list , array( 'message'=>$error_msg , 'file'=>$FILE , 'line'=>$LINE ) );
 		return	true;
-	}
-	#--------------------------------------
-	#	オブジェクト内部エラーを取得
-	function get_error_list(){
+	}//internal_error()
+
+	/**
+	 * オブジェクト内部エラーを取得
+	 */
+	public function get_error_list(){
 		return	$this->error_list;
-	}
-	#--------------------------------------
-	#	エラー数を調べる
-	function get_error_count(){
+	}//get_error_list()
+
+	/**
+	 * エラー数を調べる
+	 */
+	public function get_error_count(){
 		return	count( $this->error_list );
-	}
+	}//get_error_count()
 
 }
 

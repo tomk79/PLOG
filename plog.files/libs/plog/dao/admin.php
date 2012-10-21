@@ -8,17 +8,14 @@
 #	コンテンツオブジェクトクラス [ cont_plog_dao_admin ]
 class cont_plog_dao_admin{
 	var $plog;
-	var $conf;
-	var $errors;
-	var $dbh;
+	var $px;
 
-	#--------------------------------------
-	#	コンストラクタ
-	function cont_plog_dao_admin( &$plog ){
+	/**
+	 * コンストラクタ
+	 */
+	function __construct( &$plog ){
 		$this->plog = &$plog;
-		$this->conf = &$plog->get_basicobj_conf();
-		$this->errors = &$plog->get_basicobj_errors();
-		$this->dbh = &$plog->get_basicobj_dbh();
+		$this->px = &$plog->px;
 	}
 
 
@@ -97,7 +94,7 @@ WHERE
 		ob_start();?>
 SELECT
 	a.article_cd AS article_cd,
-	a.user_cd AS user_cd,
+	a.user_id AS user_id,
 	a.article_title AS article_title,
 	a.article_summary AS article_summary,
 	a.status AS status,
@@ -132,9 +129,10 @@ WHERE
 
 
 
-	#--------------------------------------
-	#	新規記事を作成する
-	function create_article( $article_title , $status , $contents , $ary_options = array() ){
+	/**
+	 * 新規記事を作成する
+	 */
+	public function create_article( $article_title , $status , $contents , $ary_options = array() ){
 		if( !strlen( $ary_options['release_date'] ) ){
 			$ary_options['release_date'] = date( 'Y-m-d H:i:s' );
 		}
@@ -142,7 +140,7 @@ WHERE
 		ob_start();?>
 INSERT INTO :D:tableName(
 	article_title ,
-	user_cd ,
+	user_id ,
 	article_summary ,
 	status ,
 	category_cd ,
@@ -151,7 +149,7 @@ INSERT INTO :D:tableName(
 	update_date
 ) VALUES (
 	:S:article_title ,
-	:N:user_cd ,
+	:S:user_id ,
 	:S:article_summary ,
 	:N:status ,
 	:N:category_cd ,
@@ -167,7 +165,7 @@ INSERT INTO :D:tableName(
 			'tableName'=>$this->plog->table_name.'_article',
 			'article_title'=>$article_title,
 			'article_summary'=>$ary_options['article_summary'],
-			'user_cd'=>intval( $ary_options['user_cd'] ),
+			'user_id'=>$ary_options['user_id'],
 			'status'=>$status,
 			'category_cd'=>$ary_options['category_cd'],
 			'release_date'=>$ary_options['release_date'],
@@ -191,7 +189,7 @@ INSERT INTO :D:tableName(
 		#	コンテンツファイルの保存
 		$base_path = $this->plog->get_article_dir( $article_cd );
 		if( !is_dir( $base_path ) ){
-			if( !$this->px->dbh()->mkdirall( $base_path ) ){
+			if( !$this->px->dbh()->mkdir_all( $base_path ) ){
 				return	false;
 			}
 		}
@@ -205,7 +203,7 @@ INSERT INTO :D:tableName(
 
 		return	intval( $article_cd );
 
-	}
+	}//create_article()
 
 
 	#--------------------------------------
@@ -268,10 +266,10 @@ WHERE article_cd = :N:article_cd
 	}
 
 
-	#--------------------------------------
-	#	記事コンテンツのインデックスを更新する
-	function update_article_index( $article_cd ){
-
+	/**
+	 * 記事コンテンツのインデックスを更新する
+	 */
+	public function update_article_index( $article_cd ){
 		#	HTMLを取得
 		$operator = $this->plog->factory_articleparser();
 		$ARTICLE_BODY_SRC = $operator->get_article_content( $article_cd );
@@ -313,7 +311,7 @@ WHERE article_cd = :N:article_cd
 		$dao_search->update_article_index( $article_cd );
 
 		return	true;
-	}
+	}//update_article_index()
 
 
 	#--------------------------------------
@@ -454,7 +452,7 @@ WHERE category_cd = :N:category_cd
 		ob_start();?>
 INSERT INTO :D:tableName(
 	category_title ,
-	user_cd ,
+	user_id ,
 	category_subtitle ,
 	category_summary ,
 	parent_category_cd ,
@@ -462,7 +460,7 @@ INSERT INTO :D:tableName(
 	update_date
 ) VALUES (
 	:S:category_title ,
-	:N:user_cd ,
+	:S:user_id ,
 	:S:category_subtitle ,
 	:S:category_summary ,
 	:N:parent_category_cd ,
@@ -476,7 +474,7 @@ INSERT INTO :D:tableName(
 		$bindData = array(
 			'tableName'=>$this->plog->table_name.'_category',
 			'category_title'=>$category_title,
-			'user_cd'=>intval($ary_options['user_cd']),
+			'user_id'=>$ary_options['user_id'],
 			'category_subtitle'=>$category_subtitle,
 			'category_summary'=>$category_summary,
 			'parent_category_cd'=>$parent_category_cd,
@@ -559,7 +557,7 @@ WHERE category_cd = :N:category_cd
 SELECT
 	a.article_cd,
 	a.article_title,
-	a.user_cd,
+	a.user_id,
 	c.keystr,
 	c.comment,
 	c.commentator_name,
@@ -613,7 +611,7 @@ ORDER BY c.comment_date
 SELECT
 	a.article_cd,
 	a.article_title,
-	a.user_cd,
+	a.user_id,
 	t.keystr,
 	t.trackback_title,
 	t.trackback_url,
@@ -716,7 +714,7 @@ WHERE article_cd = :N:article_cd
 SELECT 
     atc.article_cd       AS article_cd       ,
     atc.category_cd      AS category_cd      ,
-    atc.user_cd          AS user_cd          ,
+    atc.user_id          AS user_id          ,
     atc.article_title    AS article_title    ,
     atc.article_summary  AS article_summary  ,
     atc.status           AS status           ,

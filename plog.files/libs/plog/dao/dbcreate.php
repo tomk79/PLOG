@@ -13,10 +13,10 @@ class cont_plog_dao_dbcreate{
 	/**
 	 * コンストラクタ
 	 */
-	function cont_plog_dao_dbcreate( &$plog ){
+	function __construct( &$plog ){
 		$this->plog = &$plog;
 		$this->px = &$plog->px;
-	}
+	}//__construct()
 
 
 	/**

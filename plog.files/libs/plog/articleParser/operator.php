@@ -7,14 +7,7 @@
 #	コンテンツ解析オブジェクトクラス [ cont_plog_articleParser_operator ]
 class cont_plog_articleParser_operator{
 	var $plog;
-	var $conf;
-	var $errors;
-	var $dbh;
-	var $req;
-	var $user;
-	var $site;
-	var $theme;
-	var $custom;
+	var $px;
 
 	var $BLOCK_MODE = 'p';
 
@@ -22,16 +15,9 @@ class cont_plog_articleParser_operator{
 
 	#--------------------------------------
 	#	コンストラクタ
-	function cont_plog_articleParser_operator( &$plog ){
-		$this->plog = &$plog;
-		$this->conf = &$plog->get_basicobj_conf();
-		$this->errors = &$plog->get_basicobj_errors();
-		$this->dbh = &$plog->get_basicobj_dbh();
-		$this->req = &$plog->get_basicobj_req();
-		$this->user = &$plog->get_basicobj_user();
-		$this->site = &$plog->get_basicobj_site();
-		$this->theme = &$plog->get_basicobj_theme();
-		$this->custom = &$plog->get_basicobj_custom();
+	function cont_plog_articleParser_operator( $plog ){
+		$this->plog = $plog;
+		$this->px = $plog->px;
 	}
 
 
@@ -55,47 +41,50 @@ class cont_plog_articleParser_operator{
 		$CAHCE_SRC = $this->src_original2php( $ORIGINALSRC );
 
 		if( !is_dir( dirname( $path_cache ) ) ){
-			if( !$this->dbh->mkdirall( dirname( $path_cache ) ) ){
+			if( !$this->px->dbh()->mkdir_all( dirname( $path_cache ) ) ){
 				return	false;
 			}
 		}
-		if( !$this->dbh->file_overwrite( $path_cache , $CAHCE_SRC ) ){//PLOG 0.1.9 : savefile()をfile_overwrite()に変更。Windowsでキャッシュを開けないバグへの対応。
+		if( !$this->px->dbh()->file_overwrite( $path_cache , $CAHCE_SRC ) ){
 			return	false;
 		}
-		$this->dbh->fclose( $path_cache );
+		$this->px->dbh()->fclose( $path_cache );
 
 		return	$this->load_cache( $path_cache , $type );
 	}
 
-	#--------------------------------------
-	#	作成中の記事本文のプレビューを作成して返す。
-	#	21:26 2008/09/19
-	function get_article_content_preview( $ORIGINALSRC , $type = null ){
+	/**
+	 * 作成中の記事本文のプレビューを作成して返す。
+	 */
+	public function get_article_content_preview( $ORIGINALSRC , $type = null ){
+		return $ORIGINALSRC;
+/**
+		//↓一旦コメントアウト
 		$this->preview_mode = true;	//←プレビューモードのスイッチを入れる
 
 		$CAHCE_SRC = $this->src_original2php( $ORIGINALSRC );
 
 		$path_cache = dirname( $this->get_cache_file_path( $article_cd ) ).'/'.session_id().time().'.php';
 		if( !is_dir( dirname( $path_cache ) ) ){
-			if( !$this->dbh->mkdirall( dirname( $path_cache ) ) ){
+			if( !$this->px->dbh()->mkdir_all( dirname( $path_cache ) ) ){
 				$this->preview_mode = false;
 				return	false;
 			}
 		}
-		if( !$this->dbh->file_overwrite( $path_cache , $CAHCE_SRC ) ){//PLOG 0.1.9 : savefile()をfile_overwrite()に変更。Windowsでキャッシュを開けないバグへの対応。
+		if( !$this->px->dbh()->file_overwrite( $path_cache , $CAHCE_SRC ) ){//PLOG 0.1.9 : savefile()をfile_overwrite()に変更。Windowsでキャッシュを開けないバグへの対応。
 			$this->preview_mode = false;
 			return	false;
 		}
-		$this->dbh->fclose( $path_cache );
+		$this->px->dbh()->fclose( $path_cache );
 		clearstatcache();
 
 		$RTN = $this->load_cache( $path_cache , $type );
-		$this->dbh->rmdir( $path_cache );
+		$this->px->dbh()->rmdir( $path_cache );
 
 		$this->preview_mode = false;
 		return	$RTN;
-
-	}
+**/
+	}//get_article_content_preview()
 
 
 
@@ -476,7 +465,7 @@ class cont_plog_articleParser_operator{
 
 		if( !is_file( $path_cache ) ){ return false; }
 		if( !is_file( $path_article ) ){ return false; }
-		if( $this->dbh->comp_filemtime( $path_article , $path_cache ) ){
+		if( $this->px->dbh()->is_newer_a_than_b( $path_article , $path_cache ) ){
 			return	false;
 		}
 		return	true;
@@ -515,7 +504,7 @@ class cont_plog_articleParser_operator{
 			return	false;
 		}
 
-		$ary_original_src = $this->dbh->file_get_lines( $base_path.'/contents.txt' );
+		$ary_original_src = $this->px->dbh()->file_get_lines( $base_path.'/contents.txt' );
 
 		return	$ary_original_src;
 
@@ -530,7 +519,7 @@ class cont_plog_articleParser_operator{
 		$callNumber ++;
 
 		$resource_type = null;
-		switch( strtolower( $this->dbh->get_extension($filename) ) ){
+		switch( strtolower( $this->px->dbh()->get_extension($filename) ) ){
 			case 'gif':
 			case 'png':
 			case 'jpg':

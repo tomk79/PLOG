@@ -9,8 +9,6 @@ class cont_plog{
 	public $px;
 
 	private $path_lib = null;//ライブラリディレクトリのパスを記憶(コンストラクタで初期化)
-	private $queries = array();
-	private $content_mode = 'article';//コンテンツモード (article|admin)
 
 	#--------------------------------------
 	#	設定項目
@@ -124,13 +122,11 @@ class cont_plog{
 	/**
 	 * コンストラクタ
 	 */
-	public function cont_plog( &$px , $query ){
-		$this->px = &$px;
+	public function __construct( $px ){
+		$this->px = $px;
 
-		$content_path = $px->get_local_resource_dir_realpath();
+		$content_path = $px->realpath_files();
 		$this->path_lib = $this->px->dbh()->get_realpath($content_path.'/libs').'/';
-
-		$this->parse_query( $query );
 
 		/*
 		//↓UTODO: PxFWから削除された機能を使用するため、一時的にコメントアウト。
@@ -141,68 +137,15 @@ class cont_plog{
 	}
 
 	/**
-	 * クエリを解析する。
-	 */
-	private function parse_query( $query ){
-		if($query == 'index.html'){ $query = ''; } //←PxFWが補完した index.html を削除
-		$query = preg_replace( '/\/index\.html$/is','/',$query ); //←PxFWが補完した index.html を削除
-		$query = preg_replace( '/\.html$/is','',$query ); //←拡張子を削除
-		$query = preg_replace( '/\/$/is','',$query ); //←最後のスラッシュ閉じを削除
-		$this->queries = explode('/',$query);
-
-		if( $this->queries[0] == 'admin' ){
-			$this->content_mode = array_shift( $this->queries );
-		}
-
-		return true;
-	}
-
-	/**
-	 * クエリの一部分を取り出す
-	 */
-	public function get_query( $num = 0 ){
-		if(is_null($num)){$num=0;}
-		$rtn = $this->queries[$num];
-		return $rtn;
-	}
-
-	/**
-	 * コンテンツ内へのリンク先を調整する。
-	 */
-	public function href( $linkto ){
-		$linkto = preg_replace('/^\:/s', '', $linkto);
-		$linkto = preg_replace('/\./s', '/', $linkto);
-
-		$page_info = $this->px->site()->get_page_info( $this->px->req()->get_request_file_path() );
-		$rtn = $this->px->site()->bind_dynamic_path_param( $page_info['path'] , array(''=>($this->content_mode=='admin'?'admin/':'').$linkto.'/'));
-		$rtn = preg_replace('/\/+/','/',$rtn);
-
-		$rtn = $this->px->theme()->href( $rtn );
-		return $rtn;
-	}
-
-	/**
-	 * コンテンツ内へのリンクを生成する。
-	 */
-	public function mk_link( $linkto ){
-		$linkto = preg_replace('/^\:/s', '', $linkto);
-		$linkto = preg_replace('/\./s', '/', $linkto);
-
-		$page_info = $this->px->site()->get_page_info( $this->px->req()->get_request_file_path() );
-		$rtn = $this->px->site()->bind_dynamic_path_param( $page_info['path'] , array(''=>($this->content_mode=='admin'?'admin/':'').$linkto.'/'));
-		$rtn = preg_replace('/\/+/','/',$rtn);
-
-		$rtn = $this->px->theme()->mk_link( $rtn );
-		return $rtn;
-	}
-
-	/**
 	 * コンテンツの処理を実行する。
 	 */
 	public function execute_content(){
+		$current_page_info = $this->px->site()->get_current_page_info();
+		$path_original = $this->px->site()->bind_dynamic_path_param($current_page_info['path'],array(''=>''));
+
 		#--------------------------------------
 		#	コンテンツの描画
-		if( $this->content_mode == 'admin' ){
+		if( preg_match( '/admin\/(?:index\.html)?/s' , $path_original ) ){
 			#	管理画面
 			$plog_article = &$this->factory_admin();
 			$SRC = $plog_article->start();
@@ -364,7 +307,6 @@ class cont_plog{
 			$this->px->error()->error_log( 'FAILD to load library [articleParser/operator.php]' );
 			return	false;
 		}
-
 		$RTN = new $className( &$this );
 		return	$RTN;
 	}
@@ -421,7 +363,7 @@ class cont_plog{
 	#--------------------------------------
 	#	記事コード番号から、記事のページIDを求める
 	function get_article_pid( $article_cd ){
-		$RTN = $this->req->po();
+		$RTN = $this->px->req()->po();
 		$RTN .= '.article';
 		$RTN .= '.'.intval($article_cd);
 		return	$RTN;
@@ -456,6 +398,176 @@ class cont_plog{
 		return	realpath( $path_log_dir );
 
 	}//get_send_tbp_log_dir()
+
+
+	/**
+	 * 日付選択インターフェイスを作る
+	 * 旧PxFW0.x系から移植
+	 */
+	public function mk_form_select_date( $mode = 'input' , $option = array() ){
+		#	18:32 2007/09/28 Pickles Framework 0.1.9 追加
+
+		#	カラム名を決定
+		$name = array();
+		if( !strlen($option['prefix']) ){
+			$option['prefix'] = 'selectdate';
+		}
+		$name['y'] = $option['prefix'].'_date_y';
+		$name['m'] = $option['prefix'].'_date_m';
+		$name['d'] = $option['prefix'].'_date_d';
+		$name['h'] = $option['prefix'].'_date_h';
+		$name['i'] = $option['prefix'].'_date_i';
+		$name['s'] = $option['prefix'].'_date_s';
+
+		#	デフォルト値を決定
+		$int_now = time();
+		if( strlen( $option['default'] ) ){
+			if( preg_match( '/^[0-9]+$/is' , $option['default'] ) ){
+				$int_now = intval( $option['default'] );
+			}else{
+				$int_now = $this->px->dbh()->datetime2int( $option['default'] );
+			}
+		}
+
+		if( strlen( $this->px->req()->get_param( $name['y'] ) ) || strlen( $this->px->req()->get_param( $name['m'] ) ) || strlen( $this->px->req()->get_param( $name['d'] ) ) || strlen( $this->px->req()->get_param( $name['h'] ) ) || strlen( $this->px->req()->get_param( $name['i'] ) ) || strlen( $this->px->req()->get_param( $name['s'] ) ) ){
+			#	実際に選択された値で、デフォルト値を上書き
+			$int_now = mktime(
+				intval( $this->px->req()->get_param( $name['h'] ) ) ,
+				intval( $this->px->req()->get_param( $name['i'] ) ) ,
+				intval( $this->px->req()->get_param( $name['s'] ) ) ,
+				intval( $this->px->req()->get_param( $name['m'] ) ) ,
+				intval( $this->px->req()->get_param( $name['d'] ) ) ,
+				intval( $this->px->req()->get_param( $name['y'] ) )
+			);
+		}
+		if( $mode == 'get_int' ){
+			#	INT値を返すモード
+			return	$int_now;
+		}elseif( $mode == 'get_datetime' ){
+			#	datetime値を返すモード
+			return	$this->px->dbh()->int2datetime( $int_now );
+		}
+
+		$dateinfo = getdate( $int_now );
+
+		$selected = array();
+		$selected['y'] = intval( $dateinfo['year'] );
+		$selected['m'] = intval( $dateinfo['mon'] );
+		$selected['d'] = intval( $dateinfo['mday'] );
+		$selected['h'] = intval( $dateinfo['hours'] );
+		$selected['i'] = intval( $dateinfo['minutes'] );
+		$selected['s'] = intval( $dateinfo['seconds'] );
+		unset($dateinfo);
+
+		#--------------------------------------
+		#	レイアウトを決定
+		$layout = $option['layout'];
+		if( !strlen( $layout ) ){
+			$layout = '[Y]/[M]/[D] [H]:[I]:[S]';
+		}
+
+		if( $mode == 'confirm' ){
+			#	確認用出力モード
+			$RTN = $layout;
+			$RTN = preg_replace( '/'.preg_quote('[Y]','/').'/i' , intval( $this->px->req()->get_param( $name['y'] ) ) , $RTN );
+			$RTN = preg_replace( '/'.preg_quote('[M]','/').'/i' , intval( $this->px->req()->get_param( $name['m'] ) ) , $RTN );
+			$RTN = preg_replace( '/'.preg_quote('[D]','/').'/i' , intval( $this->px->req()->get_param( $name['d'] ) ) , $RTN );
+			$RTN = preg_replace( '/'.preg_quote('[H]','/').'/i' , intval( $this->px->req()->get_param( $name['h'] ) ) , $RTN );
+			$RTN = preg_replace( '/'.preg_quote('[I]','/').'/i' , intval( $this->px->req()->get_param( $name['i'] ) ) , $RTN );
+			$RTN = preg_replace( '/'.preg_quote('[S]','/').'/i' , intval( $this->px->req()->get_param( $name['s'] ) ) , $RTN );
+			return	$RTN;
+		}elseif( $mode == 'hidden' ){
+			#	hiddenタグ出力モード
+			$RTN = '';
+			$RTN .= '<input type="hidden" name="'.htmlspecialchars( $name['y'] ).'" value="'.intval( $this->px->req()->get_param( $name['y'] ) ).'" />';
+			$RTN .= '<input type="hidden" name="'.htmlspecialchars( $name['m'] ).'" value="'.intval( $this->px->req()->get_param( $name['m'] ) ).'" />';
+			$RTN .= '<input type="hidden" name="'.htmlspecialchars( $name['d'] ).'" value="'.intval( $this->px->req()->get_param( $name['d'] ) ).'" />';
+			$RTN .= '<input type="hidden" name="'.htmlspecialchars( $name['h'] ).'" value="'.intval( $this->px->req()->get_param( $name['h'] ) ).'" />';
+			$RTN .= '<input type="hidden" name="'.htmlspecialchars( $name['i'] ).'" value="'.intval( $this->px->req()->get_param( $name['i'] ) ).'" />';
+			$RTN .= '<input type="hidden" name="'.htmlspecialchars( $name['s'] ).'" value="'.intval( $this->px->req()->get_param( $name['s'] ) ).'" />';
+			return	$RTN;
+		}
+
+
+		#	年
+		$SRC['y'] = '';
+		$SRC['y'] .= '<select name="'.htmlspecialchars($name['y']).'">';
+		$c = array( intval( $selected['y'] ) =>' selected="selected"' );
+		$max_year = date('Y');
+		if( strlen( $option['max_year'] ) ){
+			#	Pickles Framework 0.5.5 : $option['max_year'] を追加。
+			$max_year = intval($option['max_year']);
+		}
+		$min_year = 1970;
+		if( strlen( $option['min_year'] ) ){
+			#	Pickles Framework 0.5.5 : $option['min_year'] を追加。
+			$min_year = intval($option['min_year']);
+		}
+		for( $i = $min_year; $i <= $max_year; $i ++ ){
+			$i = intval( $i );
+			$SRC['y'] .= '<option value="'.intval( $i ).'"'.$c[$i].'>'.intval( $i ).'</option>';
+		}
+		$SRC['y'] .= '</select>';
+
+		#	月
+		$SRC['m'] = '';
+		$SRC['m'] .= '<select name="'.htmlspecialchars($name['m']).'">';
+		$c = array( intval( $selected['m'] ) =>' selected="selected"' );
+		for( $i = 1; $i <= 12; $i ++ ){
+			$i = intval( $i );
+			$SRC['m'] .= '<option value="'.intval( $i ).'"'.$c[$i].'>'.intval($i).'</option>';
+		}
+		$SRC['m'] .= '</select>';
+
+		#	日
+		$SRC['d'] = '';
+		$SRC['d'] .= '<select name="'.htmlspecialchars($name['d']).'">';
+		$c = array( intval( $selected['d'] ) =>' selected="selected"' );
+		for( $i = 1; $i <= 31; $i ++ ){
+			$i = intval( $i );
+			$SRC['d'] .= '<option value="'.intval( $i ).'"'.$c[$i].'>'.intval($i).'</option>';
+		}
+		$SRC['d'] .= '</select>';
+
+		#	時
+		$SRC['h'] = '';
+		$SRC['h'] .= '<select name="'.htmlspecialchars($name['h']).'">';
+		$c = array( intval( $selected['h'] ) =>' selected="selected"' );
+		for( $i = 0; $i <= 23; $i ++ ){
+			$i = intval( $i );
+			$SRC['h'] .= '<option value="'.intval( $i ).'"'.$c[$i].'>'.intval($i).'</option>';
+		}
+		$SRC['h'] .= '</select>';
+
+		#	分
+		$SRC['i'] = '';
+		$SRC['i'] .= '<select name="'.htmlspecialchars($name['i']).'">';
+		$c = array( intval( $selected['i'] ) =>' selected="selected"' );
+		for( $i = 0; $i <= 59; $i ++ ){
+			$i = intval( $i );
+			$SRC['i'] .= '<option value="'.intval( $i ).'"'.$c[$i].'>'.intval($i).'</option>';
+		}
+		$SRC['i'] .= '</select>';
+
+		#	秒
+		$SRC['s'] = '';
+		$SRC['s'] .= '<select name="'.htmlspecialchars($name['s']).'">';
+		$c = array( intval( $selected['s'] ) =>' selected="selected"' );
+		for( $i = 0; $i <= 59; $i ++ ){
+			$i = intval( $i );
+			$SRC['s'] .= '<option value="'.intval( $i ).'"'.$c[$i].'>'.intval($i).'</option>';
+		}
+		$SRC['s'] .= '</select>';
+
+		$RTN = $layout;
+		$RTN = preg_replace( '/'.preg_quote('[Y]','/').'/i' , $SRC['y'] , $RTN );
+		$RTN = preg_replace( '/'.preg_quote('[M]','/').'/i' , $SRC['m'] , $RTN );
+		$RTN = preg_replace( '/'.preg_quote('[D]','/').'/i' , $SRC['d'] , $RTN );
+		$RTN = preg_replace( '/'.preg_quote('[H]','/').'/i' , $SRC['h'] , $RTN );
+		$RTN = preg_replace( '/'.preg_quote('[I]','/').'/i' , $SRC['i'] , $RTN );
+		$RTN = preg_replace( '/'.preg_quote('[S]','/').'/i' , $SRC['s'] , $RTN );
+		return	$RTN;
+	}//mk_form_select_date()
 
 }
 
