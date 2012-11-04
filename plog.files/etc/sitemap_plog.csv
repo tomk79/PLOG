@@ -1,3 +1,3 @@
 "*path","*content","*id","*title","*title_breadcrumb","*title_h1","*title_label","*logical_path","*list_flg","*authlevel","*layout","*extension","*orderby","*keywords","*description","*category_top_flg"
 "/plog/{*}","/PLOG/plog.php",,"PLOG",,,,,1,,,,,,,
-"/plog/admin/{*}","/PLOG/plog.php",,"PLOGŠÇ—‰æ–Ê",,,,"/plog/{*}",0,,,,,,,
+"/plog_admin/{*}","/PLOG/plog.php",,"PLOGç®¡ç†ç”»é¢",,,,"/plog/{*}",0,,,,,,,

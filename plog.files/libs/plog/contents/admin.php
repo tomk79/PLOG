@@ -271,9 +271,11 @@ class cont_plog_contents_admin{
 	}//page_article_list()
 
 
-	###################################################################################################################
-	#	記事の詳細画面
-	function page_article(){
+	/**
+	 * 記事の詳細画面
+	 */
+	private function page_article(){
+
 		$dao_admin = &$this->plog->factory_dao( 'admin' );
 		$article_info = $dao_admin->get_article_info( $this->pagemgr->get_query(1) );
 		if( !is_array($article_info) ){
@@ -303,7 +305,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th>公開日</th>'."\n";
-		$RTN .= '		<td>'.htmlspecialchars( $this->px->theme()->dateformat( 'YmdHis' , $this->px->dbh()->datetime2int($article_info['release_date']) ) ).'</td>'."\n";
+		$RTN .= '		<td>'.htmlspecialchars( date( 'Y年m月d日 H時i分s秒' , $this->px->dbh()->datetime2int($article_info['release_date']) ) ).'</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th>ステータス</th>'."\n";
@@ -329,7 +331,7 @@ class cont_plog_contents_admin{
 		$operator = $this->plog->factory_articleparser();
 		$ARTICLE_BODY_SRC = $operator->get_article_content( $this->pagemgr->get_query(1) );
 
-		$RTN .= $this->px->theme()->mk_hx('記事プレビュー')."\n";
+		$RTN .= '<h2>記事プレビュー</h2>'."\n";
 		if( strlen( $ARTICLE_BODY_SRC ) ){
 			$RTN .= '<div class="unit">'.$ARTICLE_BODY_SRC.'</div>'."\n";
 		}else{
@@ -346,8 +348,8 @@ class cont_plog_contents_admin{
 		$RTN .= '<hr />'."\n";
 
 		$RTN .= '<p class="ttrs alignR">'."\n";
-		$RTN .= '	作成日:'.htmlspecialchars( $this->px->theme()->dateformat( 'YmdHis' , $this->px->dbh()->datetime2int($article_info['create_date']) ) ).''."\n";
-		$RTN .= '	更新日:'.htmlspecialchars( $this->px->theme()->dateformat( 'YmdHis' , $this->px->dbh()->datetime2int($article_info['update_date']) ) ).''."\n";
+		$RTN .= '	作成日:'.htmlspecialchars( date( 'Y年m月d日 H時i分s秒' , $this->px->dbh()->datetime2int($article_info['create_date']) ) ).''."\n";
+		$RTN .= '	更新日:'.htmlspecialchars( date( 'Y年m月d日 H時i分s秒' , $this->px->dbh()->datetime2int($article_info['update_date']) ) ).''."\n";
 		$RTN .= '</p>'."\n";
 
 		$RTN .= '<hr />'."\n";
@@ -359,7 +361,7 @@ class cont_plog_contents_admin{
 
 		return	$RTN;
 
-	}
+	}// page_article()
 
 	###################################################################################################################
 	#	記事のトラックバック一覧
@@ -470,7 +472,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th style="width:30%;"><div>投稿日時</div></th>'."\n";
 		$RTN .= '		<td style="width:70%;">'."\n";
-		$RTN .= '			<div>'.$this->px->theme()->dateformat( 'YmdHis' , $comment_info['trackback_date'] ).'</div>'."\n";
+		$RTN .= '			<div>'.date( 'Y年m月d日 H時i分s秒' , $comment_info['trackback_date'] ).'</div>'."\n";
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
@@ -596,7 +598,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th style="width:30%;"><div>投稿日時</div></th>'."\n";
 		$RTN .= '		<td style="width:70%;">'."\n";
-		$RTN .= '			<div>'.$this->px->theme()->dateformat( 'YmdHis' , $comment_info['trackback_date'] ).'</div>'."\n";
+		$RTN .= '			<div>'.date( 'Y年m月d日 H時i分s秒' , $comment_info['trackback_date'] ).'</div>'."\n";
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
@@ -663,7 +665,7 @@ class cont_plog_contents_admin{
 			if( !strlen( $Line['commentator_name'] ) ){
 				$Line['commentator_name'] = 'No Name';
 			}
-			$SRCMEMO .= $this->px->theme()->mk_hx( '<span class="date">'.htmlspecialchars( $this->px->theme()->dateformat( 'YmdHis' , $this->px->dbh()->datetime2int( $Line['comment_date'] ) ) ).'</span> '.htmlspecialchars( $Line['commentator_name'] ) , null , array('allow_html'=>true) )."\n";
+			$SRCMEMO .= $this->px->theme()->mk_hx( '<span class="date">'.htmlspecialchars( date( 'Y年m月d日 H時i分s秒' , $this->px->dbh()->datetime2int( $Line['comment_date'] ) ) ).'</span> '.htmlspecialchars( $Line['commentator_name'] ) , null , array('allow_html'=>true) )."\n";
 			$SRCMEMO .= '<p>'.preg_replace( '/\r\n|\r|\n/' , '<br />' , htmlspecialchars( $Line['comment'] ) ).'</p>'."\n";
 			$pid = ':comment_cst.'.$this->pagemgr->get_query(1);
 			$query = '';
@@ -761,7 +763,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th style="width:30%;"><div>投稿日時</div></th>'."\n";
 		$RTN .= '		<td style="width:70%;">'."\n";
-		$RTN .= '			<div>'.$this->px->theme()->dateformat( 'YmdHis' , $comment_info['comment_date'] ).'</div>'."\n";
+		$RTN .= '			<div>'.date( 'Y年m月d日 H時i分s秒' , $comment_info['comment_date'] ).'</div>'."\n";
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
@@ -884,7 +886,7 @@ class cont_plog_contents_admin{
 		$RTN .= '	<tr>'."\n";
 		$RTN .= '		<th style="width:30%;"><div>投稿日時</div></th>'."\n";
 		$RTN .= '		<td style="width:70%;">'."\n";
-		$RTN .= '			<div>'.$this->px->theme()->dateformat( 'YmdHis' , $comment_info['comment_date'] ).'</div>'."\n";
+		$RTN .= '			<div>'.date( 'Y年m月d日 H時i分s秒' , $comment_info['comment_date'] ).'</div>'."\n";
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
 		$RTN .= '	<tr>'."\n";
@@ -1257,11 +1259,13 @@ class cont_plog_contents_admin{
 
 		$operator = $this->plog->factory_articleparser();
 		$ARTICLE_BODY_SRC = $operator->get_article_content_preview( $this->px->req()->get_param('contents') );
+		$RTN .= '<div class="unit">';
 		if( strlen( $ARTICLE_BODY_SRC ) ){
-			$RTN .= '<div class="unit">'.$ARTICLE_BODY_SRC.'</div>'."\n";
+			$RTN .= $ARTICLE_BODY_SRC;
 		}else{
-			$RTN .= '<p class="ttr error">記事は作成されていません。</p>'."\n";
+			$RTN .= '<p class="error">記事は作成されていません。</p>'."\n";
 		}
+		$RTN .= '</div><!-- /.unit -->'."\n";
 
 		$RTN .= '<h2>ソース</h2>'."\n";
 		$RTN .= '<div class="unit">'."\n";
@@ -1826,8 +1830,9 @@ class cont_plog_contents_admin{
 	}
 
 
-	###################################################################################################################
-	#	記事を削除する(論理削除)
+	/**
+	 * 記事を削除する(論理削除)
+	 */
 	function start_delete_article(){
 		$error = $this->check_delete_article_check();
 		if( $this->px->req()->get_param('mode') == 'thanks' ){
@@ -1839,8 +1844,9 @@ class cont_plog_contents_admin{
 		}
 		return	$this->page_delete_article_confirm();
 	}
-	#--------------------------------------
-	#	記事を削除する(論理削除)：確認
+	/**
+	 * 記事を削除する(論理削除)：確認
+	 */
 	function page_delete_article_confirm(){
 		$RTN = '';
 		$HIDDEN = '';
@@ -1861,20 +1867,17 @@ class cont_plog_contents_admin{
 		$RTN .= '</form>'."\n";
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	記事を削除する(論理削除)：チェック
+	/**
+	 * 記事を削除する(論理削除)：チェック
+	 */
 	function check_delete_article_check(){
 		$RTN = array();
 		return	$RTN;
 	}
-	#--------------------------------------
-	#	記事を削除する(論理削除)：実行
+	/**
+	 * 記事を削除する(論理削除)：実行
+	 */
 	function execute_delete_article_execute(){
-		if( !$this->px->user()->save_t_lastaction() ){
-			#	2重書き込み防止
-			return	$this->px->redirect( $this->px->theme()->href($this->px->req()->get_request_file_path()).'?mode=thanks' );
-		}
-
 		$dao_admin = &$this->plog->factory_dao( 'admin' );
 		if( !$dao_admin->delete_article( $this->pagemgr->get_query(1) ) ){
 			return	'<p class="ttr error">記事の削除に失敗しました。</p>';
@@ -1882,12 +1885,13 @@ class cont_plog_contents_admin{
 
 		return	$this->px->redirect( $this->px->theme()->href($this->px->req()->get_request_file_path()).'?mode=thanks' );
 	}
-	#--------------------------------------
-	#	記事を削除する(論理削除)：完了
+	/**
+	 * 記事を削除する(論理削除)：完了
+	 */
 	function page_delete_article_thanks(){
 		$RTN = '';
 		$RTN .= '<p>記事['.htmlspecialchars( $this->pagemgr->get_query(1) ).']を削除しました。</p>';
-		$RTN .= '<form action="'.htmlspecialchars( $this->pagemgr->href( ':article_list' ) ).'" method="post">'."\n";
+		$RTN .= '<form action="'.htmlspecialchars( $this->pagemgr->href( 'article_list/' ) ).'" method="post">'."\n";
 		$RTN .= '	<p class="center"><input type="submit" value="戻る" /></p>'."\n";
 		$RTN .= '</form>'."\n";
 		return	$RTN;

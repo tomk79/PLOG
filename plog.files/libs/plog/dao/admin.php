@@ -655,9 +655,10 @@ ORDER BY t.trackback_date
 	}
 
 
-	#--------------------------------------
-	#	記事を削除する(論理削除)
-	function delete_article( $article_cd ){
+	/**
+	 * 記事を削除する(論理削除)
+	 */
+	public function delete_article( $article_cd ){
 
 		ob_start();?>
 UPDATE :D:tableName SET
@@ -682,12 +683,8 @@ WHERE article_cd = :N:article_cd
 		}
 		$this->px->dbh()->commit();
 
-
 		return	true;
-	}
-
-
-
+	}//delete_article()
 
 
 	#--------------------------------------
