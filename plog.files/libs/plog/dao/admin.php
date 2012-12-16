@@ -206,9 +206,10 @@ INSERT INTO :D:tableName(
 	}//create_article()
 
 
-	#--------------------------------------
-	#	既存記事を更新する
-	function update_article( $article_cd , $article_title , $status , $contents , $ary_options = array() ){
+	/**
+	 * 既存記事を更新する
+	 */
+	public function update_article( $article_cd , $article_title , $status , $contents , $ary_options = array() ){
 		if( !strlen( $ary_options['release_date'] ) ){
 			$ary_options['release_date'] = date( 'Y-m-d H:i:s' );
 		}
@@ -263,7 +264,7 @@ WHERE article_cd = :N:article_cd
 
 		return	intval( $article_cd );
 
-	}
+	}//update_article()
 
 
 	/**

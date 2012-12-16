@@ -29,7 +29,7 @@ class cont_pagemgr{
 			$options['logical_path'] = $this->get_logical_path_of($parent);
 		}
 		if( is_null($options['logical_path']) ){
-			$options['logical_path'] = $this->current_page_info['logical_path'].'>'.$this->current_page_info['id'];
+			$options['logical_path'] = (strlen($this->current_page_info['logical_path'])?$this->current_page_info['logical_path'].'>':'').$this->current_page_info['id'];
 		}
 		if( is_null($options['list_flg']) ){
 			$options['list_flg'] = 1;

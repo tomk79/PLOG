@@ -208,7 +208,7 @@ class cont_plog_contents_admin{
 			$SRCMEMO .= '			<div class="ttrs">公開日時：'.htmlspecialchars( date( 'Y年m月d日 H時i分' , $this->px->dbh()->datetime2int( $Line['release_date'] ) ) ).'</div>'."\n";
 			$SRCMEMO .= '		</td>'."\n";
 			$SRCMEMO .= '		<td>'.htmlspecialchars($status_label[$Line['status']]).'</td>';
-			$SRCMEMO .= '		<td class="ttr nowrap">'.$this->pagemgr->mk_link( 'edit_article/'.$Line['article_cd'].'/' , array('label'=>'編集','style'=>'inside') ).'</td>';
+			$SRCMEMO .= '		<td class="nowrap">'.$this->pagemgr->mk_link( 'edit_article/'.$Line['article_cd'].'/' , array('label'=>'編集','style'=>'inside') ).'</td>';
 			$SRCMEMO .= '	</tr>'."\n";
 		}
 
@@ -335,7 +335,7 @@ class cont_plog_contents_admin{
 		if( strlen( $ARTICLE_BODY_SRC ) ){
 			$RTN .= '<div class="unit">'.$ARTICLE_BODY_SRC.'</div>'."\n";
 		}else{
-			$RTN .= '<p class="ttr error">記事は作成されていません。</p>'."\n";
+			$RTN .= '<p class="error">記事は作成されていません。</p>'."\n";
 		}
 
 		$RTN .= '<hr />'."\n";
@@ -399,7 +399,7 @@ class cont_plog_contents_admin{
 			$RTN .= $SRCMEMO;
 			$RTN .= '<hr />'."\n";
 		}else{
-			$RTN .= '<p class="ttr error">表示できるトラックバックありません。</p>'."\n";
+			$RTN .= '<p class="error">表示できるトラックバックありません。</p>'."\n";
 		}
 
 		$RTN .= '<ul class="horizontal">'."\n";
@@ -523,7 +523,7 @@ class cont_plog_contents_admin{
 		$obj_trackback = &$this->plog->factory_dao( 'trackback' );
 		$result = $obj_trackback->update_trackback_status( $this->pagemgr->get_query(1) , $this->px->req()->get_param('keystr') , $this->px->req()->get_param('trackback_url') , $this->px->req()->get_param('status') );
 		if( !$result ){
-			return	'<p class="ttr error">トラックバック['.htmlspecialchars( $this->px->req()->get_param('keystr') ).']のステータスの更新に失敗しました。</p>';
+			return	'<p class="error">トラックバック['.htmlspecialchars( $this->px->req()->get_param('keystr') ).']のステータスの更新に失敗しました。</p>';
 		}
 
 
@@ -634,7 +634,7 @@ class cont_plog_contents_admin{
 		$dao_trackback = &$this->plog->factory_dao( 'trackback' );
 		$result = $dao_trackback->delete_trackback( $this->pagemgr->get_query(1) , $this->px->req()->get_param('keystr') , $this->px->req()->get_param('trackback_url') );
 		if( !$result ){
-			return	'<p class="ttr error">トラックバックの削除に失敗しました。</p>';
+			return	'<p class="error">トラックバックの削除に失敗しました。</p>';
 		}
 
 		return	$this->px->redirect( $this->px->theme()->href($this->px->req()->get_request_file_path()).'?mode=thanks' );
@@ -691,7 +691,7 @@ class cont_plog_contents_admin{
 			$RTN .= '<hr />'."\n";
 			$RTN .= $SRCMEMO;
 		}else{
-			$RTN .= '<p class="ttr error">表示できるコメントありません。</p>'."\n";
+			$RTN .= '<p class="error">表示できるコメントありません。</p>'."\n";
 		}
 
 		$RTN .= '<ul class="horizontal">'."\n";
@@ -812,7 +812,7 @@ class cont_plog_contents_admin{
 		$obj_comment = &$this->plog->factory_dao( 'comment' );
 		$result = $obj_comment->update_comment_status( $this->pagemgr->get_query(1) , $this->px->req()->get_param('keystr') , $this->px->req()->get_param('create_date') , $this->px->req()->get_param('client_ip') , $this->px->req()->get_param('status') );
 		if( !$result ){
-			return	'<p class="ttr error">コメント['.htmlspecialchars( $this->px->req()->get_param('keystr') ).']のステータスの更新に失敗しました。</p>';
+			return	'<p class="error">コメント['.htmlspecialchars( $this->px->req()->get_param('keystr') ).']のステータスの更新に失敗しました。</p>';
 		}
 
 
@@ -922,7 +922,7 @@ class cont_plog_contents_admin{
 		$dao_comment = &$this->plog->factory_dao( 'comment' );
 		$result = $dao_comment->delete_comment( $this->pagemgr->get_query(1) , $this->px->req()->get_param('keystr') );
 		if( !$result ){
-			return	'<p class="ttr error">コメントの削除に失敗しました。</p>';
+			return	'<p class="error">コメントの削除に失敗しました。</p>';
 		}
 
 		return	$this->px->redirect( $this->px->theme()->href($this->px->req()->get_request_file_path()).'?mode=thanks' );
@@ -1037,7 +1037,7 @@ class cont_plog_contents_admin{
 		$RTN = '';
 
 		if( count( $error ) ){
-			$RTN .= '<p class="ttr error">'.count( $error ).'件の入力エラーがあります。もう一度ご確認ください。</p>'."\n";
+			$RTN .= '<p class="error">'.count( $error ).'件の入力エラーがあります。もう一度ご確認ください。</p>'."\n";
 		}else{
 			$RTN .= '<p>'."\n";
 			if( $this->pagemgr->get_query() == 'edit_article' ){
@@ -1065,7 +1065,7 @@ class cont_plog_contents_admin{
 		$RTN .= '		<td>'."\n";
 		$RTN .= '			<div><input type="text" name="article_title" value="'.htmlspecialchars( $this->px->req()->get_param('article_title') ).'" class="inputitems" /></div>'."\n";
 		if( strlen( $error['article_title'] ) ){
-			$RTN .= '			<div class="ttr error">'.$error['article_title'].'</div>'."\n";
+			$RTN .= '			<div class="error">'.$error['article_title'].'</div>'."\n";
 		}
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
@@ -1085,7 +1085,7 @@ class cont_plog_contents_admin{
 		$RTN .= '				</select>'."\n";
 		$RTN .= '			</div>'."\n";
 		if( strlen( $error['category_cd'] ) ){
-			$RTN .= '			<div class="ttr error">'.$error['category_cd'].'</div>'."\n";
+			$RTN .= '			<div class="error">'.$error['category_cd'].'</div>'."\n";
 		}
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
@@ -1094,7 +1094,7 @@ class cont_plog_contents_admin{
 		$RTN .= '		<td>'."\n";
 		$RTN .= '			<div>'.$this->plog->mk_form_select_date( 'input' , array( 'default'=>$this->px->req()->get_param('release_date'),'max_year'=>date('Y')+3 ) ).'</div>'."\n";
 		if( strlen( $error['release_date'] ) ){
-			$RTN .= '			<div class="ttr error">'.$error['release_date'].'</div>'."\n";
+			$RTN .= '			<div class="error">'.$error['release_date'].'</div>'."\n";
 		}
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
@@ -1107,7 +1107,7 @@ class cont_plog_contents_admin{
 		$RTN .= '				<input type="radio" name="status" id="status_1" value="1"'.$c[1].' /><label for="status_1">公開中</label>'."\n";
 		$RTN .= '			</div>'."\n";
 		if( strlen( $error['status'] ) ){
-			$RTN .= '			<div class="ttr error">'.$error['status'].'</div>'."\n";
+			$RTN .= '			<div class="error">'.$error['status'].'</div>'."\n";
 		}
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
@@ -1116,14 +1116,14 @@ class cont_plog_contents_admin{
 		if( $this->plog->article_summary_mode == 'manual' ){
 			$RTN .= '<h2>サマリ</h2>'."\n";
 			if( strlen( $error['article_summary'] ) ){
-				$RTN .= '<div class="ttr error">'.$error['article_summary'].'</div>'."\n";
+				$RTN .= '<div class="error">'.$error['article_summary'].'</div>'."\n";
 			}
 			$RTN .= '<p><textarea name="article_summary" rows="7" cols="20" class="inputitems">'.htmlspecialchars( $this->px->req()->get_param('article_summary') ).'</textarea></p>'."\n";
 		}
 
 		$RTN .= '<h2>内容 <span class="must">*</span></h2>'."\n";
 		if( strlen( $error['contents'] ) ){
-			$RTN .= '<div class="ttr error">'.$error['contents'].'</div>'."\n";
+			$RTN .= '<div class="error">'.$error['contents'].'</div>'."\n";
 		}
 		$RTN .= '<p><textarea name="contents" rows="11" cols="20" class="inputitems">'.htmlspecialchars( $this->px->req()->get_param('contents') ).'</textarea></p>'."\n";
 
@@ -1430,7 +1430,7 @@ class cont_plog_contents_admin{
 				)
 			);
 			if( $result === false ){
-				return	'<p class="ttr error">記事の作成に失敗しました。</p>';
+				return	'<p class="error">記事の作成に失敗しました。</p>';
 			}
 			$article_cd = $result;
 
@@ -1451,7 +1451,7 @@ class cont_plog_contents_admin{
 				)
 			);
 			if( $result === false ){
-				return	'<p class="ttr error">記事の保存に失敗しました。</p>';
+				return	'<p class="error">記事の保存に失敗しました。</p>';
 			}
 			$article_cd = $this->pagemgr->get_query(1);
 
@@ -1461,7 +1461,7 @@ class cont_plog_contents_admin{
 			#	どちらでもなければエラー
 			$errorMsg = '不明な命令です。['.$this->pagemgr->get_query().']';
 			$this->px->error()->error_log( $errorMsg , __FILE__ , __LINE__ );
-			return	'<p class="ttr error">'.htmlspecialchars( $errorMsg ).'</p>';
+			return	'<p class="error">'.htmlspecialchars( $errorMsg ).'</p>';
 		}
 
 		#--------------------------------------
@@ -1494,7 +1494,7 @@ class cont_plog_contents_admin{
 		#	記事インデックスの更新
 		$result = $dao_admin->update_article_index( $article_cd );
 		if( !$result ){
-			return	'<p class="ttr error">記事インデックスの更新に失敗しました。</p>';
+			return	'<p class="error">記事インデックスの更新に失敗しました。</p>';
 		}
 
 		return	$this->px->redirect( $this->px->theme()->href($this->px->req()->get_request_file_path()).'?mode=thanks&article_cd='.$article_cd );
@@ -1586,7 +1586,7 @@ class cont_plog_contents_admin{
 		$RTN .= '<h2>トラックバック先URI</h2>'."\n";
 		$RTN .= '<p><textarea name="trackback_url" class="inputitems" rows="5" cols="20">'.htmlspecialchars( $this->px->req()->get_param('trackback_url') ).'</textarea></p>'."\n";
 		if( strlen( $error['trackback_url'] ) ){
-			$RTN .= '<p class="ttr error">'.$error['trackback_url'].'</p>'."\n";
+			$RTN .= '<p class="error">'.$error['trackback_url'].'</p>'."\n";
 		}
 
 		$operator = $this->plog->factory_articleparser();
@@ -1604,7 +1604,7 @@ class cont_plog_contents_admin{
 		$RTN .= '			<div class="p">'."\n";
 		$RTN .= '			<div><textarea name="article_summary" class="inputitems" rows="5" cols="20">'.htmlspecialchars( $article_summary ).'</textarea></div>'."\n";
 		if( strlen( $error['article_summary'] ) ){
-			$RTN .= '			<div class="ttr error">'.$error['article_summary'].'</div>'."\n";
+			$RTN .= '			<div class="error">'.$error['article_summary'].'</div>'."\n";
 		}
 		$RTN .= '			</div>'."\n";
 
@@ -1614,7 +1614,7 @@ class cont_plog_contents_admin{
 		if( strlen( $ARTICLE_BODY_SRC ) ){
 			$RTN .= '<div class="unit">'.$ARTICLE_BODY_SRC.'</div>'."\n";
 		}else{
-			$RTN .= '<p class="ttr error">記事は作成されていません。</p>'."\n";
+			$RTN .= '<p class="error">記事は作成されていません。</p>'."\n";
 		}
 
 
@@ -1721,7 +1721,7 @@ class cont_plog_contents_admin{
 		}
 
 		if( !$this->plog->enable_trackback ){
-			return	'<p class="ttr error">トラックバック機能が無効になっています。</p>';
+			return	'<p class="error">トラックバック機能が無効になっています。</p>';
 		}
 
 		#--------------------------------------
@@ -1738,7 +1738,7 @@ class cont_plog_contents_admin{
 
 		$className = $this->plog->require_lib('/PLOG/resources/tbp.php');
 		if( !$className ){
-			return	'<p class="ttr error">TrackbackPingクラスのロードに失敗しました。</p>';
+			return	'<p class="error">TrackbackPingクラスのロードに失敗しました。</p>';
 		}
 		$tbp = new $className( &$this->plog , &$this->conf , &$this->dbh , &$this->theme );
 
@@ -1779,7 +1779,7 @@ class cont_plog_contents_admin{
 		$dao_tb = $this->plog->factory_dao( 'trackback' );
 		$result = $dao_tb->tbp_sendlog( $tbp->get_tbp_sendlog() );
 #		if( !$result ){
-#			return	'<p class="ttr error">トラックバックPING送信ログを保存できませんでした。</p>';
+#			return	'<p class="error">トラックバックPING送信ログを保存できませんでした。</p>';
 #		}
 
 		return	$this->px->redirect( $this->px->req()->get_request_file_path() , 'mode=thanks&count='.count($done).'&ok_list='.urlencode(implode("\n",$done_ok)).'&ng_list='.urlencode(implode("\n",$done_ng)) );
@@ -1880,7 +1880,7 @@ class cont_plog_contents_admin{
 	function execute_delete_article_execute(){
 		$dao_admin = &$this->plog->factory_dao( 'admin' );
 		if( !$dao_admin->delete_article( $this->pagemgr->get_query(1) ) ){
-			return	'<p class="ttr error">記事の削除に失敗しました。</p>';
+			return	'<p class="error">記事の削除に失敗しました。</p>';
 		}
 
 		return	$this->px->redirect( $this->px->theme()->href($this->px->req()->get_request_file_path()).'?mode=thanks' );
@@ -1968,7 +1968,7 @@ class cont_plog_contents_admin{
 				$dao_admin = &$this->plog->factory_dao( 'admin' );
 				$category_info = $dao_admin->get_category_info( $this->pagemgr->get_query(1) );
 				if( !is_array($category_info) ){
-					return	'<p class="ttr error">指定されたカテゴリは存在しません。</p>';
+					return	'<p class="error">指定されたカテゴリは存在しません。</p>';
 				}
 				$this->px->req()->setin( 'category_title' , $category_info['category_title'] );
 				$this->px->req()->setin( 'category_subtitle' , $category_info['category_subtitle'] );
@@ -2002,7 +2002,7 @@ class cont_plog_contents_admin{
 		$RTN .= '		<td>'."\n";
 		$RTN .= '			<div><input type="text" name="category_title" value="'.htmlspecialchars( $this->px->req()->get_param('category_title') ).'" class="inputitems" /></div>'."\n";
 		if( strlen( $error['category_title'] ) ){
-			$RTN .= '			<div class="ttr error">'.$error['category_title'].'</div>'."\n";
+			$RTN .= '			<div class="error">'.$error['category_title'].'</div>'."\n";
 		}
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
@@ -2011,7 +2011,7 @@ class cont_plog_contents_admin{
 		$RTN .= '		<td>'."\n";
 		$RTN .= '			<div><input type="text" name="category_subtitle" value="'.htmlspecialchars( $this->px->req()->get_param('category_subtitle') ).'" class="inputitems" /></div>'."\n";
 		if( strlen( $error['category_subtitle'] ) ){
-			$RTN .= '			<div class="ttr error">'.$error['category_subtitle'].'</div>'."\n";
+			$RTN .= '			<div class="error">'.$error['category_subtitle'].'</div>'."\n";
 		}
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
@@ -2020,7 +2020,7 @@ class cont_plog_contents_admin{
 		$RTN .= '		<td>'."\n";
 		$RTN .= '			<div><textarea name="category_summary" class="inputitems" cols="24" rows="5">'.htmlspecialchars( $this->px->req()->get_param('category_summary') ).'</textarea></div>'."\n";
 		if( strlen( $error['category_summary'] ) ){
-			$RTN .= '			<div class="ttr error">'.$error['category_summary'].'</div>'."\n";
+			$RTN .= '			<div class="error">'.$error['category_summary'].'</div>'."\n";
 		}
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
@@ -2040,7 +2040,7 @@ class cont_plog_contents_admin{
 		$RTN .= '				</select>'."\n";
 		$RTN .= '			</div>'."\n";
 		if( strlen( $error['parent_category_cd'] ) ){
-			$RTN .= '			<div class="ttr error">'.$error['parent_category_cd'].'</div>'."\n";
+			$RTN .= '			<div class="error">'.$error['parent_category_cd'].'</div>'."\n";
 		}
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
@@ -2192,11 +2192,11 @@ class cont_plog_contents_admin{
 				intval( $this->px->req()->get_param('parent_category_cd') )
 			);
 		}else{
-			return	'<p class="ttr error">不明な指示です。</p>';
+			return	'<p class="error">不明な指示です。</p>';
 		}
 
 		if( !$result ){
-			return	'<p class="ttr error">失敗しました。</p>';
+			return	'<p class="error">失敗しました。</p>';
 		}
 
 		return	$this->px->redirect( $this->px->theme()->href($this->px->req()->get_request_file_path()).'?mode=thanks' );
@@ -2272,7 +2272,7 @@ class cont_plog_contents_admin{
 		if( !$dao_admin->make_all_categories_flat() ){
 			$errorMsg = 'カテゴリ階層構造のリセットに失敗しました。';
 			$this->px->error()->error_log( $errorMsg , __FILE__ , __LINE__ );
-			return	'<p class="ttr error">'.htmlspecialchars( $errorMsg ).'</p>';
+			return	'<p class="error">'.htmlspecialchars( $errorMsg ).'</p>';
 		}
 
 		return	$this->px->redirect( $this->px->theme()->href($this->px->req()->get_request_file_path()).'?mode=thanks' );
@@ -2304,7 +2304,7 @@ class cont_plog_contents_admin{
 		$RTN = '';
 		$RTN .= '<p>この機能は、サーバに登録された記事情報をファイルとしてエクスポート、エクスポートされたデータの登録が行えます。</p>'."\n";
 		if( !strlen( $this->conf->path_commands['tar'] ) ){
-			$RTN .= '<p class="ttr error">この機能は、UNIXの tar コマンドを使用します。<code>$conf->path_commands[\'tar\']</code> に、適切な tarコマンド のパスを設定してください。</p>'."\n";
+			$RTN .= '<p class="error">この機能は、UNIXの tar コマンドを使用します。<code>$conf->path_commands[\'tar\']</code> に、適切な tarコマンド のパスを設定してください。</p>'."\n";
 		}
 
 		$RTN .= '<div class="unit_pane2">'."\n";
@@ -2359,7 +2359,7 @@ class cont_plog_contents_admin{
 	#	全記事データのエクスポート
 	function download_io_article_export(){
 		if( !$this->plog->enable_function_export ){
-			return	'<p class="ttr error">エクスポート機能が無効に設定されています。</p>';
+			return	'<p class="error">エクスポート機能が無効に設定されています。</p>';
 		}
 
 		$dao_io = &$this->plog->factory_dao( 'io' );
@@ -2371,13 +2371,13 @@ class cont_plog_contents_admin{
 		$result = $dao_io->export( $export_tmp_dir );
 		if( $result === false ){
 			$RTN = '';
-			$RTN .= '	<p class="ttr error">出力ファイルの生成に失敗しました。</p>'."\n";
+			$RTN .= '	<p class="error">出力ファイルの生成に失敗しました。</p>'."\n";
 			return	$RTN;
 		}
 
 		if( !is_file( $result ) ){
 			$RTN = '';
-			$RTN .= '	<p class="ttr error">出力ファイルが存在しません。</p>'."\n";
+			$RTN .= '	<p class="error">出力ファイルが存在しません。</p>'."\n";
 			return	$RTN;
 		}
 
@@ -2412,7 +2412,7 @@ class cont_plog_contents_admin{
 		$RTN .= '		<td>'."\n";
 		$RTN .= '			<div><input type="file" name="exported_data" value="" /></div>'."\n";
 		if( strlen( $error['exported_data'] ) ){
-			$RTN .= '			<div class="ttr error">'.$error['exported_data'].'</div>'."\n";
+			$RTN .= '			<div class="error">'.$error['exported_data'].'</div>'."\n";
 		}
 		$RTN .= '		</td>'."\n";
 		$RTN .= '	</tr>'."\n";
@@ -2507,12 +2507,12 @@ class cont_plog_contents_admin{
 		$UPFILE_INFO = $this->px->req()->get_uploadfile('exported_data');
 		if( !strlen( $UPFILE_INFO['content'] ) ){
 			$RTN = '';
-			$RTN .= '<p class="ttr error">アップロードファイルがゼロバイトです。</p>'."\n";
+			$RTN .= '<p class="error">アップロードファイルがゼロバイトです。</p>'."\n";
 			return	$RTN;
 		}
 		if( !$this->px->dbh()->file_overwrite( $this->plog->get_home_dir().'/tmp_io/import/export.tgz' , $UPFILE_INFO['content'] ) ){//PLOG 0.1.9 : savefile()をfile_overwrite()に変更。Windowsでキャッシュを開けないバグへの対応。
 			$RTN = '';
-			$RTN .= '<p class="ttr error">アップロードファイルの一時領域への保存に失敗しました。</p>'."\n";
+			$RTN .= '<p class="error">アップロードファイルの一時領域への保存に失敗しました。</p>'."\n";
 			return	$RTN;
 		}
 		$UPFILE_INFO['tmp_name'] = $this->plog->get_home_dir().'/tmp_io/import/export.tgz';
@@ -2520,7 +2520,7 @@ class cont_plog_contents_admin{
 		$result = $dao_io->import( $import_tmp_dir , $UPFILE_INFO );
 		if( $result === false ){
 			$RTN = '';
-			$RTN .= '<p class="ttr error">記事データの入力に失敗しました。</p>'."\n";
+			$RTN .= '<p class="error">記事データの入力に失敗しました。</p>'."\n";
 			return	$RTN;
 		}
 
@@ -2650,10 +2650,10 @@ class cont_plog_contents_admin{
 			$ERROR = '';
 			$error_list = $dao_rss->get_error_list();
 			foreach( $error_list as $error_cont ){
-				$ERROR .= '	<li class="ttr error">'.htmlspecialchars($error_cont['message']).'</li>'."\n";
+				$ERROR .= '	<li class="error">'.htmlspecialchars($error_cont['message']).'</li>'."\n";
 			}
 			$RTN = '';
-			$RTN .= '<p class="ttr error">RSSファイルの書き出し中にエラーが発生しました。</p>'."\n";
+			$RTN .= '<p class="error">RSSファイルの書き出し中にエラーが発生しました。</p>'."\n";
 			$RTN .= '<ul>'."\n";
 			$RTN .= $ERROR;
 			$RTN .= '</ul>'."\n";
@@ -2966,7 +2966,7 @@ class cont_plog_contents_admin{
 	function execute_update_search_index_execute(){
 		$dao_search = $this->plog->factory_dao('search');
 		if( !$dao_search->update_all_index() ){
-			return	'<p class="ttr error">更新に失敗しました。</p>';
+			return	'<p class="error">更新に失敗しました。</p>';
 		}
 
 		return	$this->px->redirect( $this->px->theme()->href($this->px->req()->get_request_file_path()).'?mode=thanks' );
@@ -3083,7 +3083,7 @@ class cont_plog_contents_admin{
 		$result = $dao->create_tables();
 
 		if( !$result ){
-			return	'<p class="ttr error">テーブルの作成に失敗しました。</p>';
+			return	'<p class="error">テーブルの作成に失敗しました。</p>';
 		}
 
 		return	$this->px->redirect( $this->px->theme()->href($this->px->req()->get_request_file_path()).'?mode=thanks' );
